@@ -10,17 +10,23 @@ interface SelectedItem {
 interface SelectedItemsState {
   items: SelectedItem[];
   total: number;
+  isBackDropOpen: boolean;
 }
 
 const initialState: SelectedItemsState = {
   items: [],
   total: 0,
+  isBackDropOpen: false,
 };
 
 const selectedItemsSlice = createSlice({
   name: 'selectedItems',
   initialState,
   reducers: {
+    setIsBackDropOpen: (state, action) => ({
+      ...state,
+      isBackDropOpen: action.payload,
+    }),
     addItem: (state, action: PayloadAction<{ id: string; name: string; price: number }>) => {
       const { id, name, price } = action.payload;
       const existingItem = state.items.find((item) => item.id === id);
@@ -54,7 +60,8 @@ const selectedItemsSlice = createSlice({
   },
 });
 
-export const { addItem, removeItem, updateItemQuantity, clearItems } = selectedItemsSlice.actions;
+export const { addItem, removeItem, updateItemQuantity, clearItems, setIsBackDropOpen } =
+  selectedItemsSlice.actions;
 
 export const getSelectedItems = (state: any) => state.selectedItems;
 

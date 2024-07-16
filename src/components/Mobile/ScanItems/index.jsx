@@ -30,7 +30,7 @@ import {
 import { formatCurrency } from '@/src/common/helpers';
 import Html5QrcodePlugin from '../../Scanner';
 import QrCodeScannerIcon from '@mui/icons-material/QrCodeScanner';
-import Nav from '../Nav';
+import Nav from '../../Nav';
 import { useRouter } from 'next/router';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
@@ -243,39 +243,42 @@ const ComboBox = () => {
         </Typography>
         <List sx={{ marginTop: '10px', height: '50vh', overflow: 'scroll' }}>
           {items.length > 0 ? (
-            items.map((item) => (
-              <ListItem key={item.id}>
-                <ListItemText
-                  sx={{
-                    fontSize: '10px',
-                    '& .MuiTypography-root': {
-                      fontSize: '10px !important',
-                    },
-                  }}
-                  primary={`${item.name} - ${formatCurrency(item.price)}`}
-                  secondary={`Quantity: ${item.quantity}`}
-                />
-                <ListItemSecondaryAction>
-                  <IconButton
-                    edge="end"
-                    onClick={() => handleDecreaseQuantity(item.id)}
-                    disabled={item.quantity === 1}
-                  >
-                    <RemoveCircleIcon color="error" />
-                  </IconButton>
-                  <IconButton edge="end" onClick={() => handleIncreaseQuantity(item.id)}>
-                    <AddCircleIcon color="primary" />
-                  </IconButton>
-                  <IconButton
-                    edge="end"
-                    onClick={() => handleDeleteItem(item.id)}
-                    sx={{ color: 'error.main' }}
-                  >
-                    <DeleteIcon />
-                  </IconButton>
-                </ListItemSecondaryAction>
-              </ListItem>
-            ))
+            items
+              .slice()
+              .reverse()
+              .map((item) => (
+                <ListItem key={item.id}>
+                  <ListItemText
+                    sx={{
+                      fontSize: '10px',
+                      '& .MuiTypography-root': {
+                        fontSize: '10px !important',
+                      },
+                    }}
+                    primary={`${item.name} - ${formatCurrency(item.price)}`}
+                    secondary={`Quantity: ${item.quantity}`}
+                  />
+                  <ListItemSecondaryAction>
+                    <IconButton
+                      edge="end"
+                      onClick={() => handleDecreaseQuantity(item.id)}
+                      disabled={item.quantity === 1}
+                    >
+                      <RemoveCircleIcon color="error" />
+                    </IconButton>
+                    <IconButton edge="end" onClick={() => handleIncreaseQuantity(item.id)}>
+                      <AddCircleIcon color="primary" />
+                    </IconButton>
+                    <IconButton
+                      edge="end"
+                      onClick={() => handleDeleteItem(item.id)}
+                      sx={{ color: 'error.main' }}
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  </ListItemSecondaryAction>
+                </ListItem>
+              ))
           ) : (
             <ListItem>
               <ListItemText

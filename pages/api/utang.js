@@ -22,7 +22,9 @@ export default async function handler(req, res) {
         } else {
           utang = await Utang.find({});
         }
-
+        utang.reverse().forEach((entry, index) => {
+          entry.number = index + 1;
+        });
         const totalUtang = utang.reduce((sum, entry) => sum + entry.total, 0);
         res.status(200).json({ utang, totalUtang });
       } catch (error) {

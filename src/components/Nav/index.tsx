@@ -1,4 +1,5 @@
 import { Box } from '@mui/material';
+import SimpleDialogDemo from '../Loader/backdrop';
 
 export default function Nav({ children }: any) {
   return (
@@ -13,6 +14,7 @@ export default function Nav({ children }: any) {
       >
         {children}
       </Box>
+      <SimpleDialogDemo />
     </div>
   );
 }

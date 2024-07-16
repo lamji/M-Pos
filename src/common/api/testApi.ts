@@ -10,6 +10,19 @@ export const postTransaction = async (params?: TObjectAny) => {
   return axios.post('/api/transactions', params);
 };
 
+export const getSalesData = async () => {
+  try {
+    const response = await axios.get('/api/transactions', {
+      params: {
+        sales: true,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    throw new Error('Failed to fetch sales data: ' + error);
+  }
+};
+
 export const getTransactionsByType = async (transactionType: string) => {
   const response = await axios.get('/api/transactions', {
     params: { transactionType },

@@ -2,7 +2,8 @@ import { Box, Button, Typography } from '@mui/material';
 import styles from './styles.module.css';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
-import Nav from '@/src/components/Mobile/Nav';
+
+import Nav from '@/src/components/Nav';
 
 export default function Home() {
   const router = useRouter();

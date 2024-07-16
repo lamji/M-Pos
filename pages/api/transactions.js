@@ -70,25 +70,67 @@ import Transaction from '../../src/common/app/model/transaction';
 import Utang from '../../src/common/app/model/utang';
 
 export default async function handler(req, res) {
-  const { method, body } = req;
+  const { method, body, query } = req;
 
   await connectToDatabase();
 
   switch (method) {
     case 'GET':
       try {
-        // Handle filtering by transactionType in a case-insensitive manner
-        if (body.transactionType) {
-          const transactionTypeRegex = new RegExp(body.transactionType, 'i');
-          const transactions = await Transaction.find({ transactionType: transactionTypeRegex });
-          return res.status(200).json(transactions);
+        if (query.sales) {
+          // Retrieve sales from yesterday and today
+          const today = new Date();
+          today.setHours(0, 0, 0, 0); // Set to the beginning of today
+
+          const yesterday = new Date(today);
+          yesterday.setDate(today.getDate() - 1); // Set to yesterday
+
+          const transactionsToday = await Transaction.find({
+            date: { $gte: today },
+          });
+
+          const transactionsYesterday = await Transaction.find({
+            date: { $gte: yesterday, $lt: today },
+          });
+
+          const totalSalesToday = transactionsToday.reduce(
+            (total, transaction) => total + transaction.total,
+            0
+          );
+          const totalSalesYesterday = transactionsYesterday.reduce(
+            (total, transaction) => total + transaction.total,
+            0
+          );
+
+          return res.status(200).json({ today: totalSalesToday, yesterday: totalSalesYesterday });
         }
 
-        // If no transactionType filter is provided, return all transactions
-        const transactions = await Transaction.find({});
+        let transactionsQuery = {};
+
+        // Handle filtering by transactionType in a case-insensitive manner
+        if (query.transactionType) {
+          const transactionTypeRegex = new RegExp(query.transactionType, 'i');
+          transactionsQuery.transactionType = transactionTypeRegex;
+        }
+
+        // Handle date filtering
+        if (query.startDate && query.endDate) {
+          const startDate = new Date(query.startDate);
+          const endDate = new Date(query.endDate);
+          endDate.setDate(endDate.getDate() + 1); // Include transactions on endDate day
+
+          transactionsQuery.createdAt = {
+            $gte: startDate,
+            $lt: endDate,
+          };
+        }
+
+        // Fetch transactions based on query parameters or fetch all if no query is provided
+        const transactions = await Transaction.find(transactionsQuery);
+
         res.status(200).json(transactions);
       } catch (error) {
-        console.error('Error fetching transactions:', error); // Log the error
+        console.error('Error fetching transactions:', error);
         res.status(500).json({ error: 'Failed to fetch transactions' });
       }
       break;

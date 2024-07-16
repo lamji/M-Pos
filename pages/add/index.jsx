@@ -10,7 +10,7 @@ import { ToastContainer } from 'react-toastify';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import 'react-toastify/dist/ReactToastify.css';
 import { useRouter } from 'next/router';
-import Nav from '@/src/components/Mobile/Nav';
+import Nav from '@/src/components/Nav';
 
 // Validation Schema
 const validationSchema = Yup.object({

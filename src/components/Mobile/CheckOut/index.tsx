@@ -95,7 +95,7 @@ export default function Checkout() {
       };
       try {
         const data = await postTransaction(transactionData);
-        console.log('test', data);
+
         if (data) {
           setAllItems(data.data);
           setReceiptOpen(true);

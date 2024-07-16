@@ -1,4 +1,4 @@
-import { getAllUtang, getUtangById } from '@/src/common/api/testApi';
+import { getAllUtang, getUtangById, postTransaction } from '@/src/common/api/testApi';
 import {
   Box,
   Button,
@@ -19,7 +19,12 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { formatCurrency } from '@/src/common/helpers';
 import SearchIcon from '@mui/icons-material/Search';
 import moment from 'moment';
-import Nav from '@/src/components/Mobile/Nav';
+
+import { useFormik } from 'formik';
+import * as Yup from 'yup';
+import { useDispatch } from 'react-redux';
+import { setIsBackDropOpen } from '@/src/common/reducers/items';
+import Nav from '@/src/components/Nav';
 
 // types.ts
 export interface Item {
@@ -42,13 +47,26 @@ export interface Transaction {
   transactionType: string;
 }
 
+const validationSchema = Yup.object({
+  description: Yup.string()
+    .required('Description is required')
+    .min(2, 'Description should be at least 2 characters')
+    .max(50, 'Description should be 50 characters or less'),
+  amount: Yup.number()
+    .required('Amount is required')
+    .positive('Amount must be a positive number')
+    .integer('Amount must be an integer'),
+});
+
 const UtangTransactions: React.FC = () => {
+  const dispatch = useDispatch();
   const router = useRouter();
   const [transactions, setTransactions] = useState<any>([]);
   const [open, setOpen] = useState(false);
   const [selectedData, setSelectedData] = useState<Transaction | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-
+  const [type, setType] = useState('');
+  const [refresh, setRefresh] = useState(false);
   const handleOpen = (row: Transaction) => {
     setSelectedData(row);
     setOpen(true);
@@ -85,9 +103,56 @@ const UtangTransactions: React.FC = () => {
       setIsLoading(false);
     }
   };
+
+  const formikUtang = useFormik({
+    initialValues: {
+      description: '',
+      amount: '',
+    },
+    validationSchema: validationSchema,
+    onSubmit: async (values, { resetForm }) => {
+      dispatch(setIsBackDropOpen(true));
+      console.log('Form values:', values, selectedData);
+      setIsLoading(true);
+      const transactionData = {
+        type: 'Utang',
+        items: [
+          {
+            id: '480036-adjustMent',
+            name: values?.description,
+            price: values?.amount,
+            quantity: 1,
+          },
+        ],
+        personName: selectedData?.personName,
+        total: values.amount,
+        _id: selectedData?._id || undefined,
+        forAdj: 'adjustment',
+      };
+      try {
+        const data = await postTransaction(transactionData);
+        if (data) {
+          resetForm();
+          dispatch(setIsBackDropOpen(false));
+          setType('');
+          setRefresh(!refresh);
+          handleClose();
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        setIsLoading(false);
+        dispatch(setIsBackDropOpen(false));
+        handleClose();
+      }
+    },
+  });
+
+  const handleAdjustMent = () => {
+    setType('adjustment');
+  };
   useEffect(() => {
     getAllUtandData();
-  }, []);
+  }, [refresh]);
 
   return (
     <>
@@ -169,18 +234,6 @@ const UtangTransactions: React.FC = () => {
             overflow: 'scroll',
           }}
         >
-          {/* <DataGrid
-          rows={rows}
-          columns={columns}
-          initialState={{
-            pagination: {
-              paginationModel: {
-                pageSize: 10,
-              },
-            },
-          }}
-        /> */}
-
           {isLoading ? (
             <>
               <Box
@@ -224,62 +277,155 @@ const UtangTransactions: React.FC = () => {
         </Box>
         <Box display="flex" alignItems="center" justifyContent="end">
           <Typography fontWeight={700} py={2}>
-            Total: {formatCurrency(transactions?.totalUtang) ?? ''}
+            Total: {formatCurrency(transactions?.totalUtang ?? 0)}
           </Typography>
         </Box>
 
         <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
-          <DialogTitle>Transaction Receipt</DialogTitle>
+          {type === 'adjustment' ? (
+            <DialogTitle>Adjustment</DialogTitle>
+          ) : (
+            <DialogTitle>
+              <Box>
+                <Typography
+                  sx={{ marginBottom: '0px' }}
+                  variant="body1"
+                  align="right"
+                  gutterBottom
+                  fontWeight={700}
+                >
+                  {selectedData?.personName}
+                </Typography>
+                {type != 'adjustment' && (
+                  <Typography align="right" sx={{ fontSize: '10px' }}>
+                    <strong>Total: {formatCurrency(selectedData?.total as number)}</strong>
+                  </Typography>
+                )}
+              </Box>
+            </DialogTitle>
+          )}
+
           <DialogContent>
             <Box>
-              <Typography gutterBottom>{selectedData?.personName}</Typography>
-              <Box sx={{ marginTop: '10px', height: '50vh', overflow: 'scroll' }}>
-                {selectedData?.items.map((item: any) => (
-                  <Box
-                    key={item._id}
-                    sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      marginBottom: '5px',
-                    }}
-                  >
-                    <Box>
-                      <Typography fontSize={'12px'} fontWeight={700}>
-                        {item.name}
-                      </Typography>
-                      <Typography fontSize={'12px'}>
-                        {`Quantity: ${item.quantity} x ${formatCurrency(item.price)}`}
-                      </Typography>
-                      <Typography fontSize={'12px'}>
-                        Date: {moment(item.date).format('llll')}
-                      </Typography>
-                    </Box>
+              {type === 'adjustment' ? (
+                <>
+                  <form onSubmit={formikUtang.handleSubmit}>
+                    <Box sx={{ width: '100%', textAlign: 'center' }}>
+                      <TextField
+                        fullWidth
+                        id="description"
+                        name="description"
+                        label="Input Description"
+                        value={formikUtang.values.description}
+                        onChange={formikUtang.handleChange}
+                        error={
+                          formikUtang.touched.description && Boolean(formikUtang.errors.description)
+                        }
+                        helperText={
+                          formikUtang.touched.description && formikUtang.errors.description
+                        }
+                        margin="normal"
+                        multiline
+                        rows={4}
+                      />
 
-                    <Box>
-                      <Typography fontSize={'12px'}>
-                        {formatCurrency(item.quantity * item.price)}
-                      </Typography>
+                      <TextField
+                        fullWidth
+                        id="amount"
+                        name="amount"
+                        type="number"
+                        label="Input Amount"
+                        value={formikUtang.values.amount}
+                        onChange={formikUtang.handleChange}
+                        error={formikUtang.touched.amount && Boolean(formikUtang.errors.amount)}
+                        helperText={formikUtang.touched.amount && formikUtang.errors.amount}
+                        margin="normal"
+                      />
+                      {/* <Button color="primary" variant="contained" type="submit">
+                        Submit
+                      </Button> */}
                     </Box>
-                  </Box>
-                ))}
-              </Box>
-              <Typography variant="h6" align="right" sx={{ mt: 2 }}>
-                <strong>Total: {formatCurrency(selectedData?.total as number)}</strong>
-              </Typography>
+                  </form>
+                </>
+              ) : (
+                <>
+                  {selectedData?.items.map((item: any) => (
+                    <Box
+                      key={item._id}
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        marginBottom: '5px',
+                        borderBottom: '1px solid gray',
+                      }}
+                    >
+                      <Box>
+                        <Typography fontSize={'10px'} fontWeight={700}>
+                          {item.name}
+                        </Typography>
+                        <Typography fontSize={'9px'}>
+                          {`Quantity: ${item.quantity} x ${formatCurrency(item.price)}`}
+                        </Typography>
+                        <Typography fontSize={'9px'}>
+                          Date: {moment(item.date).format('llll')}
+                        </Typography>
+                      </Box>
+
+                      <Box>
+                        <Typography fontSize={'10px'}>
+                          {formatCurrency(item.quantity * item.price)}
+                        </Typography>
+                      </Box>
+                    </Box>
+                  ))}
+                </>
+              )}
+              <Box sx={{ marginTop: '10px', height: '50vh', overflow: 'scroll' }}></Box>
             </Box>
           </DialogContent>
           <DialogActions>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={() => alert('Implement Pay functionality')}
-            >
-              Pay
-            </Button>
-            <Button variant="contained" color="error" onClick={handleClose}>
-              Close
-            </Button>
+            {type === 'adjustment' ? (
+              <Button
+                color="primary"
+                variant="text"
+                sx={{ textTransform: 'capitalize' }}
+                type="submit"
+                onClick={() => formikUtang.handleSubmit()}
+              >
+                Confirm
+              </Button>
+            ) : (
+              <Button
+                variant="text"
+                sx={{ textTransform: 'capitalize' }}
+                color="primary"
+                onClick={handleAdjustMent}
+              >
+                Adjust
+              </Button>
+            )}
+
+            {type != 'adjustment' && (
+              <>
+                <Button
+                  variant="text"
+                  sx={{ textTransform: 'capitalize' }}
+                  color="primary"
+                  onClick={() => alert('Implement Pay functionality')}
+                >
+                  Pay
+                </Button>
+                <Button
+                  variant="text"
+                  sx={{ textTransform: 'capitalize' }}
+                  color="error"
+                  onClick={handleClose}
+                >
+                  Close
+                </Button>
+              </>
+            )}
           </DialogActions>
         </Dialog>
       </div>
