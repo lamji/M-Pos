@@ -16,13 +16,14 @@ import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import useViewModel from './useViewModel';
 
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { formatCurrency } from '@/src/common/helpers';
-import { getSelectedItems } from '@/src/common/reducers/items';
+import { getSelectedItems, setIsBackDropOpen } from '@/src/common/reducers/items';
 import { getAllUtang, postTransaction } from '@/src/common/api/testApi';
 import moment from 'moment';
 
 export default function Checkout() {
+  const dispatch = useDispatch();
   const { total, items } = useSelector(getSelectedItems); // Get total from Redux
   const { classes, handleClickOpen, handleClose, open, fullScreen, handleClearItems } =
     useViewModel();
@@ -48,7 +49,7 @@ export default function Checkout() {
     }),
     onSubmit: async (values, { resetForm }) => {
       const cashAmount = Number(values.cashAmount);
-
+      dispatch(setIsBackDropOpen(true));
       const transactionData = {
         type: 'Cash',
         items: items,
@@ -64,9 +65,11 @@ export default function Checkout() {
         handleClose();
         setIsLoading(false);
         resetForm();
+        dispatch(setIsBackDropOpen(false));
       } catch (error) {
         console.error('Error:', error);
         setIsLoading(false);
+        dispatch(setIsBackDropOpen(false));
       }
     },
   });
@@ -84,7 +87,7 @@ export default function Checkout() {
       _id: Yup.string().nullable(),
     }),
     onSubmit: async (values, { resetForm }) => {
-      console.log(values);
+      dispatch(setIsBackDropOpen(true));
       setIsLoading(true);
       const transactionData = {
         type: 'Utang',
@@ -104,10 +107,12 @@ export default function Checkout() {
           resetForm();
           setIsLoading(false);
           setIsOld(true);
+          dispatch(setIsBackDropOpen(false));
         }
       } catch (error) {
         console.error('Error:', error);
         setIsLoading(false);
+        dispatch(setIsBackDropOpen(false));
       }
     },
   });
@@ -137,6 +142,7 @@ export default function Checkout() {
     onSubmit: async (values, { resetForm }) => {
       const partialAmount = Number(values.partialAmount);
       const desiredAmount = Number(values.desiredAmount);
+      dispatch(setIsBackDropOpen(true));
 
       const transactionData = {
         type: 'partial',
@@ -157,9 +163,11 @@ export default function Checkout() {
           setReceiptOpen(true);
           resetForm();
           handleClose();
+          dispatch(setIsBackDropOpen(false));
         }
       } catch (error) {
         console.error('Error:', error);
+        dispatch(setIsBackDropOpen(false));
       }
     },
   });

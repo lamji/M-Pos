@@ -5,24 +5,37 @@ import { useRouter } from 'next/router';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { getSalesData } from '@/src/common/api/testApi';
 import { formatCurrency } from '@/src/common/helpers';
+import AutorenewIcon from '@mui/icons-material/Autorenew';
+import { setIsBackDropOpen } from '@/src/common/reducers/items';
+import { useDispatch } from 'react-redux';
 
 export default function Dashboard() {
   const router = useRouter();
+  const dispatch = useDispatch();
   const [data, setData] = useState<any>({});
+  const [refresh, setRefresh] = useState(false);
 
   const getSales = async () => {
+    dispatch(setIsBackDropOpen(true));
     try {
       const data = await getSalesData();
-      setData(data);
-      console.log(data);
+      if (data) {
+        dispatch(setIsBackDropOpen(false));
+        setData(data);
+      }
     } catch (error) {
       console.log(error);
+      dispatch(setIsBackDropOpen(false));
     }
+  };
+
+  const handleRefresh = () => {
+    setRefresh(!refresh);
   };
 
   useEffect(() => {
     getSales();
-  }, []);
+  }, [refresh]);
   return (
     <div>
       <Nav>
@@ -44,9 +57,22 @@ export default function Dashboard() {
           height: '80vh',
         }}
       >
-        <Typography align="center" fontWeight={700} variant="body1" mb={2}>
-          SALES
-        </Typography>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            mb: 2,
+            justifyContent: 'center',
+          }}
+        >
+          <Typography align="center" fontWeight={700} variant="body1">
+            SALES
+          </Typography>
+          <IconButton onClick={handleRefresh}>
+            <AutorenewIcon />
+          </IconButton>
+        </Box>
+
         <Box
           display="flex"
           alignItems="center"
@@ -66,7 +92,7 @@ export default function Dashboard() {
             <Typography fontSize="12px" fontWeight={700}>
               Yesterday
             </Typography>
-            <Typography>{formatCurrency(data?.today)}</Typography>
+            <Typography>{formatCurrency(data?.today ?? 0)}</Typography>
           </Box>
           <Box
             sx={{
@@ -81,7 +107,7 @@ export default function Dashboard() {
             <Typography fontSize="12px" fontWeight={700}>
               Today
             </Typography>
-            <Typography>{formatCurrency(data?.yesterday)}</Typography>
+            <Typography>{formatCurrency(data?.yesterday ?? 0)}</Typography>
           </Box>
         </Box>
         <Box>
