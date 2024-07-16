@@ -1,21 +1,10 @@
 import Checkout from '@/src/components/Mobile/CheckOut';
 import ScanItems from '@/src/components/Mobile/ScanItems';
-import { Box, IconButton, Typography } from '@mui/material';
+import { Box } from '@mui/material';
 import styles from '../styles.module.css';
 import Head from 'next/head';
-import { useRouter } from 'next/router';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import { useDispatch } from 'react-redux';
-import { clearItems } from '@/src/common/reducers/items';
 
 export default function Home() {
-  const router = useRouter();
-  const dispatch = useDispatch();
-
-  const handleClearItems = () => {
-    router.push('/');
-    dispatch(clearItems());
-  };
   return (
     <>
       <Head>
@@ -25,14 +14,8 @@ export default function Home() {
 
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main style={{ padding: '10px' }}>
-        <IconButton onClick={handleClearItems}>
-          <ArrowBackIcon />
-        </IconButton>
-        <Typography variant="h6" fontWeight={700} className={styles.title}>
-          SCAN ITEMS
-        </Typography>
-        <Box mt={2}>
+      <main>
+        <Box>
           <ScanItems />
         </Box>
         <div className={styles.footer}>

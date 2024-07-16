@@ -10,8 +10,21 @@ export default async function handler(req, res) {
   switch (method) {
     case 'GET':
       try {
-        const utang = await Utang.find({});
-        res.status(200).json(utang);
+        const { _id } = req.query;
+
+        let utang;
+        if (_id) {
+          utang = await Utang.findById(_id);
+          if (!utang) {
+            return res.status(404).json({ error: 'Utang not found' });
+          }
+          utang = [utang]; // Ensure utang is an array for consistent response format
+        } else {
+          utang = await Utang.find({});
+        }
+
+        const totalUtang = utang.reduce((sum, entry) => sum + entry.total, 0);
+        res.status(200).json({ utang, totalUtang });
       } catch (error) {
         res.status(500).json({ error: 'Failed to fetch utang' });
       }

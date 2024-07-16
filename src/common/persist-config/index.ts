@@ -6,6 +6,12 @@ export const authPersistConfig = {
   whitelist: ['user'],
 };
 
+export const itemsPersistConfig = {
+  key: 'items',
+  storage,
+  whitelist: ['user'],
+};
+
 // export const receiptPersistConfig = {
 //   key: 'receipt',
 //   storage,

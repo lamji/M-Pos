@@ -31,7 +31,9 @@ export const getAllUtang = async () => {
 // Fetch a specific utang record by its ID
 export const getUtangById = async (id: string) => {
   try {
-    const response = await axios.get(`/api/utang/${id}`);
+    const response = await axios.get(`/api/utang`, {
+      params: { _id: id },
+    });
     return response.data;
   } catch (error) {
     console.error('Error fetching utang by ID:', error);

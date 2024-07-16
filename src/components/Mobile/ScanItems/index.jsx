@@ -22,6 +22,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   addItem,
+  clearItems,
   getSelectedItems,
   removeItem,
   updateItemQuantity,
@@ -29,6 +30,9 @@ import {
 import { formatCurrency } from '@/src/common/helpers';
 import Html5QrcodePlugin from '../../Scanner';
 import QrCodeScannerIcon from '@mui/icons-material/QrCodeScanner';
+import Nav from '../Nav';
+import { useRouter } from 'next/router';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 // Debounce function to limit how frequently a function can be invoked
 const debounce = (func, delay) => {
@@ -40,6 +44,7 @@ const debounce = (func, delay) => {
 };
 
 const ComboBox = () => {
+  const router = useRouter();
   const dispatch = useDispatch();
   const { items } = useSelector(getSelectedItems);
 
@@ -142,120 +147,147 @@ const ComboBox = () => {
     }
   };
 
+  const handleClearItems = () => {
+    router.push('/');
+    dispatch(clearItems());
+  };
+
   // Apply debouncing to the scan result
   const debouncedOnNewScanResult = useCallback(debounce(onNewScanResult, 500), [onNewScanResult]);
 
   return (
-    <Box sx={{ marginTop: '10px', paddingBottom: '60px', position: 'relative' }}>
-      {/* Conditionally render the Html5QrcodePlugin based on isScanning state */}
-
-      {isScanning && (
-        <Html5QrcodePlugin
-          fps={10}
-          qrbox={250}
-          disableFlip={false}
-          qrCodeSuccessCallback={debouncedOnNewScanResult}
-          stopScanning={stopScanning} // Pass the stopScanning state as a prop
-        />
-      )}
-
-      <Box sx={{ display: 'flex', alignItems: 'center' }}>
-        <Autocomplete
-          disablePortal
-          id="combo-box-demo"
-          options={allItems}
-          getOptionLabel={(option) => option.name}
-          sx={{
-            width: '100%',
-            '& .MuiAutocomplete-endAdornment': {
-              display: 'none',
-            },
-            '& .MuiAutocomplete-inputRoot': {
-              padding: '10px !important',
-
-              borderRadius: '4px', // Optional: Add border radius
-              '&:hover': {
-                borderColor: '#888', // Change border color on hover
-              },
-            },
-          }}
-          onChange={handleAddItem}
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              label="Search Item"
-              InputProps={{
-                ...params.InputProps,
-                endAdornment: (
-                  <>
-                    {params.InputProps.endAdornment}
-                    <InputAdornment position="end">
-                      <IconButton>
-                        <SearchIcon />
-                      </IconButton>
-                    </InputAdornment>
-                  </>
-                ),
-              }}
-            />
-          )}
-        />
-        <Box>
-          <IconButton onClick={handleScanClick}>
-            <QrCodeScannerIcon style={{ fontSize: '50px' }} />
+    <>
+      <Nav>
+        <Box display="flex" alignItems="center">
+          <IconButton onClick={handleClearItems}>
+            <ArrowBackIcon sx={{ color: 'white' }} />
           </IconButton>
+          <Typography variant="h6" fontWeight={700}>
+            SCAN ITEM
+          </Typography>
         </Box>
-      </Box>
+      </Nav>
+      <Box
+        sx={{
+          padding: '20px',
+          paddingBottom: '60px',
+          position: 'relative',
+          borderRadius: 10,
+          background: 'white',
+          marginTop: '-100px',
+          paddingTop: '20px',
+        }}
+      >
+        {/* Conditionally render the Html5QrcodePlugin based on isScanning state */}
 
-      <Typography mt={4} sx={{ marginBottom: '-5px' }} fontWeight={700}>
-        Scanned Items
-      </Typography>
-      <List sx={{ marginTop: '10px', height: '50vh', overflow: 'scroll' }}>
-        {items.length > 0 ? (
-          items.map((item) => (
-            <ListItem key={item.id}>
-              <ListItemText
-                sx={{
-                  fontSize: '10px',
-                  '& .MuiTypography-root': {
-                    fontSize: '10px !important',
-                  },
-                }}
-                primary={`${item.name} - ${formatCurrency(item.price)}`}
-                secondary={`Quantity: ${item.quantity}`}
-              />
-              <ListItemSecondaryAction>
-                <IconButton
-                  edge="end"
-                  onClick={() => handleDecreaseQuantity(item.id)}
-                  disabled={item.quantity === 1}
-                >
-                  <RemoveCircleIcon color="error" />
-                </IconButton>
-                <IconButton edge="end" onClick={() => handleIncreaseQuantity(item.id)}>
-                  <AddCircleIcon color="primary" />
-                </IconButton>
-                <IconButton
-                  edge="end"
-                  onClick={() => handleDeleteItem(item.id)}
-                  sx={{ color: 'error.main' }}
-                >
-                  <DeleteIcon />
-                </IconButton>
-              </ListItemSecondaryAction>
-            </ListItem>
-          ))
-        ) : (
-          <ListItem>
-            <ListItemText
-              primary={<Typography color="textSecondary">No items added yet.</Typography>}
-            />
-          </ListItem>
+        {isScanning && (
+          <Html5QrcodePlugin
+            fps={10}
+            qrbox={250}
+            disableFlip={false}
+            qrCodeSuccessCallback={debouncedOnNewScanResult}
+            stopScanning={stopScanning} // Pass the stopScanning state as a prop
+          />
         )}
-      </List>
 
-      <ToastContainer />
-    </Box>
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Autocomplete
+            disablePortal
+            id="combo-box-demo"
+            options={allItems}
+            getOptionLabel={(option) => option.name}
+            sx={{
+              width: '100%',
+              '& .MuiAutocomplete-endAdornment': {
+                display: 'none',
+              },
+              '& .MuiAutocomplete-inputRoot': {
+                padding: '10px !important',
+
+                borderRadius: '4px', // Optional: Add border radius
+                '&:hover': {
+                  borderColor: '#888', // Change border color on hover
+                },
+              },
+            }}
+            onChange={handleAddItem}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Search Item"
+                InputProps={{
+                  ...params.InputProps,
+                  endAdornment: (
+                    <>
+                      {params.InputProps.endAdornment}
+                      <InputAdornment position="end">
+                        <IconButton>
+                          <SearchIcon />
+                        </IconButton>
+                      </InputAdornment>
+                    </>
+                  ),
+                }}
+              />
+            )}
+          />
+          <Box>
+            <IconButton onClick={handleScanClick}>
+              <QrCodeScannerIcon style={{ fontSize: '50px' }} />
+            </IconButton>
+          </Box>
+        </Box>
+
+        <Typography mt={4} sx={{ marginBottom: '-5px' }} fontWeight={700}>
+          Scanned Items
+        </Typography>
+        <List sx={{ marginTop: '10px', height: '50vh', overflow: 'scroll' }}>
+          {items.length > 0 ? (
+            items.map((item) => (
+              <ListItem key={item.id}>
+                <ListItemText
+                  sx={{
+                    fontSize: '10px',
+                    '& .MuiTypography-root': {
+                      fontSize: '10px !important',
+                    },
+                  }}
+                  primary={`${item.name} - ${formatCurrency(item.price)}`}
+                  secondary={`Quantity: ${item.quantity}`}
+                />
+                <ListItemSecondaryAction>
+                  <IconButton
+                    edge="end"
+                    onClick={() => handleDecreaseQuantity(item.id)}
+                    disabled={item.quantity === 1}
+                  >
+                    <RemoveCircleIcon color="error" />
+                  </IconButton>
+                  <IconButton edge="end" onClick={() => handleIncreaseQuantity(item.id)}>
+                    <AddCircleIcon color="primary" />
+                  </IconButton>
+                  <IconButton
+                    edge="end"
+                    onClick={() => handleDeleteItem(item.id)}
+                    sx={{ color: 'error.main' }}
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                </ListItemSecondaryAction>
+              </ListItem>
+            ))
+          ) : (
+            <ListItem>
+              <ListItemText
+                primary={<Typography color="textSecondary">No items added yet.</Typography>}
+              />
+            </ListItem>
+          )}
+        </List>
+
+        <ToastContainer />
+      </Box>
+    </>
   );
 };
 

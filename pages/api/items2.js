@@ -15,9 +15,7 @@ export default async function handler(req, res) {
         // Handle filtering by barcode
         if (query.barcode) {
           const barcode = query.barcode.toLowerCase();
-          console.log(barcode);
           const filteredItems = items.filter((item) => item.barcode.toLowerCase() === barcode);
-          console.log(query, filteredItems);
           return res.status(200).json(filteredItems);
         }
 

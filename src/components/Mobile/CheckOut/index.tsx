@@ -199,11 +199,15 @@ export default function Checkout() {
       <Box sx={classes.root}>
         <Typography fontWeight={700}>Total: {formatCurrency(total)}</Typography>{' '}
         {/* Use total here */}
-        <Box>
-          <Button sx={classes.button} onClick={handleClickOpen}>
-            Check Out
-          </Button>
-        </Box>
+        {total > 0 && (
+          <>
+            <Box>
+              <Button sx={classes.button} onClick={handleClickOpen}>
+                Check Out
+              </Button>
+            </Box>
+          </>
+        )}
       </Box>
       <div>
         <Dialog
@@ -300,7 +304,7 @@ export default function Checkout() {
                             }}
                             disablePortal
                             id="combo-box-demo"
-                            options={allItemsUtang}
+                            options={allItemsUtang.utang}
                             getOptionLabel={(option: any) => option?.personName}
                             sx={{ width: 300, marginBottom: 2 }}
                             renderInput={(params) => (
@@ -416,7 +420,7 @@ export default function Checkout() {
                         onChange={formikUtang.handleChange}
                         disablePortal
                         id="combo-box-demo"
-                        options={allItemsUtang}
+                        options={allItemsUtang.utang}
                         getOptionLabel={(option: any) => option?.personName}
                         sx={{ width: '100%', marginBottom: 2 }}
                         renderInput={(params) => <TextField {...params} label="Select Name" />}

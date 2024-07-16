@@ -101,20 +101,6 @@ export default async function handler(req, res) {
         const change = cash ? cash - total : undefined;
         const remainingBalance = partialAmount ? total - partialAmount : undefined;
 
-        console.log(items, personName, cash, total, partialAmount, type, _id, payment);
-
-        console.log(
-          items,
-          personName,
-          cash,
-          total,
-          partialAmount,
-          type,
-          _id,
-          payment,
-          type === 'Utang'
-        );
-
         if (type === 'Utang') {
           // let utangRecord; // Rename from `utang` to `utangRecord`
 

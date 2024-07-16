@@ -10,6 +10,7 @@ import { ToastContainer } from 'react-toastify';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import 'react-toastify/dist/ReactToastify.css';
 import { useRouter } from 'next/router';
+import Nav from '@/src/components/Mobile/Nav';
 
 // Validation Schema
 const validationSchema = Yup.object({
@@ -48,7 +49,6 @@ const AddItemForm = () => {
 
       if (response.ok) {
         const data = await response.json();
-        console.log('Item added:', data);
         setApiResponse(data); // Set the API response state
         resetForm();
         setGeneratedId('');
@@ -78,96 +78,114 @@ const AddItemForm = () => {
   };
 
   return (
-    <Box sx={{ maxWidth: 600, margin: 'auto', padding: 2 }}>
-      <IconButton onClick={() => router.push('/')}>
-        <ArrowBackIcon />
-      </IconButton>
-      <Typography variant="h5" gutterBottom>
-        Add New Item
-      </Typography>
-      <Formik
-        initialValues={{ ...initialValues, barcode: scannedBarcode, id: generatedId }}
-        enableReinitialize
-        validationSchema={validationSchema}
-        onSubmit={handleSubmit}
-      >
-        {({ isSubmitting, errors, touched, setFieldValue }) => (
-          <Form>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              <Field
-                name="id"
-                as={TextField}
-                label="ID"
-                variant="outlined"
-                fullWidth
-                value={generatedId}
-                error={touched.id && Boolean(errors.id)}
-                helperText={touched.id && errors.id}
-                disabled
-              />
-              <Field
-                name="name"
-                as={TextField}
-                label="Name"
-                variant="outlined"
-                fullWidth
-                error={touched.name && Boolean(errors.name)}
-                helperText={touched.name && errors.name}
-              />
-              <Field
-                name="price"
-                as={TextField}
-                label="Price"
-                type="number"
-                variant="outlined"
-                fullWidth
-                error={touched.price && Boolean(errors.price)}
-                helperText={touched.price && errors.price}
-              />
-              <Field
-                name="barcode"
-                as={TextField}
-                label="Barcode"
-                variant="outlined"
-                fullWidth
-                value={scannedBarcode}
-                error={touched.barcode && Boolean(errors.barcode)}
-                helperText={touched.barcode && errors.barcode}
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <IconButton onClick={handleScanClick}>
-                        <QrCodeScannerIcon />
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                }}
-                onChange={(event) => setFieldValue('barcode', event.target.value)}
-              />
-              <Button type="submit" variant="contained" color="primary" disabled={isSubmitting}>
-                {isSubmitting ? 'Submitting...' : 'Submit'}
-              </Button>
-            </Box>
-            {isScanning && (
-              <Html5QrcodePlugin
-                fps={10}
-                qrbox={250}
-                disableFlip={false}
-                qrCodeSuccessCallback={handleBarcodeScan}
-                stopScanning={stopScanning}
-              />
-            )}
-          </Form>
-        )}
-      </Formik>
-      <ToastContainer />
-      {apiResponse && (
-        <Box mt={4}>
-          <Typography variant="h6">API Response</Typography>
-          <pre>{JSON.stringify(apiResponse, null, 2)}</pre>
+    <>
+      <Nav>
+        <Box display="flex" alignItems="center">
+          <IconButton onClick={() => router.push('/')}>
+            <ArrowBackIcon sx={{ color: 'white' }} />
+          </IconButton>
+          <Typography variant="h6" fontWeight={700}>
+            AKHIRO POS
+          </Typography>
         </Box>
-      )}
-    </Box>
+      </Nav>
+      <Box
+        sx={{
+          maxWidth: 600,
+          margin: 'auto',
+          padding: 3,
+          borderRadius: 10,
+          marginTop: '-110px',
+          background: 'white',
+        }}
+      >
+        <Typography variant="h6" fontWeight={700} gutterBottom>
+          Add New Item
+        </Typography>
+        <Formik
+          initialValues={{ ...initialValues, barcode: scannedBarcode, id: generatedId }}
+          enableReinitialize
+          validationSchema={validationSchema}
+          onSubmit={handleSubmit}
+        >
+          {({ isSubmitting, errors, touched, setFieldValue }) => (
+            <Form>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <Field
+                  name="id"
+                  as={TextField}
+                  label="ID"
+                  variant="outlined"
+                  fullWidth
+                  value={generatedId}
+                  error={touched.id && Boolean(errors.id)}
+                  helperText={touched.id && errors.id}
+                  disabled
+                />
+                <Field
+                  name="name"
+                  as={TextField}
+                  label="Name"
+                  variant="outlined"
+                  fullWidth
+                  error={touched.name && Boolean(errors.name)}
+                  helperText={touched.name && errors.name}
+                />
+                <Field
+                  name="price"
+                  as={TextField}
+                  label="Price"
+                  type="number"
+                  variant="outlined"
+                  fullWidth
+                  error={touched.price && Boolean(errors.price)}
+                  helperText={touched.price && errors.price}
+                />
+                <Field
+                  name="barcode"
+                  as={TextField}
+                  label="Barcode"
+                  variant="outlined"
+                  fullWidth
+                  value={scannedBarcode}
+                  error={touched.barcode && Boolean(errors.barcode)}
+                  helperText={touched.barcode && errors.barcode}
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton onClick={handleScanClick}>
+                          <QrCodeScannerIcon />
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                  onChange={(event) => setFieldValue('barcode', event.target.value)}
+                />
+                <Button type="submit" variant="contained" color="primary" disabled={isSubmitting}>
+                  {isSubmitting ? 'Submitting...' : 'Submit'}
+                </Button>
+              </Box>
+              {isScanning && (
+                <Html5QrcodePlugin
+                  fps={10}
+                  qrbox={250}
+                  disableFlip={false}
+                  qrCodeSuccessCallback={handleBarcodeScan}
+                  stopScanning={stopScanning}
+                />
+              )}
+            </Form>
+          )}
+        </Formik>
+        <ToastContainer />
+        {apiResponse && (
+          <Box mt={4}>
+            <Typography variant="h6">API Response</Typography>
+            <pre>{JSON.stringify(apiResponse, null, 2)}</pre>
+          </Box>
+        )}
+      </Box>
+    </>
   );
 };
 

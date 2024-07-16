@@ -2,6 +2,7 @@ import { Box, Button, Typography } from '@mui/material';
 import styles from './styles.module.css';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
+import Nav from '@/src/components/Mobile/Nav';
 
 export default function Home() {
   const router = useRouter();
@@ -14,13 +15,18 @@ export default function Home() {
 
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main style={{ padding: '10px' }}>
-        <Typography variant="h6" fontWeight={700} className={styles.title}>
-          AKHIRO POS
-        </Typography>
+      <main>
+        <Nav>
+          <Typography variant="h6" fontWeight={700} className={styles.title}>
+            AKHIRO POS
+          </Typography>
+        </Nav>
 
         <Box
           sx={{
+            marginTop: '-110px',
+            background: 'white',
+            borderRadius: 5,
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
@@ -94,13 +100,6 @@ export default function Home() {
             DASHBOARD
           </Button>
         </Box>
-
-        {/* <Box mt={2}>
-          <ScanItems />
-        </Box>
-        <div className={styles.footer}>
-          <Checkout />
-        </div> */}
       </main>
     </>
   );
