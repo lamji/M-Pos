@@ -1,0 +1,32 @@
+[
+    {
+        "id": "1",
+        "name": "Milo",
+        "price": 50,
+        "barcode": "48000361413480"
+    },
+    {
+        "id": "2",
+        "name": "Headphones Pro",
+        "price": 150,
+        "barcode": "234567890123"
+    },
+    {
+        "id": "3",
+        "name": "Keyboard",
+        "price": 30,
+        "barcode": "345678901234"
+    },
+    {
+        "id": "4",
+        "name": "Mouse",
+        "price": 20,
+        "barcode": "456789012345"
+    },
+    {
+        "id": "5",
+        "name": "Monitor",
+        "price": 200,
+        "barcode": "567890123456"
+    }
+]

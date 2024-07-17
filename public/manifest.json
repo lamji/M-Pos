@@ -1,0 +1,58 @@
+{
+  "background_color": "#0A736C",
+  "categories": ["central", "eats", "markets"],
+  "display": "standalone",
+  "scope": "/",
+  "start_url": "/",
+  "name": "Central",
+  "short_name": "Central",
+  "description": "Central is where you get the best of what life has to offer. Whether you're looking for a birthday treat or planning to fill your pantry with all your favorites.",
+  "android_package_name": "com.central.android",
+  "icons": [
+    {
+      "purpose": "maskable",
+      "src": "/icons/192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/256x256.png",
+      "sizes": "256x256",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/384x384.png",
+      "sizes": "384x384",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Central",
+      "url": "/",
+      "icons": [
+        {
+          "src": "/icons/96x96.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Eats",
+      "url": "/eats",
+      "icons": [
+        {
+          "src": "/icons/96x96.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    }
+  ]
+}
