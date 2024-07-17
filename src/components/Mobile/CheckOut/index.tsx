@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Box,
   Button,
@@ -9,6 +9,7 @@ import {
   IconButton,
   Typography,
   TextField,
+  Autocomplete,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { useFormik } from 'formik';
@@ -18,7 +19,7 @@ import useViewModel from './useViewModel';
 import { useSelector } from 'react-redux';
 import { formatCurrency } from '@/src/common/helpers';
 import { getSelectedItems } from '@/src/common/reducers/items';
-import { postTransaction } from '@/src/common/api/testApi';
+import { getAllUtang, postTransaction } from '@/src/common/api/testApi';
 import moment from 'moment';
 
 export default function Checkout() {
@@ -30,7 +31,9 @@ export default function Checkout() {
   );
   const [receiptOpen, setReceiptOpen] = React.useState(false);
   const [allItems, setAllItems] = useState<any>([]);
+  const [allItemsUtang, setAllItemsUtang] = useState<any>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isOld, setIsOld] = useState(true);
 
   const formikCash = useFormik({
     initialValues: {
@@ -59,10 +62,11 @@ export default function Checkout() {
         handleClearItems();
         setReceiptOpen(true);
         handleClose();
-        setIsLoading(true);
+        setIsLoading(false);
         resetForm();
       } catch (error) {
         console.error('Error:', error);
+        setIsLoading(false);
       }
     },
   });
@@ -70,33 +74,40 @@ export default function Checkout() {
   const formikUtang = useFormik({
     initialValues: {
       personName: '',
+      _id: '',
     },
     validationSchema: Yup.object({
       personName: Yup.string()
         .required('Required')
         .min(2, 'Name is too short')
         .max(50, 'Name is too long'),
+      _id: Yup.string().nullable(),
     }),
     onSubmit: async (values, { resetForm }) => {
+      console.log(values);
       setIsLoading(true);
       const transactionData = {
         type: 'Utang',
         items: items,
         personName: values.personName,
         total,
+        _id: values._id || undefined,
       };
       try {
         const data = await postTransaction(transactionData);
+        console.log('test', data);
         if (data) {
-          setIsLoading(true);
           setAllItems(data.data);
           setReceiptOpen(true);
           handleClose();
           handleClearItems();
           resetForm();
+          setIsLoading(false);
+          setIsOld(true);
         }
       } catch (error) {
         console.error('Error:', error);
+        setIsLoading(false);
       }
     },
   });
@@ -134,6 +145,7 @@ export default function Checkout() {
         cash: partialAmount,
         total,
         partialAmount: desiredAmount,
+        _id: undefined,
       };
       setIsLoading(true);
       try {
@@ -168,6 +180,20 @@ export default function Checkout() {
     }
   };
 
+  const getAllUtandData = async () => {
+    try {
+      const data = await getAllUtang();
+      if (data) {
+        setAllItemsUtang(data);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    getAllUtandData();
+  }, [allItems]);
   return (
     <div>
       <Box sx={classes.root}>
@@ -235,6 +261,9 @@ export default function Checkout() {
               </Button>
             </Box>
 
+            <Typography textTransform="capitalize" fontWeight={700} m={2}>
+              {selectedOption}
+            </Typography>
             <Box px={2}>
               {selectedOption === 'cash' && (
                 <form onSubmit={formikCash.handleSubmit}>
@@ -253,19 +282,96 @@ export default function Checkout() {
                 </form>
               )}
               {selectedOption === 'utang' && (
-                <form onSubmit={formikUtang.handleSubmit}>
-                  <TextField
-                    fullWidth
-                    id="personName"
-                    name="personName"
-                    label="Input Person Name"
-                    value={formikUtang.values.personName}
-                    onChange={formikUtang.handleChange}
-                    error={formikUtang.touched.personName && Boolean(formikUtang.errors.personName)}
-                    helperText={formikUtang.touched.personName && formikUtang.errors.personName}
-                    margin="normal"
-                  />
-                </form>
+                <>
+                  <form onSubmit={formikUtang.handleSubmit}>
+                    <Box
+                      sx={{
+                        width: '100%',
+                        textAlign: 'center',
+                      }}
+                    >
+                      {isOld ? (
+                        <>
+                          <Autocomplete
+                            // value={formikUtang.values.personName}
+                            onChange={(event, value) => {
+                              formikUtang.setFieldValue('_id', value?._id ?? ''); // Set _id
+                              formikUtang.setFieldValue('personName', value?.personName ?? ''); // Set personName
+                            }}
+                            disablePortal
+                            id="combo-box-demo"
+                            options={allItemsUtang}
+                            getOptionLabel={(option: any) => option?.personName}
+                            sx={{ width: 300, marginBottom: 2 }}
+                            renderInput={(params) => (
+                              <TextField
+                                {...params}
+                                label="Select Name"
+                                name="personName"
+                                error={
+                                  formikUtang.touched.personName &&
+                                  Boolean(formikUtang.errors.personName)
+                                }
+                                helperText={
+                                  formikUtang.touched.personName && formikUtang.errors.personName
+                                }
+                              />
+                            )}
+                          />
+                          <Box
+                            component="a"
+                            sx={{
+                              width: '100%',
+                              textAlign: 'center',
+                              cursor: 'pointer',
+                              textDecoration: 'underline',
+                              color: 'blue',
+                              mt: 2,
+                              fontSize: '12px',
+                            }}
+                            onClick={() => setIsOld(false)}
+                          >
+                            Not found?
+                          </Box>
+                        </>
+                      ) : (
+                        <>
+                          <TextField
+                            fullWidth
+                            id="personName"
+                            name="personName"
+                            label="Input Person Name"
+                            value={formikUtang.values.personName}
+                            onChange={formikUtang.handleChange}
+                            error={
+                              formikUtang.touched.personName &&
+                              Boolean(formikUtang.errors.personName)
+                            }
+                            helperText={
+                              formikUtang.touched.personName && formikUtang.errors.personName
+                            }
+                            margin="normal"
+                          />
+                          <Box
+                            component="a"
+                            sx={{
+                              width: '100%',
+                              textAlign: 'center',
+                              cursor: 'pointer',
+                              textDecoration: 'underline',
+                              color: 'blue',
+                              mt: 2,
+                              fontSize: '12px',
+                            }}
+                            onClick={() => setIsOld(true)}
+                          >
+                            Back
+                          </Box>
+                        </>
+                      )}
+                    </Box>
+                  </form>
+                </>
               )}
               {selectedOption === 'partial' && (
                 <form onSubmit={formikPartial.handleSubmit}>
@@ -284,8 +390,9 @@ export default function Checkout() {
                     helperText={
                       formikPartial.touched.partialAmount && formikPartial.errors.partialAmount
                     }
-                    margin="normal"
+                    sx={{ marginBottom: '10px' }}
                   />
+
                   <TextField
                     fullWidth
                     type="number"
@@ -301,32 +408,85 @@ export default function Checkout() {
                     helperText={
                       formikPartial.touched.desiredAmount && formikPartial.errors.desiredAmount
                     }
-                    margin="normal"
+                    sx={{ marginBottom: '10px' }}
                   />
-                  <TextField
-                    fullWidth
-                    id="personName"
-                    name="personName"
-                    label="Input Person Name"
-                    value={formikPartial.values.personName}
-                    onChange={formikPartial.handleChange}
-                    error={
-                      formikPartial.touched.personName && Boolean(formikPartial.errors.personName)
-                    }
-                    helperText={formikPartial.touched.personName && formikPartial.errors.personName}
-                    margin="normal"
-                  />
+                  {isOld ? (
+                    <>
+                      <Autocomplete
+                        onChange={formikUtang.handleChange}
+                        disablePortal
+                        id="combo-box-demo"
+                        options={allItemsUtang}
+                        getOptionLabel={(option: any) => option?.personName}
+                        sx={{ width: '100%', marginBottom: 2 }}
+                        renderInput={(params) => <TextField {...params} label="Select Name" />}
+                      />
+                      <Box
+                        component="a"
+                        sx={{
+                          width: '100%',
+                          textAlign: 'center',
+                          cursor: 'pointer',
+                          textDecoration: 'underline',
+                          color: 'blue',
+                          mt: 2,
+                          fontSize: '12px',
+                        }}
+                        onClick={() => setIsOld(false)}
+                      >
+                        Person not found?
+                      </Box>
+                    </>
+                  ) : (
+                    <>
+                      <TextField
+                        fullWidth
+                        id="personName"
+                        name="personName"
+                        label="Input Person Name"
+                        value={formikPartial.values.personName}
+                        onChange={formikPartial.handleChange}
+                        error={
+                          formikPartial.touched.personName &&
+                          Boolean(formikPartial.errors.personName)
+                        }
+                        helperText={
+                          formikPartial.touched.personName && formikPartial.errors.personName
+                        }
+                      />
+                      <Box
+                        component="a"
+                        sx={{
+                          width: '100%',
+                          textAlign: 'center',
+                          cursor: 'pointer',
+                          textDecoration: 'underline',
+                          color: 'blue',
+                          mt: 2,
+                          fontSize: '12px',
+                        }}
+                        onClick={() => setIsOld(true)}
+                      >
+                        Back
+                      </Box>
+                    </>
+                  )}
                 </form>
               )}
             </Box>
           </DialogContent>
-          <DialogActions>
+          <DialogActions sx={{ p: '0px' }}>
             <Box sx={classes.footerButton}>
               <Button
                 disabled={isLoading}
                 onClick={handleProceedClick}
                 variant="contained"
                 color="primary"
+                sx={{
+                  width: '100%',
+                  height: '80px',
+                  '& .MuiButtonBase-root': { borderRadius: 'unset !important' },
+                }}
               >
                 {isLoading ? 'Processing' : 'Proceed'}
               </Button>
@@ -393,11 +553,11 @@ export default function Checkout() {
               Items
             </Typography>
 
-            {allItems?.items?.map((data: any) => {
+            {allItems?.items?.map((data: any, idx: number) => {
               console.log(data);
               return (
                 <>
-                  <Box sx={classes.receiptsWrapper} key={data.id}>
+                  <Box sx={classes.receiptsWrapper} key={idx}>
                     <Typography
                       sx={classes.receiptsText}
                       fontSize={'11px'}
@@ -461,52 +621,57 @@ export default function Checkout() {
                     align="left"
                     mb={1}
                   >
-                    {formatCurrency(allItems?.partialAmount)}
+                    {formatCurrency(allItems?.partialAmount) ?? '-'}
                   </Typography>
                 </Box>
               </>
             )}
 
-            <Box sx={classes.receiptsWrapper}>
-              <Typography
-                sx={classes.receiptsText}
-                fontSize={'11px'}
-                variant="body2"
-                align="left"
-                mb={1}
-              >
-                Cash
-              </Typography>
-              <Typography
-                sx={classes.receiptsText}
-                fontSize={'11px'}
-                variant="body2"
-                align="left"
-                mb={1}
-              >
-                {formatCurrency(allItems?.cash)}
-              </Typography>
-            </Box>
-            <Box sx={classes.receiptsWrapper}>
-              <Typography
-                sx={classes.receiptsText}
-                fontSize={'11px'}
-                variant="body2"
-                align="left"
-                mb={1}
-              >
-                Change
-              </Typography>
-              <Typography
-                sx={classes.receiptsText}
-                fontSize={'11px'}
-                variant="body2"
-                align="left"
-                mb={1}
-              >
-                {formatCurrency(allItems?.change)}
-              </Typography>
-            </Box>
+            {selectedOption !== 'utang' && (
+              <>
+                <Box sx={classes.receiptsWrapper}>
+                  <Typography
+                    sx={classes.receiptsText}
+                    fontSize={'11px'}
+                    variant="body2"
+                    align="left"
+                    mb={1}
+                  >
+                    Cash
+                  </Typography>
+                  <Typography
+                    sx={classes.receiptsText}
+                    fontSize={'11px'}
+                    variant="body2"
+                    align="left"
+                    mb={1}
+                  >
+                    {formatCurrency(allItems?.cash)}
+                  </Typography>
+                </Box>
+                <Box sx={classes.receiptsWrapper}>
+                  <Typography
+                    sx={classes.receiptsText}
+                    fontSize={'11px'}
+                    variant="body2"
+                    align="left"
+                    mb={1}
+                  >
+                    Change
+                  </Typography>
+                  <Typography
+                    sx={classes.receiptsText}
+                    fontSize={'11px'}
+                    variant="body2"
+                    align="left"
+                    mb={1}
+                  >
+                    {formatCurrency(allItems?.change) ?? '-'}
+                  </Typography>
+                </Box>
+              </>
+            )}
+
             {selectedOption === 'partial' && (
               <>
                 <Box sx={classes.receiptsWrapper}>
@@ -526,7 +691,7 @@ export default function Checkout() {
                     align="left"
                     mb={1}
                   >
-                    {formatCurrency(allItems?.remainingBalance)}
+                    {formatCurrency(allItems?.remainingBalance) ?? '-'}
                   </Typography>
                 </Box>
               </>
@@ -534,7 +699,7 @@ export default function Checkout() {
 
             {selectedOption === 'utang' && (
               <Typography fontSize={'11px'} variant="body2" align="left" mb={1}>
-                Person Name: {allItems?.personName}
+                Person Name: {allItems?.personName ?? '-'}
               </Typography>
             )}
             <Box mt={2}>

@@ -82,7 +82,7 @@ const AddItemForm = () => {
       <IconButton onClick={() => router.push('/')}>
         <ArrowBackIcon />
       </IconButton>
-      <Typography variant="h4" component="h1" gutterBottom>
+      <Typography variant="h5" gutterBottom>
         Add New Item
       </Typography>
       <Formik

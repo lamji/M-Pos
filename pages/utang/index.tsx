@@ -1,20 +1,23 @@
-import { DataGrid, GridColDef, GridRowsProp } from '@mui/x-data-grid';
-import { getTransactionsByType } from '@/src/common/api/testApi';
+import { getAllUtang } from '@/src/common/api/testApi';
 import {
   Box,
   Button,
-  Paper,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
   IconButton,
   Typography,
+  Autocomplete,
+  TextField,
+  InputAdornment,
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { formatCurrency } from '@/src/common/helpers';
+import SearchIcon from '@mui/icons-material/Search';
+import moment from 'moment';
 
 // types.ts
 export interface Item {
@@ -53,65 +56,141 @@ const UtangTransactions: React.FC = () => {
     setSelectedData(null);
   };
 
-  useEffect(() => {
-    const fetchTransactions = async () => {
-      try {
-        const data = await getTransactionsByType('utang');
+  const getAllUtandData = async () => {
+    try {
+      const data = await getAllUtang();
+      if (data) {
         setTransactions(data);
-      } catch (error) {
-        console.error('Failed to fetch transactions:', error);
       }
-    };
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  useEffect(() => {
+    // const fetchTransactions = async () => {
+    //   try {
+    //     const data = await getTransactionsByType('utang');
+    //     setTransactions(data);
+    //   } catch (error) {
+    //     console.error('Failed to fetch transactions:', error);
+    //   }
+    // };
 
-    fetchTransactions();
+    // fetchTransactions();
+    getAllUtandData();
   }, []);
-
-  const rows: GridRowsProp = transactions.map((transaction) => ({
-    id: transaction._id,
-    personName: transaction.personName,
-    total: transaction.total,
-    transaction,
-  }));
-
-  const columns: GridColDef[] = [
-    { field: 'personName', headerName: 'Name', width: 150 },
-    { field: 'total', headerName: 'Total', width: 120 },
-    {
-      field: 'view',
-      headerName: 'View',
-      width: 100,
-      renderCell: (params: any) => (
-        <Button
-          sx={{ textTransform: 'capitalize' }}
-          variant="text"
-          color="primary"
-          onClick={() => handleOpen(params.row.transaction)}
-        >
-          View
-        </Button>
-      ),
-    },
-  ];
 
   return (
     <div style={{ padding: '10px' }}>
       <IconButton onClick={() => router.push('/')}>
         <ArrowBackIcon />
       </IconButton>
-      <h1>Utang Transactions</h1>
+      <h3>Utang Transactions</h3>
+      <Autocomplete
+        disablePortal
+        id="combo-box-demo"
+        options={[]}
+        getOptionLabel={(option: any) => option?.name}
+        sx={{
+          width: '100%',
+          '& .MuiAutocomplete-endAdornment': {
+            display: 'none',
+          },
+          '& .MuiAutocomplete-inputRoot': {
+            padding: '10px !important',
 
-      <Box component={Paper} sx={{ height: 400, width: '100%' }}>
-        <DataGrid
+            borderRadius: '4px', // Optional: Add border radius
+            '&:hover': {
+              borderColor: '#888', // Change border color on hover
+            },
+          },
+        }}
+        onChange={() => null}
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            label="Search Item"
+            InputProps={{
+              ...params.InputProps,
+              endAdornment: (
+                <>
+                  {params.InputProps.endAdornment}
+                  <InputAdornment position="end">
+                    <IconButton>
+                      <SearchIcon />
+                    </IconButton>
+                  </InputAdornment>
+                </>
+              ),
+            }}
+          />
+        )}
+      />
+      <Box
+        display="flex"
+        alignItems="center"
+        justifyContent="space-between"
+        p={1}
+        sx={{
+          border: '1px solid #ccd2d7',
+        }}
+      >
+        <Typography fontWeight={700}>Name</Typography>
+
+        <Typography fontWeight={700}>Total</Typography>
+        <Typography fontWeight={700} sx={{ textTransform: 'capitalize' }}>
+          Action
+        </Typography>
+      </Box>
+      <Box
+        sx={{
+          height: '70vh',
+          width: '100%',
+          borderRadius: '0px 0px 10px 10px',
+          border: '1px solid #ccd2d7',
+          overflow: 'scroll',
+        }}
+      >
+        {/* <DataGrid
           rows={rows}
           columns={columns}
           initialState={{
             pagination: {
               paginationModel: {
-                pageSize: 5,
+                pageSize: 10,
               },
             },
           }}
-        />
+        /> */}
+
+        {transactions.map((data: any, idx) => {
+          console.log('utand data', data);
+          return (
+            <Box
+              key={idx}
+              display="flex"
+              alignItems="center"
+              justifyContent="space-between"
+              p={1}
+              sx={{
+                border: '1px solid #ccd2d7',
+              }}
+            >
+              <Box sx={{ width: 70 }}>
+                <Typography fontSize={'12px'}>{data.personName}</Typography>
+              </Box>
+              <Typography fontSize={'12px'}>{formatCurrency(data.total)}</Typography>
+              <Button onClick={() => handleOpen(data)} sx={{ textTransform: 'capitalize' }}>
+                View
+              </Button>
+            </Box>
+          );
+        })}
+      </Box>
+      <Box display="flex" alignItems="center" justifyContent="end">
+        <Typography fontWeight={700} py={2}>
+          Total: {formatCurrency(20000)}
+        </Typography>
       </Box>
 
       <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
@@ -120,7 +199,7 @@ const UtangTransactions: React.FC = () => {
           <Box>
             <Typography gutterBottom>{selectedData?.personName}</Typography>
             <Box sx={{ marginTop: '10px', height: '50vh', overflow: 'scroll' }}>
-              {selectedData?.items.map((item) => (
+              {selectedData?.items.map((item: any) => (
                 <Box
                   key={item._id}
                   sx={{
@@ -137,7 +216,9 @@ const UtangTransactions: React.FC = () => {
                     <Typography fontSize={'12px'}>
                       {`Quantity: ${item.quantity} x ${formatCurrency(item.price)}`}
                     </Typography>
-                    <Typography fontSize={'12px'}>Date:</Typography>
+                    <Typography fontSize={'12px'}>
+                      Date: {moment(item.date).format('llll')}
+                    </Typography>
                   </Box>
 
                   <Box>

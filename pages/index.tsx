@@ -47,9 +47,9 @@ export default function Home() {
           <Box
             sx={{
               display: 'flex',
-              gap: '10px',
+              alignItems: 'center',
+              justifyContent: 'space-between',
               width: '100%',
-              maxWidth: '400px', // Optional: Set a maximum width for the container
             }}
           >
             <Button
@@ -58,9 +58,9 @@ export default function Home() {
               sx={{
                 border: '1px solid gray',
                 borderRadius: '20px',
-                padding: '50px 30px',
+                height: '100px',
                 textAlign: 'center',
-                width: '45%',
+                width: '48%',
               }}
             >
               LISTAHAN
@@ -71,14 +71,28 @@ export default function Home() {
               sx={{
                 border: '1px solid gray',
                 borderRadius: '20px',
-                padding: '50px 30px',
+                height: '100px',
                 textAlign: 'center',
-                width: '45%',
+                width: '48%',
               }}
             >
               ADD ITEM
             </Button>
           </Box>
+          <Button
+            variant="contained"
+            onClick={() => router.push('/dashboard')}
+            sx={{
+              padding: '50px 30px',
+              border: '1px solid gray',
+              borderRadius: '20px',
+              textAlign: 'center',
+              width: '100%',
+              maxWidth: '400px', // Optional: Set a maximum width for the button
+            }}
+          >
+            DASHBOARD
+          </Button>
         </Box>
 
         {/* <Box mt={2}>

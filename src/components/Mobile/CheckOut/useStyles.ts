@@ -19,7 +19,6 @@ export const useStyles = () => {
     footerButton: {
       textAlign: 'center',
       width: '100% !important',
-      padding: '30px',
     } as CSSProperties,
     receiptsWrapper: {
       display: 'flex',
