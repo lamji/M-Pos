@@ -1,6 +1,6 @@
 // pages/api/items.js
-import { connectToDatabase } from '../lib/mongodb';
-import Item from '../model/Item';
+import { connectToDatabase } from '../../src/common/app/lib/mongodb';
+import Item from '../../src/common/app/model/Item';
 
 export default async function handler(req, res) {
   const { method, query } = req;

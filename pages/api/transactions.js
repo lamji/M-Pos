@@ -1,6 +1,6 @@
 // pages/api/transactions.js
-import { connectToDatabase } from '../lib/mongodb';
-import Transaction from '../model/transaction';
+import { connectToDatabase } from '../../src/common/app/lib/mongodb';
+import Transaction from '../../src/common/app/model/transaction';
 
 export default async function handler(req, res) {
   const { method, query } = req;
@@ -18,25 +18,25 @@ export default async function handler(req, res) {
           const transactions = await Transaction.find({ transactionType: transactionTypeRegex });
 
           // Combine transactions by name
-          const combinedTransactions = transactions.reduce((acc, transaction) => {
-            const existingTransaction = acc.find(
-              (t) => t.name.toLowerCase() === transaction.name.toLowerCase()
-            );
-            if (existingTransaction) {
-              existingTransaction.totalAmount += transaction.totalAmount;
-              existingTransaction.items.push(...transaction.items);
-            } else {
-              acc.push({
-                ...transaction._doc,
-                totalAmount: transaction.totalAmount,
-                items: [...transaction.items],
-              });
-            }
-            return acc;
-          }, []);
+          // const combinedTransactions = transactions.reduce((acc, transaction) => {
+          //   const existingTransaction = acc.find(
+          //     (t) => t?.name?.toLowerCase() === transaction?.name.toLowerCase()
+          //   );
+          //   if (existingTransaction) {
+          //     existingTransaction.totalAmount += transaction.totalAmount;
+          //     existingTransaction.items.push(...transaction.items);
+          //   } else {
+          //     acc.push({
+          //       ...transaction._doc,
+          //       totalAmount: transaction.totalAmount,
+          //       items: [...transaction.items],
+          //     });
+          //   }
+          //   return acc;
+          // }, []);
 
-          console.log('Combined Transactions:', combinedTransactions); // Log the combined transactions
-          return res.status(200).json(combinedTransactions);
+          // console.log('Combined Transactions:', combinedTransactions); // Log the combined transactions
+          return res.status(200).json(transactions);
         }
 
         // If no transactionType filter is provided, return all transactions
