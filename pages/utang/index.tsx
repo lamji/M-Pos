@@ -1,4 +1,4 @@
-import { getUtangById, postTransaction } from '@/src/common/api/testApi';
+import { getAllUtang, getUtangById, postTransaction } from '@/src/common/api/testApi';
 import {
   Box,
   Button,
@@ -17,13 +17,13 @@ import React, { useEffect, useState } from 'react';
 import { formatCurrency } from '@/src/common/helpers';
 import SearchIcon from '@mui/icons-material/Search';
 import moment from 'moment';
-
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { useDispatch, useSelector } from 'react-redux';
 import { setIsBackDropOpen } from '@/src/common/reducers/items';
 import Nav from '@/src/components/Nav';
-import { getUtangData } from '@/src/common/reducers/utangData';
+import { getUtangData, setPayment, setUtangData } from '@/src/common/reducers/utangData';
+import { useRouter } from 'next/router';
 
 // types.ts
 export interface Item {
@@ -58,6 +58,7 @@ const validationSchema = Yup.object({
 });
 
 const UtangTransactions: React.FC = () => {
+  const router = useRouter();
   const dispatch = useDispatch();
   const state = useSelector(getUtangData);
   const [transactions, setTransactions] = useState<any>([]);
@@ -134,9 +135,34 @@ const UtangTransactions: React.FC = () => {
   const handleAdjustMent = () => {
     setType('adjustment');
   };
+
+  const hanndlePayment = () => {
+    const props = {
+      name: selectedData?.personName, // Payor's name
+      amount: selectedData?.total, // Payment amount
+      id: selectedData?._id,
+    };
+    dispatch(setPayment(props as any));
+    router.push('/payment');
+  };
   useEffect(() => {
     setTransactions(state);
   }, [state]);
+
+  const updateUtang = async () => {
+    try {
+      const data = await getAllUtang();
+      if (data) {
+        dispatch(setUtangData(data));
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    updateUtang();
+  }, []);
 
   return (
     <>
@@ -387,7 +413,7 @@ const UtangTransactions: React.FC = () => {
                   variant="text"
                   sx={{ textTransform: 'capitalize' }}
                   color="primary"
-                  onClick={() => alert('Implement Pay functionality')}
+                  onClick={() => hanndlePayment()}
                 >
                   Pay
                 </Button>

@@ -174,12 +174,13 @@ export default async function handler(req, res) {
             // Update the personName, cash, total, remainingBalance, and transactionType fields
             utangRecord.personName = personName;
             utangRecord.cash = cash;
-            utangRecord.total = utangRecord.total; // This line is technically redundant but keeps the clarity
+            utangRecord.total = utangRecord.remainingBalance; // This line is technically redundant but keeps the clarity
             utangRecord.remainingBalance = utangRecord.remainingBalance; // Ensure this is updated
             utangRecord.transactionType = type;
 
+            console.log(utangRecord);
             // Save the updated 'utang' record
-            await utangRecord.save();
+            // await utangRecord.save();
 
             // Create and save the new transaction record
             const transactionData = {
@@ -248,10 +249,8 @@ export default async function handler(req, res) {
             utangRecord.items = [...utangRecord.items, ...items];
 
             // Recalculate the total amount including the incoming items and the new total to add
-            const newTotal = utangRecord.items.reduce(
-              (sum, item) => sum + item.price * item.quantity,
-              0
-            );
+            const newTotal = utangRecord.total;
+
             const utangToAdd = total - partialAmount;
             utangRecord.total = newTotal + utangToAdd; // Update total to include the new amount
 

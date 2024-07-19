@@ -178,7 +178,7 @@ const AddItemForm = () => {
                     <Box sx={{ mt: '40px' }}>
                       <BarcodeScannerComponent
                         dataOut={(data) => handleBarcodeScan(data)}
-                        size={'100px'}
+                        size={100}
                       />
                     </Box>
                     <Button

@@ -1,4 +1,3 @@
-// models/Utang.js
 import mongoose from 'mongoose';
 
 // Define the item schema
@@ -8,6 +7,7 @@ const itemSchema = new mongoose.Schema({
   price: Number,
   quantity: Number,
   date: { type: Date, default: Date.now },
+  isActive: { type: Boolean, default: true }, // Added isActive field
 });
 
 // Define the transaction schema

@@ -167,7 +167,7 @@ const ComboBox = () => {
           position: 'relative',
           borderRadius: 10,
           background: 'white',
-          marginTop: '-100px',
+          marginTop: '-130px',
           paddingTop: '20px',
         }}
       >
@@ -183,8 +183,7 @@ const ComboBox = () => {
           />
         )} */}
 
-        <BarcodeScannerComponent dataOut={(data) => onNewScanResult(data)} size={'200px'} />
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+        <Box>
           <Autocomplete
             disablePortal
             id="combo-box-demo"
@@ -225,12 +224,11 @@ const ComboBox = () => {
               />
             )}
           />
-          {/* <Box>
-            <IconButton onClick={handleScanClick}>
-              <QrCodeScannerIcon style={{ fontSize: '50px' }} />
-            </IconButton>
-          </Box> */}
         </Box>
+        <Box sx={{ mt: '60px' }}>
+          <BarcodeScannerComponent dataOut={(data) => onNewScanResult(data)} size={150} />
+        </Box>
+
         <Typography mt={4} sx={{ marginBottom: '-5px' }} fontWeight={700}>
           Scanned Items
         </Typography>

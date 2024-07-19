@@ -16,7 +16,7 @@ export default function Nav() {
   enablePullToRefresh(true);
   statusBar({
     style: 'light',
-    color: '#0A736C',
+    color: '#A0153E',
     overlay: true, //Only for android
   });
 
@@ -87,6 +87,7 @@ export default function Nav() {
           {currentPath === '/pos' && 'POS'}
           {currentPath === '/utang' && 'LIST'}
           {currentPath === '/add' && 'ADD / UPDATE'}
+          {currentPath === '/payment' && 'PAYMENT'}
         </Typography>
       </Box>
       <SimpleDialogDemo />

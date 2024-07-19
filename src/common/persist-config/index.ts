@@ -21,7 +21,7 @@ export const dataPersistConfig = {
 export const utangDataPersistConfig = {
   key: 'utangDataSlice',
   storage,
-  whitelist: ['utangData'],
+  whitelist: ['utangData', 'payment'],
 };
 
 // export const receiptPersistConfig = {

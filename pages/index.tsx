@@ -1,7 +1,8 @@
-import { Box, Button } from '@mui/material';
+import { Box, Button, Typography } from '@mui/material';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import Nav from '@/src/components/Nav';
+import Image from 'next/image';
 
 export default function Home() {
   const router = useRouter();
@@ -23,19 +24,59 @@ export default function Home() {
 
         <Box
           sx={{
-            marginTop: '-110px',
-            background: 'white',
             borderRadius: 5,
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            height: '80vh', // Full viewport height
             padding: '0 20px', // Optional: Add some horizontal padding
-            gap: '10px', // Space between the buttons
           }}
         >
-          <Button
+          <Box>
+            <Box sx={{ width: '100%', textAlign: 'center' }} onClick={() => router.push('/pos')}>
+              <Image src="/logoscan2.png" width={300} height={200} alt="Picture of the author" />
+            </Box>
+
+            <Box
+              sx={{
+                width: '100%',
+              }}
+            >
+              <Button
+                variant="contained"
+                onClick={() => router.push('/utang')}
+                sx={{
+                  textAlign: 'center',
+                  width: '100%',
+                  mb: '5px',
+                }}
+              >
+                LISTAHAN
+              </Button>
+              <Button
+                variant="contained"
+                onClick={() => router.push('/add')}
+                sx={{
+                  textAlign: 'center',
+                  width: '100%',
+                  mb: '5px',
+                }}
+              >
+                ADD ITEM
+              </Button>
+              <Button
+                variant="contained"
+                onClick={() => router.push('/dashboard')}
+                sx={{
+                  textAlign: 'center',
+                  width: '100%',
+                }}
+              >
+                DASHBOARD
+              </Button>
+            </Box>
+          </Box>
+          {/* <Button
             variant="contained"
             onClick={() => router.push('/pos')}
             sx={{
@@ -48,56 +89,13 @@ export default function Home() {
             }}
           >
             POS
-          </Button>
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              width: '100%',
-            }}
-          >
-            <Button
-              variant="contained"
-              onClick={() => router.push('/utang')}
-              sx={{
-                border: '1px solid gray',
-                borderRadius: '20px',
-                height: '100px',
-                textAlign: 'center',
-                width: '48%',
-              }}
-            >
-              LISTAHAN
-            </Button>
-            <Button
-              variant="contained"
-              onClick={() => router.push('/add')}
-              sx={{
-                border: '1px solid gray',
-                borderRadius: '20px',
-                height: '100px',
-                textAlign: 'center',
-                width: '48%',
-              }}
-            >
-              ADD ITEM
-            </Button>
+          </Button> */}
+          <Box p={2} pt={5}>
+            <Typography textAlign="center" fontSize="10px">
+              Streamline your sales process with our Mobile POS system! Easily manage transactions,
+              track sales, and handle inventory on the go.
+            </Typography>
           </Box>
-          <Button
-            variant="contained"
-            onClick={() => router.push('/dashboard')}
-            sx={{
-              padding: '50px 30px',
-              border: '1px solid gray',
-              borderRadius: '20px',
-              textAlign: 'center',
-              width: '100%',
-              maxWidth: '400px', // Optional: Set a maximum width for the button
-            }}
-          >
-            DASHBOARD
-          </Button>
         </Box>
       </main>
     </>

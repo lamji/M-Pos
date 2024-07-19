@@ -74,10 +74,13 @@ export const createUtang = async (utangData: {
 
 // Add a payment to an existing utang record
 export const addPaymentToUtang = async (id: string, payment: { amount: number }) => {
+  console.log(id, payment);
   try {
     const response = await axios.post(`/api/utang`, {
       _id: id,
-      payment,
+      payment: {
+        amount: payment.amount,
+      },
     });
     return response.data;
   } catch (error) {

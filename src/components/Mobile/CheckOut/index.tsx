@@ -235,7 +235,9 @@ export default function Checkout() {
           aria-labelledby="responsive-dialog-title"
         >
           <DialogTitle>
-            <Typography>Check Out</Typography>
+            <Typography variant="h5" fontWeight={700}>
+              Check Out
+            </Typography>
             <IconButton
               onClick={handleClose}
               aria-label="close"
@@ -245,42 +247,66 @@ export default function Checkout() {
             </IconButton>
           </DialogTitle>
           <DialogContent>
-            <Box p={2}>
-              <Typography fontWeight={700} variant="h6">
-                Amount To Pay
-              </Typography>
-              <Typography>{formatCurrency(total)}</Typography> {/* Use total here */}
-            </Box>
             <Box px={2}>
               <Typography fontWeight={700} variant="h6">
                 Select Option
               </Typography>
             </Box>
-            <Box px={2}>
-              <Button
-                variant="contained"
-                color="primary"
+            <Box
+              px={2}
+              sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
+            >
+              <Box
                 onClick={() => handleOptionClick('cash')}
-                style={{ margin: '2px', ...classes.button2 }}
+                sx={{
+                  border: '2px solid',
+                  borderColor: selectedOption === 'cash' ? '#0A736C' : 'gray',
+                  background: selectedOption === 'cash' ? '#91c991' : '#d1d1d1',
+                  padding: '10px',
+                  borderRadius: '10px',
+                  width: '90px',
+                  height: '80px',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
               >
                 Cash
-              </Button>
-              <Button
-                variant="contained"
-                color="secondary"
+              </Box>
+              <Box
                 onClick={() => handleOptionClick('utang')}
-                style={{ margin: '2px', ...classes.button2 }}
+                sx={{
+                  border: '2px solid',
+                  borderColor: selectedOption === 'utang' ? '#0A736C' : 'gray',
+                  background: selectedOption === 'utang' ? '#91c991' : '#d1d1d1',
+                  padding: '10px',
+                  borderRadius: '10px',
+                  width: '90px',
+                  height: '80px',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
               >
                 Utang
-              </Button>
-              <Button
-                variant="contained"
-                color="error"
+              </Box>
+              <Box
                 onClick={() => handleOptionClick('partial')}
-                style={{ margin: '2px', ...classes.button2 }}
+                sx={{
+                  padding: '10px',
+                  borderRadius: '10px',
+                  width: '90px',
+                  height: '80px',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  border: '2px solid',
+                  borderColor: selectedOption === 'partial' ? '#0A736C' : 'gray',
+                  background: selectedOption === 'partial' ? '#91c991' : '#d1d1d1',
+                }}
               >
                 Partial
-              </Button>
+              </Box>
             </Box>
 
             <Typography textTransform="capitalize" fontWeight={700} m={2}>
@@ -518,17 +544,19 @@ export default function Checkout() {
           <DialogActions sx={{ p: '0px' }}>
             <Box sx={classes.footerButton}>
               <Button
-                disabled={isLoading}
+                disabled={selectedOption ? false : true}
                 onClick={handleProceedClick}
                 variant="contained"
                 color="primary"
                 sx={{
                   width: '100%',
                   height: '80px',
+                  fontSize: '20px',
+                  fontWeight: 700,
                   '& .MuiButtonBase-root': { borderRadius: 'unset !important' },
                 }}
               >
-                {isLoading ? 'Processing' : 'Proceed'}
+                {isLoading ? 'Processing' : `PAY ${formatCurrency(total)}`}
               </Button>
             </Box>
           </DialogActions>
@@ -573,22 +601,6 @@ export default function Checkout() {
             <Typography fontSize={'11px'} variant="body2" align="left" mb={1}>
               Type: {allItems?.data?.transactionType}
             </Typography>
-            {/* <Typography fontSize={'11px'} variant="body2" align="left" mb={1}>
-              {selectedOption === 'cash' &&
-                `Cash Amount: ${receiptContent?.match(/Cash Amount: (.+)/)?.[1]}`}
-              {selectedOption === 'partial' && `Cash: ${receiptContent?.match(/Cash: (.+)/)?.[1]}`}
-              {selectedOption === 'utang' &&
-                `Amount To Pay: ${receiptContent?.match(/Amount To Pay: (.+)/)?.[1]}`}
-            </Typography>
-            <Typography fontSize={'11px'} variant="body2" align="left" mb={1}>
-              {selectedOption === 'partial' &&
-                `Desired Amount: ${receiptContent?.match(/Desired Amount: (.+)/)?.[1]}`}
-            </Typography>
-            <Typography fontSize={'11px'} variant="body2" align="left" mb={1}>
-              {selectedOption === 'cash' && `Change: ${receiptContent?.match(/Change: (.+)/)?.[1]}`}
-              {selectedOption === 'partial' &&
-                `Change: ${receiptContent?.match(/Change: (.+)/)?.[1]}`}
-            </Typography> */}
             <Typography fontSize={'11px'} variant="body2" align="left" mb={1} fontWeight={700}>
               Items
             </Typography>
