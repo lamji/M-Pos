@@ -6,7 +6,7 @@ import { clearItems } from '@/src/common/reducers/items';
 import { useDispatch } from 'react-redux';
 import { setData } from '@/src/common/reducers/data';
 import { setUtangData } from '@/src/common/reducers/utangData';
-import { enablePullToRefresh } from 'webtonative';
+import { enablePullToRefresh, statusBar } from 'webtonative';
 
 export default function Nav() {
   const router = useRouter();
@@ -14,6 +14,11 @@ export default function Nav() {
   const dispatch = useDispatch();
 
   enablePullToRefresh(true);
+  statusBar({
+    style: 'light',
+    color: '#0A736C',
+    overlay: true, //Only for android
+  });
 
   const refetch = async () => {
     try {
