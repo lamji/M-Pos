@@ -84,7 +84,7 @@ export default function Nav() {
         <Typography fontWeight={700}>
           {currentPath === '/dashboard' && 'Dashboard'}
           {currentPath === '/' && 'AKHIRO-POS'}
-          {currentPath === '/pos' && 'SAN ITEMS'}
+          {currentPath === '/pos' && 'POS'}
           {currentPath === '/utang' && 'LIST'}
           {currentPath === '/add' && 'ADD / UPDATE'}
         </Typography>

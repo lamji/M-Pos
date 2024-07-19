@@ -1,11 +1,10 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import Nav from '@/src/components/Nav';
-import { Box, IconButton, Typography } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 
 import { getSalesData } from '@/src/common/api/testApi';
 import { formatCurrency } from '@/src/common/helpers';
-import AutorenewIcon from '@mui/icons-material/Autorenew';
 import { setIsBackDropOpen } from '@/src/common/reducers/items';
 import { useDispatch } from 'react-redux';
 import moment from 'moment';
@@ -13,7 +12,6 @@ import moment from 'moment';
 export default function Dashboard() {
   const dispatch = useDispatch();
   const [data, setData] = useState<any>({});
-  const [refresh, setRefresh] = useState(false);
   const [filterData, setFilterData] = useState('dataToday');
 
   const getSales = async () => {
@@ -30,13 +28,9 @@ export default function Dashboard() {
     }
   };
 
-  const handleRefresh = () => {
-    setRefresh(!refresh);
-  };
-
   useEffect(() => {
     getSales();
-  }, [refresh]);
+  }, []);
 
   return (
     <div>
@@ -66,9 +60,6 @@ export default function Dashboard() {
           <Typography align="center" fontWeight={700} variant="body1">
             SALES
           </Typography>
-          <IconButton onClick={handleRefresh}>
-            <AutorenewIcon />
-          </IconButton>
         </Box>
 
         <Box
