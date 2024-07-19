@@ -25,7 +25,8 @@
     "src/components/Scanner/index.jsx",
     "src/components/Scanner",
     "src/components/Mobile/ScanItems/index.jsx",
-    "pages/add/index.jsx"
+    "pages/add/index.jsx",
+    "src/components/Nav/index.jsx"
   ],
   "exclude": ["node_modules"]
 }

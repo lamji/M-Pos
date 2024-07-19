@@ -6,11 +6,14 @@ import { clearItems } from '@/src/common/reducers/items';
 import { useDispatch } from 'react-redux';
 import { setData } from '@/src/common/reducers/data';
 import { setUtangData } from '@/src/common/reducers/utangData';
+import { enablePullToRefresh } from 'webtonative';
 
-export default function Nav({ children, isDashboard }: any) {
+export default function Nav() {
   const router = useRouter();
   const currentPath = router.pathname;
   const dispatch = useDispatch();
+
+  enablePullToRefresh(true);
 
   const refetch = async () => {
     try {
@@ -58,7 +61,6 @@ export default function Nav({ children, isDashboard }: any) {
           padding: '20px 10px',
           background: '#0A736C',
           color: 'white',
-          height: isDashboard ? 'auto' : 'auto',
           position: 'fixed',
           top: 0,
           left: 0,
@@ -88,9 +90,7 @@ export default function Nav({ children, isDashboard }: any) {
           marginTop: '200px',
           position: 'relative',
         }}
-      >
-        {children}
-      </Box>
+      ></Box>
     </div>
   );
 }

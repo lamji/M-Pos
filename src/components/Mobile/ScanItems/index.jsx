@@ -34,6 +34,7 @@ import Nav from '../../Nav';
 import { getData, setData } from '@/src/common/reducers/data';
 import { getAllUtang } from '@/src/common/api/testApi';
 import { setUtangData } from '@/src/common/reducers/utangData';
+import BarcodeScanner from '../../wt2Scanner/index';
 
 // Debounce function to limit how frequently a function can be invoked
 const debounce = (func, delay) => {
@@ -197,7 +198,7 @@ const ComboBox = () => {
         }}
       >
         {/* Conditionally render the Html5QrcodePlugin based on isScanning state */}
-
+        <BarcodeScanner />
         {isScanning && (
           <Html5QrcodePlugin
             fps={10}
@@ -207,7 +208,6 @@ const ComboBox = () => {
             stopScanning={stopScanning} // Pass the stopScanning state as a prop
           />
         )}
-
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <Autocomplete
             disablePortal
@@ -255,7 +255,6 @@ const ComboBox = () => {
             </IconButton>
           </Box>
         </Box>
-
         <Typography mt={4} sx={{ marginBottom: '-5px' }} fontWeight={700}>
           Scanned Items
         </Typography>
@@ -305,7 +304,6 @@ const ComboBox = () => {
             </ListItem>
           )}
         </List>
-
         <ToastContainer />
       </Box>
     </>
