@@ -12,6 +12,18 @@ export const itemsPersistConfig = {
   whitelist: ['user'],
 };
 
+export const dataPersistConfig = {
+  key: 'data',
+  storage,
+  whitelist: ['data'],
+};
+
+export const utangDataPersistConfig = {
+  key: 'utangDataSlice',
+  storage,
+  whitelist: ['utangData'],
+};
+
 // export const receiptPersistConfig = {
 //   key: 'receipt',
 //   storage,

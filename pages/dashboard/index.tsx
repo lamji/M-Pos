@@ -38,7 +38,6 @@ export default function Dashboard() {
     getSales();
   }, [refresh]);
 
-  console.log('data', data);
   return (
     <div>
       <Nav isDashboard={true}>
@@ -54,7 +53,6 @@ export default function Dashboard() {
           background: 'white',
           borderRadius: 15,
           marginTop: '-130px',
-          height: '80vh',
         }}
       >
         <Box
@@ -240,7 +238,6 @@ export default function Dashboard() {
                   ?.map((transaction: any, transactionIdx: number) => (
                     <Box key={transactionIdx}>
                       {transaction?.items?.map((item: any, itemIdx: number) => {
-                        console.log(item);
                         return (
                           <Box
                             key={itemIdx}

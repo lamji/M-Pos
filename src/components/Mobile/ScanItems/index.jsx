@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect, useCallback } from 'react';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -30,6 +31,9 @@ import { formatCurrency } from '@/src/common/helpers';
 import Html5QrcodePlugin from '../../Scanner';
 import QrCodeScannerIcon from '@mui/icons-material/QrCodeScanner';
 import Nav from '../../Nav';
+import { getData, setData } from '@/src/common/reducers/data';
+import { getAllUtang } from '@/src/common/api/testApi';
+import { setUtangData } from '@/src/common/reducers/utangData';
 
 // Debounce function to limit how frequently a function can be invoked
 const debounce = (func, delay) => {
@@ -43,6 +47,7 @@ const debounce = (func, delay) => {
 const ComboBox = () => {
   const dispatch = useDispatch();
   const { items } = useSelector(getSelectedItems);
+  const state = useSelector(getData);
 
   const [allItems, setAllItems] = useState([]);
   const [lastScan, setLastScan] = useState(0);
@@ -65,10 +70,15 @@ const ComboBox = () => {
     fetch('/api/items2')
       .then((response) => response.json())
       .then((data) => {
-        setAllItems(data);
+        // setAllItems(data);
+        dispatch(setData(data));
       })
       .catch((error) => console.error('Error fetching JSON data:', error));
   }, []);
+
+  useEffect(() => {
+    setAllItems(state);
+  }, [state]);
 
   const handleScanClick = () => {
     setIsScanning(!isScanning); // Toggle scanning state
@@ -145,6 +155,23 @@ const ComboBox = () => {
 
   // Apply debouncing to the scan result
   const debouncedOnNewScanResult = useCallback(debounce(onNewScanResult, 500), [onNewScanResult]);
+
+  /**Utang updates */
+
+  const updateUtang = async () => {
+    try {
+      const data = await getAllUtang();
+      if (data) {
+        dispatch(setUtangData(data));
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    updateUtang();
+  }, [state]);
 
   return (
     <>

@@ -1,4 +1,4 @@
-import { getAllUtang, getUtangById, postTransaction } from '@/src/common/api/testApi';
+import { getUtangById, postTransaction } from '@/src/common/api/testApi';
 import {
   Box,
   Button,
@@ -20,9 +20,10 @@ import moment from 'moment';
 
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { setIsBackDropOpen } from '@/src/common/reducers/items';
 import Nav from '@/src/components/Nav';
+import { getUtangData } from '@/src/common/reducers/utangData';
 
 // types.ts
 export interface Item {
@@ -58,10 +59,11 @@ const validationSchema = Yup.object({
 
 const UtangTransactions: React.FC = () => {
   const dispatch = useDispatch();
+  const state = useSelector(getUtangData);
   const [transactions, setTransactions] = useState<any>([]);
   const [open, setOpen] = useState(false);
   const [selectedData, setSelectedData] = useState<Transaction | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [type, setType] = useState('');
   const [refresh, setRefresh] = useState(false);
   const handleOpen = (row: Transaction) => {
@@ -87,19 +89,6 @@ const UtangTransactions: React.FC = () => {
       setIsLoading(false);
     }
   };
-  const getAllUtandData = async () => {
-    setIsLoading(true);
-    try {
-      const data = await getAllUtang();
-      if (data) {
-        setTransactions(data);
-        setIsLoading(false);
-      }
-    } catch (error) {
-      console.log(error);
-      setIsLoading(false);
-    }
-  };
 
   const formikUtang = useFormik({
     initialValues: {
@@ -109,8 +98,6 @@ const UtangTransactions: React.FC = () => {
     validationSchema: validationSchema,
     onSubmit: async (values, { resetForm }) => {
       dispatch(setIsBackDropOpen(true));
-      console.log('Form values:', values, selectedData);
-      setIsLoading(true);
       const transactionData = {
         type: 'Utang',
         items: [
@@ -148,18 +135,12 @@ const UtangTransactions: React.FC = () => {
     setType('adjustment');
   };
   useEffect(() => {
-    getAllUtandData();
-  }, [refresh]);
+    setTransactions(state);
+  }, [state]);
 
   return (
     <>
-      <Nav>
-        {/* <Box display="flex" alignItems="center">
-          <IconButton onClick={() => router.push('/')}>
-            <ArrowBackIcon sx={{ color: 'white' }} />
-          </IconButton>
-        </Box> */}
-      </Nav>
+      <Nav></Nav>
       <div style={{ padding: '20px', background: 'white', borderRadius: 25, marginTop: '-150px' }}>
         <h3 style={{ marginBottom: '10px' }}>Utang Transactions</h3>
         <Autocomplete
@@ -221,7 +202,7 @@ const UtangTransactions: React.FC = () => {
         </Box>
         <Box
           sx={{
-            height: '50vh',
+            height: '60vh',
             width: '100%',
             borderRadius: '0px 0px 10px 10px',
             border: '1px solid #ccd2d7',

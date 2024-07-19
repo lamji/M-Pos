@@ -1,7 +1,15 @@
 // components/AddItemForm.js
 
 import React, { useState } from 'react';
-import { Button, TextField, Box, Typography, InputAdornment, IconButton } from '@mui/material';
+import {
+  Button,
+  TextField,
+  Box,
+  Typography,
+  InputAdornment,
+  IconButton,
+  Switch,
+} from '@mui/material';
 import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
 import Html5QrcodePlugin from '../../src/components/Scanner';
@@ -33,6 +41,11 @@ const AddItemForm = () => {
   const [isScanning, setIsScanning] = useState(false);
   const [stopScanning, setStopScanning] = useState(false);
   const [apiResponse, setApiResponse] = useState(null);
+  const [checked, setChecked] = React.useState(true);
+
+  const handleChange = (event) => {
+    setChecked(event.target.checked);
+  };
 
   // Form Submit Handler
   const handleSubmit = async (values, { resetForm, setSubmitting }) => {
@@ -97,81 +110,118 @@ const AddItemForm = () => {
           background: 'white',
         }}
       >
-        <Formik
-          initialValues={{ ...initialValues, barcode: scannedBarcode, id: generatedId }}
-          enableReinitialize
-          validationSchema={validationSchema}
-          onSubmit={handleSubmit}
-        >
-          {({ isSubmitting, errors, touched, setFieldValue }) => (
-            <Form>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                <Field
-                  name="id"
-                  as={TextField}
-                  label="ID"
-                  variant="outlined"
-                  fullWidth
-                  value={generatedId}
-                  error={touched.id && Boolean(errors.id)}
-                  helperText={touched.id && errors.id}
-                  disabled
-                />
-                <Field
-                  name="name"
-                  as={TextField}
-                  label="Name"
-                  variant="outlined"
-                  fullWidth
-                  error={touched.name && Boolean(errors.name)}
-                  helperText={touched.name && errors.name}
-                />
-                <Field
-                  name="price"
-                  as={TextField}
-                  label="Price"
-                  type="number"
-                  variant="outlined"
-                  fullWidth
-                  error={touched.price && Boolean(errors.price)}
-                  helperText={touched.price && errors.price}
-                />
-                <Field
-                  name="barcode"
-                  as={TextField}
-                  label="Barcode"
-                  variant="outlined"
-                  fullWidth
-                  value={scannedBarcode}
-                  error={touched.barcode && Boolean(errors.barcode)}
-                  helperText={touched.barcode && errors.barcode}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton onClick={handleScanClick}>
-                          <QrCodeScannerIcon />
-                        </IconButton>
-                      </InputAdornment>
-                    ),
-                  }}
-                  onChange={(event) => setFieldValue('barcode', event.target.value)}
-                />
-                <Button type="submit" variant="contained" color="primary" disabled={isSubmitting}>
-                  {isSubmitting ? 'Submitting...' : 'Submit'}
-                </Button>
-              </Box>
-              {isScanning && (
-                <Html5QrcodePlugin
-                  fps={10}
-                  qrbox={250}
-                  disableFlip={false}
-                  qrCodeSuccessCallback={handleBarcodeScan}
-                  stopScanning={stopScanning}
-                />
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Typography
+            sx={{
+              color: !checked ? 'primary.main' : 'gray',
+              fontWeight: !checked ? 'bold' : 'normal',
+            }}
+          >
+            Add
+          </Typography>
+          <Switch
+            checked={checked}
+            onChange={handleChange}
+            inputProps={{ 'aria-label': 'controlled' }}
+          />
+          <Typography
+            sx={{
+              color: checked ? 'primary.main' : 'gray',
+              fontWeight: checked ? 'bold' : 'normal',
+            }}
+          >
+            Update
+          </Typography>
+        </Box>
+
+        {checked ? (
+          <>for update</>
+        ) : (
+          <>
+            {' '}
+            <Formik
+              initialValues={{ ...initialValues, barcode: scannedBarcode, id: generatedId }}
+              enableReinitialize
+              validationSchema={validationSchema}
+              onSubmit={handleSubmit}
+            >
+              {({ isSubmitting, errors, touched, setFieldValue }) => (
+                <Form>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    <Field
+                      name="id"
+                      as={TextField}
+                      label="ID"
+                      variant="outlined"
+                      fullWidth
+                      value={generatedId}
+                      error={touched.id && Boolean(errors.id)}
+                      helperText={touched.id && errors.id}
+                      disabled
+                    />
+                    <Field
+                      name="name"
+                      as={TextField}
+                      label="Name"
+                      variant="outlined"
+                      fullWidth
+                      error={touched.name && Boolean(errors.name)}
+                      helperText={touched.name && errors.name}
+                    />
+                    <Field
+                      name="price"
+                      as={TextField}
+                      label="Price"
+                      type="number"
+                      variant="outlined"
+                      fullWidth
+                      error={touched.price && Boolean(errors.price)}
+                      helperText={touched.price && errors.price}
+                    />
+                    <Field
+                      name="barcode"
+                      as={TextField}
+                      label="Barcode"
+                      variant="outlined"
+                      fullWidth
+                      value={scannedBarcode}
+                      error={touched.barcode && Boolean(errors.barcode)}
+                      helperText={touched.barcode && errors.barcode}
+                      InputProps={{
+                        endAdornment: (
+                          <InputAdornment position="end">
+                            <IconButton onClick={handleScanClick}>
+                              <QrCodeScannerIcon />
+                            </IconButton>
+                          </InputAdornment>
+                        ),
+                      }}
+                      onChange={(event) => setFieldValue('barcode', event.target.value)}
+                    />
+                    <Button
+                      type="submit"
+                      variant="contained"
+                      color="primary"
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting ? 'Submitting...' : 'Submit'}
+                    </Button>
+                  </Box>
+                  {isScanning && (
+                    <Html5QrcodePlugin
+                      fps={10}
+                      qrbox={250}
+                      disableFlip={false}
+                      qrCodeSuccessCallback={handleBarcodeScan}
+                      stopScanning={stopScanning}
+                    />
+                  )}
+                </Form>
               )}
-            </Form>
-          )}
-        </Formik>
+            </Formik>
+          </>
+        )}
+
         <ToastContainer />
         {apiResponse && (
           <Box mt={4}>

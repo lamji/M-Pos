@@ -25,7 +25,11 @@ export default async function handler(req, res) {
         utang.reverse().forEach((entry, index) => {
           entry.number = index + 1;
         });
-        const totalUtang = utang.reduce((sum, entry) => sum + entry.total, 0);
+
+        const totalUtang = utang.reduce((sum, entry) => {
+          return sum + entry.total;
+        }, 0);
+
         res.status(200).json({ utang, totalUtang });
       } catch (error) {
         res.status(500).json({ error: 'Failed to fetch utang' });

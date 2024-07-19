@@ -4,12 +4,42 @@ import { useRouter } from 'next/router';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { clearItems } from '@/src/common/reducers/items';
 import { useDispatch } from 'react-redux';
+import { setData } from '@/src/common/reducers/data';
+import { setUtangData } from '@/src/common/reducers/utangData';
 
 export default function Nav({ children, isDashboard }: any) {
   const router = useRouter();
   const currentPath = router.pathname;
   const dispatch = useDispatch();
-  console.log(currentPath);
+
+  const refetch = async () => {
+    try {
+      const [utang, items] = await Promise.all([
+        fetch('/api/utang'),
+        fetch('/api/items2'),
+        // fetch('https://api.example.com/endpoint3'),
+      ]);
+
+      if (!utang.ok || !items.ok) {
+        throw new Error('One or more requests failed');
+      }
+
+      const data1 = await utang.json();
+      const data2 = await items.json();
+      // const data3 = await response3.json();
+
+      // console.log('Data from endpoint1:', data1);
+      // console.log('Data from endpoint2:', data2);
+      // console.log('Data from endpoint3:', data3);
+      dispatch(setData(data2));
+      dispatch(setUtangData(data1));
+
+      // Handle the fetched data as needed
+      // For example, updating state if you are using a framework/library like React
+    } catch (error) {
+      console.error('Failed to refetch APIs:', error);
+    }
+  };
 
   const handleBackClick = () => {
     if (currentPath === '/pos') {
@@ -18,6 +48,7 @@ export default function Nav({ children, isDashboard }: any) {
     } else {
       router.push('/');
     }
+    refetch();
   };
 
   return (
