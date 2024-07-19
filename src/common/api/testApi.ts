@@ -7,6 +7,7 @@ export const getClearBatchReports = async (params?: TObjectAny) => {
 };
 
 export const postTransaction = async (params?: TObjectAny) => {
+  console.log('params', params);
   return axios.post('/api/transactions', params);
 };
 

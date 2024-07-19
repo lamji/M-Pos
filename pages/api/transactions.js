@@ -1,70 +1,4 @@
 /* eslint-disable no-self-assign */
-/* eslint-disable no-const-assign */
-// // pages/api/transactions.js
-// import { connectToDatabase } from '../../src/common/app/lib/mongodb';
-// import Transaction from '../../src/common/app/model/transaction';
-
-// export default async function handler(req, res) {
-//   const { method, query } = req;
-
-//   await connectToDatabase();
-
-//   switch (method) {
-//     case 'GET':
-//       try {
-//         // Handle filtering by transactionType in a case-insensitive manner
-//         if (query.transactionType) {
-//           const transactionTypeRegex = new RegExp(query.transactionType, 'i');
-//           const transactions = await Transaction.find({ transactionType: transactionTypeRegex });
-//           return res.status(200).json(transactions);
-//         }
-
-//         // If no transactionType filter is provided, return all transactions
-//         const transactions = await Transaction.find({});
-//         res.status(200).json(transactions);
-//       } catch (error) {
-//         console.error('Error fetching transactions:', error); // Log the error
-//         res.status(500).json({ error: 'Failed to fetch transactions' });
-//       }
-//       break;
-
-//     case 'POST':
-//       try {
-//         const { items, personName, cash, total, partialAmount, type } = req.body;
-
-//         // Calculate remaining balance and change
-//         const change = cash ? cash - total : undefined;
-//         const remainingBalance = partialAmount ? total - partialAmount : undefined;
-
-//         const transactionData = {
-//           items,
-//           personName,
-//           cash,
-//           total,
-//           remainingBalance,
-//           partialAmount,
-//           change,
-//           transactionType: type,
-//         };
-
-//         const newTransaction = new Transaction(transactionData);
-//         await newTransaction.save();
-
-//         console.log(transactionData, newTransaction);
-
-//         res.status(201).json(newTransaction);
-//       } catch (error) {
-//         console.log(error);
-//         res.status(500).json({ error: 'Failed to add transaction' });
-//       }
-//       break;
-
-//     default:
-//       res.setHeader('Allow', ['POST']);
-//       res.status(405).end(`Method ${method} Not Allowed`);
-//   }
-// }
-/* eslint-disable no-const-assign */
 import { connectToDatabase } from '../../src/common/app/lib/mongodb';
 import Transaction from '../../src/common/app/model/transaction';
 import Utang from '../../src/common/app/model/utang';
@@ -85,13 +19,37 @@ export default async function handler(req, res) {
           const yesterday = new Date(today);
           yesterday.setDate(today.getDate() - 1); // Set to yesterday
 
+          const tomorrow = new Date(today);
+          tomorrow.setDate(today.getDate() + 1); // Set to tomorrow
+
           const transactionsToday = await Transaction.find({
-            date: { $gte: today },
+            date: { $gte: today, $lt: tomorrow },
           });
 
           const transactionsYesterday = await Transaction.find({
             date: { $gte: yesterday, $lt: today },
           });
+
+          // Helper function to calculate totals by transaction type
+          const calculateTotalsByType = (transactions) => {
+            const totals = {
+              Cash: 0,
+              Utang: 0,
+            };
+
+            transactions.forEach((transaction) => {
+              if (transaction.transactionType === 'Cash') {
+                totals.Cash += transaction.total;
+              } else if (transaction.transactionType === 'Utang') {
+                totals.Utang += transaction.total;
+              }
+            });
+
+            return totals;
+          };
+
+          const totalsToday = calculateTotalsByType(transactionsToday);
+          const totalsYesterday = calculateTotalsByType(transactionsYesterday);
 
           const totalSalesToday = transactionsToday.reduce(
             (total, transaction) => total + transaction.total,
@@ -102,7 +60,43 @@ export default async function handler(req, res) {
             0
           );
 
-          return res.status(200).json({ today: totalSalesToday, yesterday: totalSalesYesterday });
+          // Retrieve all transactions to calculate top 5 fast-moving items
+          const allTransactions = await Transaction.find({});
+
+          // Aggregate items and calculate their total quantities
+          const itemMap = new Map();
+
+          allTransactions.forEach((transaction) => {
+            transaction.items.forEach((item) => {
+              if (itemMap.has(item.name)) {
+                itemMap.set(item.name, itemMap.get(item.name) + item.quantity);
+              } else {
+                itemMap.set(item.name, item.quantity);
+              }
+            });
+          });
+
+          // Convert map to array and sort by quantity in descending order
+          const sortedItems = Array.from(itemMap.entries()).sort((a, b) => b[1] - a[1]);
+
+          // Get top 5 fast-moving items
+          const top5Items = sortedItems.slice(0, 5).map(([name, quantity]) => ({ name, quantity }));
+
+          return res.status(200).json({
+            today: {
+              total: totalSalesToday,
+              Cash: totalsToday.Cash,
+              Utang: totalsToday.Utang,
+            },
+            dataToday: transactionsToday,
+            yesterday: {
+              total: totalSalesYesterday,
+              Cash: totalsYesterday.Cash,
+              Utang: totalsYesterday.Utang,
+            },
+            dataYesterday: transactionsYesterday,
+            top5Items,
+          });
         }
 
         let transactionsQuery = {};
@@ -128,12 +122,11 @@ export default async function handler(req, res) {
         // Fetch transactions based on query parameters or fetch all if no query is provided
         const transactions = await Transaction.find(transactionsQuery);
 
-        res.status(200).json(transactions);
+        return res.status(200).json(transactions);
       } catch (error) {
         console.error('Error fetching transactions:', error);
-        res.status(500).json({ error: 'Failed to fetch transactions' });
+        return res.status(500).json({ error: 'Failed to fetch transactions' });
       }
-      break;
 
     case 'POST':
       try {
@@ -142,10 +135,21 @@ export default async function handler(req, res) {
         // Calculate remaining balance and change
         const change = cash ? cash - total : undefined;
         const remainingBalance = partialAmount ? total - partialAmount : undefined;
+        const returnTotal = total;
+        console.log(
+          'items:',
+          items,
+          'personName,personName',
+          'cash',
+          'total:',
+          total,
+          partialAmount,
+          type,
+          _id,
+          payment
+        );
 
         if (type === 'Utang') {
-          // let utangRecord; // Rename from `utang` to `utangRecord`
-
           if (_id) {
             // If _id is provided, it is an existing 'utang' record to update
             var utangRecord = await Utang.findById(_id);
@@ -193,18 +197,11 @@ export default async function handler(req, res) {
             await newTransaction.save();
 
             // Send the response
-            const response = {
-              items: newTransaction.items,
-              personName: newTransaction.personName,
-              total: newTransaction.total,
-              remainingBalance: newTransaction.remainingBalance,
-              transactions: newTransaction.transactions,
-              _id: newTransaction._id,
-              __v: newTransaction.__v,
-              transactionType: type,
-            };
-
-            res.status(201).json(response);
+            return res.status(201).json({
+              data: newTransaction,
+              total: returnTotal,
+              remainingBalance: remainingBalance,
+            });
           } else {
             // Create a new 'utang' record
             const newUtangRecord = new Utang({
@@ -231,65 +228,53 @@ export default async function handler(req, res) {
             const newTransaction = new Transaction(transactionData);
             await newTransaction.save();
 
-            const response = {
-              items: newUtangRecord.items,
-              personName: newUtangRecord.personName,
-              total: newUtangRecord.total,
-              remainingBalance: newUtangRecord.remainingBalance,
-              transactions: newUtangRecord.transactions,
-              _id: newUtangRecord._id,
-              __v: newUtangRecord.__v,
-              transactionType: type,
-            };
-
-            res.status(201).json(response);
-
-            // _id = newUtangRecord._id; // Get the ID of the newly created 'utang' record
+            return res.status(201).json({
+              data: newTransaction,
+              total: returnTotal,
+              remainingBalance: remainingBalance,
+            });
           }
         }
 
         if (type === 'partial') {
           if (_id) {
             // If _id is provided, it is an existing 'utang' record to update
-            var utangRecordPartial = await Utang.findById(_id);
-            if (!utangRecordPartial) {
+            const utangRecord = await Utang.findById(_id);
+            if (!utangRecord) {
               return res.status(404).json({ error: 'Utang person name not found' });
             }
 
             // Add the incoming items to the existing items array
-            utangRecordPartial.items = [...utangRecordPartial.items, ...items];
+            utangRecord.items = [...utangRecord.items, ...items];
 
             // Recalculate the total amount including the incoming items and the new total to add
-            const newTotal = utangRecordPartial.items.reduce(
+            const newTotal = utangRecord.items.reduce(
               (sum, item) => sum + item.price * item.quantity,
               0
             );
             const utangToAdd = total - partialAmount;
-            utangRecordPartial.total = newTotal + utangToAdd; // Update total to include the new amount
+            utangRecord.total = newTotal + utangToAdd; // Update total to include the new amount
 
             // Recalculate the remaining balance based on the new total and previous payments
-            utangRecordPartial.remainingBalance =
-              utangRecordPartial.total -
-              utangRecordPartial.transactions.reduce(
-                (sum, transaction) => sum + transaction.amount,
-                0
-              );
+            utangRecord.remainingBalance =
+              utangRecord.total -
+              utangRecord.transactions.reduce((sum, transaction) => sum + transaction.amount, 0);
 
             // Update the personName, cash, transactionType fields
-            utangRecordPartial.personName = personName;
-            utangRecordPartial.cash = cash;
-            utangRecordPartial.transactionType = type;
+            utangRecord.personName = personName;
+            utangRecord.cash = cash;
+            utangRecord.transactionType = type;
 
             // Save the updated 'utang' record
-            await utangRecordPartial.save();
+            await utangRecord.save();
 
-            // Create and save the new transaction record
+            // Create and save the new transaction record for the partial payment
             const transactionData = {
               items,
               personName,
               cash,
-              total,
-              remainingBalance: utangRecordPartial.remainingBalance, // Ensure this is updated
+              total: partialAmount, // The amount paid in this transaction
+              remainingBalance: remainingBalance, // Updated remaining balance
               partialAmount,
               change,
               transactionType: type,
@@ -299,47 +284,32 @@ export default async function handler(req, res) {
             await newTransaction.save();
 
             // Send the response
-            const response = {
-              items: newTransaction.items,
-              personName: newTransaction.personName,
-              total: newTransaction.total,
-              remainingBalance: newTransaction.remainingBalance,
-              transactions: newTransaction.transactions,
-              _id: newTransaction._id,
-              __v: newTransaction.__v,
-              transactionType: type,
-            };
-
-            res.status(201).json(response);
+            return res.status(201).json({
+              data: newTransaction,
+              total: returnTotal,
+              remainingBalance: remainingBalance,
+            });
           } else {
             // If _id is not provided, create a new 'utang' record
+            const utangToAdd = total - partialAmount;
 
-            // Calculate the `utangToAdd` and `total`
-            const newTotal = total; // Total amount to pay
-            const utangToAdd = total - partialAmount; // Amount to be added to the `utang`
-
-            // Create a new `Utang` record
-            const newUtang = new Utang({
+            const newUtangRecord = new Utang({
               items,
               personName,
-              cash,
-              total: newTotal,
-              remainingBalance: utangToAdd, // Set remaining balance to the amount to be added to `utang`
-              partialAmount,
-              change,
-              transactionType: type,
+              total,
+              remainingBalance: utangToAdd, // Remaining balance to be paid later
+              transactions: payment ? [{ date: new Date(), amount: payment.amount }] : [],
             });
 
-            // Save the new `Utang` record
-            await newUtang.save();
+            await newUtangRecord.save();
 
-            // Create and save the new transaction record
+            // Create and save the new transaction record for the partial payment
             const transactionData = {
               items,
               personName,
               cash,
-              total: newTotal,
-              remainingBalance: newUtang.remainingBalance,
+              total: partialAmount, // The amount paid in this transaction
+              remainingBalance: utangToAdd, // Remaining balance to be paid later
               partialAmount,
               change,
               transactionType: type,
@@ -348,22 +318,15 @@ export default async function handler(req, res) {
             const newTransaction = new Transaction(transactionData);
             await newTransaction.save();
 
-            // Send the response
-            const response = {
-              items: newTransaction.items,
-              personName: newTransaction.personName,
-              total: newTransaction.total,
-              remainingBalance: newTransaction.remainingBalance,
-              transactions: newTransaction.transactions,
-              _id: newTransaction._id,
-              __v: newTransaction.__v,
-              transactionType: type,
-            };
-
-            res.status(201).json(response);
+            return res.status(201).json({
+              data: newTransaction,
+              total: returnTotal,
+              remainingBalance: remainingBalance,
+            });
           }
         }
 
+        // Create a new transaction record
         const transactionData = {
           items,
           personName,
@@ -378,15 +341,20 @@ export default async function handler(req, res) {
         const newTransaction = new Transaction(transactionData);
         await newTransaction.save();
 
-        res.status(201).json(newTransaction);
+        return res.status(201).json({
+          data: newTransaction,
+          total: returnTotal,
+          remainingBalance: remainingBalance,
+        });
       } catch (error) {
-        console.error('Error adding transaction:', error);
-        res.status(500).json({ error: 'Failed to add transaction' });
+        console.error('Error creating transaction:', error);
+        return res.status(500).json({ error: 'Failed to create transaction' });
       }
-      break;
 
     default:
-      res.setHeader('Allow', ['POST', 'GET']);
-      res.status(405).end(`Method ${method} Not Allowed`);
+      return res
+        .setHeader('Allow', ['GET', 'POST'])
+        .status(405)
+        .end(`Method ${method} Not Allowed`);
   }
 }

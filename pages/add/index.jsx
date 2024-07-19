@@ -7,9 +7,8 @@ import * as Yup from 'yup';
 import Html5QrcodePlugin from '../../src/components/Scanner';
 import QrCodeScannerIcon from '@mui/icons-material/QrCodeScanner';
 import { ToastContainer } from 'react-toastify';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import 'react-toastify/dist/ReactToastify.css';
-import { useRouter } from 'next/router';
+
 import Nav from '@/src/components/Nav';
 
 // Validation Schema
@@ -29,7 +28,6 @@ const initialValues = {
 };
 
 const AddItemForm = () => {
-  const router = useRouter();
   const [scannedBarcode, setScannedBarcode] = useState('');
   const [generatedId, setGeneratedId] = useState('');
   const [isScanning, setIsScanning] = useState(false);
@@ -80,14 +78,14 @@ const AddItemForm = () => {
   return (
     <>
       <Nav>
-        <Box display="flex" alignItems="center">
+        {/* <Box display="flex" alignItems="center">
           <IconButton onClick={() => router.push('/')}>
             <ArrowBackIcon sx={{ color: 'white' }} />
           </IconButton>
           <Typography variant="h6" fontWeight={700}>
             AKHIRO POS
           </Typography>
-        </Box>
+        </Box> */}
       </Nav>
       <Box
         sx={{
@@ -95,13 +93,10 @@ const AddItemForm = () => {
           margin: 'auto',
           padding: 3,
           borderRadius: 10,
-          marginTop: '-110px',
+          marginTop: '-130px',
           background: 'white',
         }}
       >
-        <Typography variant="h6" fontWeight={700} gutterBottom>
-          Add New Item
-        </Typography>
         <Formik
           initialValues={{ ...initialValues, barcode: scannedBarcode, id: generatedId }}
           enableReinitialize

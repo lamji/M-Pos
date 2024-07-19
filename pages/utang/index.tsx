@@ -14,8 +14,6 @@ import {
   CircularProgress,
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/router';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { formatCurrency } from '@/src/common/helpers';
 import SearchIcon from '@mui/icons-material/Search';
 import moment from 'moment';
@@ -60,7 +58,6 @@ const validationSchema = Yup.object({
 
 const UtangTransactions: React.FC = () => {
   const dispatch = useDispatch();
-  const router = useRouter();
   const [transactions, setTransactions] = useState<any>([]);
   const [open, setOpen] = useState(false);
   const [selectedData, setSelectedData] = useState<Transaction | null>(null);
@@ -157,16 +154,13 @@ const UtangTransactions: React.FC = () => {
   return (
     <>
       <Nav>
-        <Box display="flex" alignItems="center">
+        {/* <Box display="flex" alignItems="center">
           <IconButton onClick={() => router.push('/')}>
             <ArrowBackIcon sx={{ color: 'white' }} />
           </IconButton>
-          <Typography variant="h6" fontWeight={700}>
-            AKHIRO POS
-          </Typography>
-        </Box>
+        </Box> */}
       </Nav>
-      <div style={{ padding: '20px', background: 'white', borderRadius: 25, marginTop: '-120px' }}>
+      <div style={{ padding: '20px', background: 'white', borderRadius: 25, marginTop: '-150px' }}>
         <h3 style={{ marginBottom: '10px' }}>Utang Transactions</h3>
         <Autocomplete
           disablePortal
@@ -251,7 +245,7 @@ const UtangTransactions: React.FC = () => {
               </Box>
             </>
           ) : (
-            transactions?.utang.map((data: any, idx: number) => {
+            transactions?.utang?.map((data: any, idx: number) => {
               return (
                 <Box
                   key={idx}
@@ -349,7 +343,7 @@ const UtangTransactions: React.FC = () => {
                 </>
               ) : (
                 <>
-                  {selectedData?.items.map((item: any) => (
+                  {selectedData?.items?.map((item: any) => (
                     <Box
                       key={item._id}
                       sx={{

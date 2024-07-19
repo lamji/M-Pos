@@ -122,6 +122,7 @@ export default function Checkout() {
       partialAmount: '',
       desiredAmount: '',
       personName: '',
+      _id: '',
     },
     validationSchema: Yup.object({
       partialAmount: Yup.number()
@@ -138,6 +139,7 @@ export default function Checkout() {
         .required('Required')
         .min(2, 'Name is too short')
         .max(50, 'Name is too long'),
+      _id: Yup.string().nullable(),
     }),
     onSubmit: async (values, { resetForm }) => {
       const partialAmount = Number(values.partialAmount);
@@ -151,7 +153,7 @@ export default function Checkout() {
         cash: partialAmount,
         total,
         partialAmount: desiredAmount,
-        _id: undefined,
+        _id: values._id || undefined,
       };
       setIsLoading(true);
       try {
@@ -182,11 +184,19 @@ export default function Checkout() {
     } else if (selectedOption === 'utang') {
       formikUtang.handleSubmit();
     } else if (selectedOption === 'partial') {
+      console.log(formikPartial);
       formikPartial.handleSubmit();
     } else {
       handleClose();
     }
   };
+
+  // const handleAutocompleteChange = (event: any, value: any) => {
+  //   // Set the selected value to Formik
+  //   console.log('handleAutocompleteChange', value);
+  //   formikPartial.setFieldValue('personName', value ? value.personName : '');
+  //   formikUtang.setFieldValue('_id', value?._id ?? ''); // Set _id
+  // };
 
   const getAllUtandData = async () => {
     try {
@@ -425,13 +435,31 @@ export default function Checkout() {
                   {isOld ? (
                     <>
                       <Autocomplete
-                        onChange={formikUtang.handleChange}
+                        onChange={(event, value) => {
+                          console.log('value', value);
+                          formikPartial.setFieldValue('_id', value?._id ?? ''); // Set _id
+                          formikPartial.setFieldValue('personName', value?.personName ?? ''); // Set personName
+                        }}
                         disablePortal
                         id="combo-box-demo"
                         options={allItemsUtang.utang}
                         getOptionLabel={(option: any) => option?.personName}
                         sx={{ width: '100%', marginBottom: 2 }}
-                        renderInput={(params) => <TextField {...params} label="Select Name" />}
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            label="Select Name"
+                            id="personName"
+                            name="personName"
+                            error={
+                              formikPartial.touched.personName &&
+                              Boolean(formikPartial.errors.personName)
+                            }
+                            helperText={
+                              formikPartial.touched.personName && formikPartial.errors.personName
+                            }
+                          />
+                        )}
                       />
                       <Box
                         component="a"
@@ -543,7 +571,7 @@ export default function Checkout() {
               Date: {moment(allItems.date).format('llll')}
             </Typography>
             <Typography fontSize={'11px'} variant="body2" align="left" mb={1}>
-              Type: {allItems.transactionType}
+              Type: {allItems?.data?.transactionType}
             </Typography>
             {/* <Typography fontSize={'11px'} variant="body2" align="left" mb={1}>
               {selectedOption === 'cash' &&
@@ -565,8 +593,7 @@ export default function Checkout() {
               Items
             </Typography>
 
-            {allItems?.items?.map((data: any, idx: number) => {
-              console.log(data);
+            {allItems?.data?.items?.map((data: any, idx: number) => {
               return (
                 <>
                   <Box sx={classes.receiptsWrapper} key={idx}>
@@ -593,7 +620,7 @@ export default function Checkout() {
               );
             })}
 
-            <Typography>- - - - - - - - - - - - - - - - - - - - - - -</Typography>
+            <Typography>- - - - - - - - - - - - - - - - - - - - -</Typography>
             <Box sx={classes.receiptsWrapper}>
               <Typography
                 sx={classes.receiptsText}
@@ -633,7 +660,7 @@ export default function Checkout() {
                     align="left"
                     mb={1}
                   >
-                    {formatCurrency(allItems?.partialAmount) ?? '-'}
+                    {formatCurrency(allItems?.data?.partialAmount) ?? '-'}
                   </Typography>
                 </Box>
               </>
@@ -658,7 +685,7 @@ export default function Checkout() {
                     align="left"
                     mb={1}
                   >
-                    {formatCurrency(allItems?.cash)}
+                    {formatCurrency(allItems?.data?.cash)}
                   </Typography>
                 </Box>
                 <Box sx={classes.receiptsWrapper}>
@@ -678,7 +705,7 @@ export default function Checkout() {
                     align="left"
                     mb={1}
                   >
-                    {formatCurrency(allItems?.change) ?? '-'}
+                    {formatCurrency(allItems?.data?.change) ?? '-'}
                   </Typography>
                 </Box>
               </>
@@ -711,7 +738,7 @@ export default function Checkout() {
 
             {selectedOption === 'utang' && (
               <Typography fontSize={'11px'} variant="body2" align="left" mb={1}>
-                Person Name: {allItems?.personName ?? '-'}
+                Person Name: {allItems?.data?.personName ?? '-'}
               </Typography>
             )}
             <Box mt={2}>

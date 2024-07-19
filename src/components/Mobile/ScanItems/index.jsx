@@ -22,7 +22,6 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   addItem,
-  clearItems,
   getSelectedItems,
   removeItem,
   updateItemQuantity,
@@ -31,8 +30,6 @@ import { formatCurrency } from '@/src/common/helpers';
 import Html5QrcodePlugin from '../../Scanner';
 import QrCodeScannerIcon from '@mui/icons-material/QrCodeScanner';
 import Nav from '../../Nav';
-import { useRouter } from 'next/router';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 // Debounce function to limit how frequently a function can be invoked
 const debounce = (func, delay) => {
@@ -44,7 +41,6 @@ const debounce = (func, delay) => {
 };
 
 const ComboBox = () => {
-  const router = useRouter();
   const dispatch = useDispatch();
   const { items } = useSelector(getSelectedItems);
 
@@ -147,25 +143,20 @@ const ComboBox = () => {
     }
   };
 
-  const handleClearItems = () => {
-    router.push('/');
-    dispatch(clearItems());
-  };
-
   // Apply debouncing to the scan result
   const debouncedOnNewScanResult = useCallback(debounce(onNewScanResult, 500), [onNewScanResult]);
 
   return (
     <>
       <Nav>
-        <Box display="flex" alignItems="center">
+        {/* <Box display="flex" alignItems="center">
           <IconButton onClick={handleClearItems}>
             <ArrowBackIcon sx={{ color: 'white' }} />
           </IconButton>
           <Typography variant="h6" fontWeight={700}>
             SCAN ITEM
           </Typography>
-        </Box>
+        </Box> */}
       </Nav>
       <Box
         sx={{

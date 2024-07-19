@@ -1,5 +1,4 @@
-import { Box, Button, Typography } from '@mui/material';
-import styles from './styles.module.css';
+import { Box, Button } from '@mui/material';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 
@@ -18,9 +17,9 @@ export default function Home() {
       </Head>
       <main>
         <Nav>
-          <Typography variant="h6" fontWeight={700} className={styles.title}>
+          {/* <Typography variant="h6" fontWeight={700} className={styles.title}>
             AKHIRO POS
-          </Typography>
+          </Typography> */}
         </Nav>
 
         <Box
