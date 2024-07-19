@@ -2,7 +2,6 @@ import { Box, Button } from '@mui/material';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import Nav from '@/src/components/Nav';
-import BarcodeScannerComponent from '../src/components/wt2Scanner/index';
 
 export default function Home() {
   const router = useRouter();
@@ -100,7 +99,7 @@ export default function Home() {
             DASHBOARD
           </Button>
         </Box>
-        <BarcodeScannerComponent />
+        {/* <BarcodeScannerComponent /> */}
       </main>
     </>
   );

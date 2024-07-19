@@ -28,12 +28,11 @@ import {
   updateItemQuantity,
 } from '@/src/common/reducers/items';
 import { formatCurrency } from '@/src/common/helpers';
-import Html5QrcodePlugin from '../../Scanner';
-import QrCodeScannerIcon from '@mui/icons-material/QrCodeScanner';
 import Nav from '../../Nav';
 import { getData, setData } from '@/src/common/reducers/data';
 import { getAllUtang } from '@/src/common/api/testApi';
 import { setUtangData } from '@/src/common/reducers/utangData';
+import BarcodeScannerComponent from '../../wt2Scanner/index';
 
 // Debounce function to limit how frequently a function can be invoked
 const debounce = (func, delay) => {
@@ -52,7 +51,7 @@ const ComboBox = () => {
   const [allItems, setAllItems] = useState([]);
   const [lastScan, setLastScan] = useState(0);
   const [isScanning, setIsScanning] = useState(false); // State to manage scanner visibility
-  const [stopScanning, setStopScanning] = useState(false); // State to manage the stop scanning action
+
   // const [jsonResponse, setJsonResponse] = useState(null); // State to hold the API response
 
   // Initialize Audio only on the client side
@@ -80,11 +79,10 @@ const ComboBox = () => {
     setAllItems(state);
   }, [state]);
 
-  const handleScanClick = () => {
-    setIsScanning(!isScanning); // Toggle scanning state
-    setStopScanning(false); // Reset stop scanning state
-    console.log('Scan button clicked:', !isScanning ? 'Starting' : 'Stopping');
-  };
+  // const handleScanClick = () => {
+  //   setIsScanning(!isScanning); // Toggle scanning state
+  //   console.log('Scan button clicked:', !isScanning ? 'Starting' : 'Stopping');
+  // };
 
   const handleAddItem = (event, value) => {
     if (value) {
@@ -143,7 +141,6 @@ const ComboBox = () => {
         // Stop scanning after a successful scan
         if (isScanning) {
           setIsScanning(false);
-          setStopScanning(true); // Set stopScanning to true
         }
       } else {
         toast.error('Barcode not found');
@@ -198,7 +195,7 @@ const ComboBox = () => {
       >
         {/* Conditionally render the Html5QrcodePlugin based on isScanning state */}
 
-        {isScanning && (
+        {/* {isScanning && (
           <Html5QrcodePlugin
             fps={10}
             qrbox={250}
@@ -206,7 +203,9 @@ const ComboBox = () => {
             qrCodeSuccessCallback={debouncedOnNewScanResult}
             stopScanning={stopScanning} // Pass the stopScanning state as a prop
           />
-        )}
+        )} */}
+
+        <BarcodeScannerComponent handleScan={debouncedOnNewScanResult} />
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <Autocomplete
             disablePortal
@@ -248,11 +247,11 @@ const ComboBox = () => {
               />
             )}
           />
-          <Box>
+          {/* <Box>
             <IconButton onClick={handleScanClick}>
               <QrCodeScannerIcon style={{ fontSize: '50px' }} />
             </IconButton>
-          </Box>
+          </Box> */}
         </Box>
         <Typography mt={4} sx={{ marginBottom: '-5px' }} fontWeight={700}>
           Scanned Items

@@ -1,21 +1,28 @@
 import React from 'react';
-import { Format, BarcodeScan } from 'webtonative/barcode';
+import { BarcodeScan } from 'webtonative/barcode';
+import QrCodeScannerIcon from '@mui/icons-material/QrCodeScanner';
+import { IconButton } from '@mui/material';
 
-const BarcodeScannerComponent = () => {
-  const handleScan = () => {
+const BarcodeScannerComponent = ({ handleScan }) => {
+  const handleClick = () => {
     BarcodeScan({
-      formats: Format.QR_CODE, // optional
       onBarcodeSearch: (value) => {
         alert(value);
+        handleScan(value);
       },
     });
   };
 
   return (
-    <div>
-      <h1>Scan your barcode</h1>
-      <p>Please scan your barcode using the camera.</p>
-      <button onClick={handleScan}>Open Scanner</button>
+    <div style={{ textAlign: 'center' }}>
+      <IconButton onClick={handleClick}>
+        <QrCodeScannerIcon
+          style={{
+            fontSize: '100px',
+            marginTop: '-50px',
+          }}
+        />
+      </IconButton>
     </div>
   );
 };
