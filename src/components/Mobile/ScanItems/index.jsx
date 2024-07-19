@@ -207,7 +207,6 @@ const ComboBox = () => {
             stopScanning={stopScanning} // Pass the stopScanning state as a prop
           />
         )}
-
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <Autocomplete
             disablePortal
@@ -255,7 +254,6 @@ const ComboBox = () => {
             </IconButton>
           </Box>
         </Box>
-
         <Typography mt={4} sx={{ marginBottom: '-5px' }} fontWeight={700}>
           Scanned Items
         </Typography>
@@ -305,7 +303,6 @@ const ComboBox = () => {
             </ListItem>
           )}
         </List>
-
         <ToastContainer />
       </Box>
     </>

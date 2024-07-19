@@ -40,7 +40,7 @@ export default function Dashboard() {
 
   return (
     <div>
-      <Nav isDashboard={true}>
+      <Nav>
         {/* <Box display="flex" alignItems="center">
           <Typography variant="h6" fontWeight={700}>
             Dashboard
