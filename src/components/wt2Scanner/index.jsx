@@ -3,14 +3,23 @@ import { Format, BarcodeScan } from 'webtonative/barcode';
 
 const BarcodeScanner = () => {
   useEffect(() => {
-    // Initialize barcode scanner
-    BarcodeScan({
-      formats: [Format.QR_CODE], // you can specify multiple formats if needed
-      onBarcodeSearch: (value) => {
-        console.log(value);
-        alert(JSON.stringify(value, null, 2)); // Alert the scanned value as a formatted JSON string
-      },
-    });
+    // Check for camera permissions if needed
+    navigator.mediaDevices
+      .getUserMedia({ video: true })
+      .then(() => {
+        // Initialize barcode scanner
+        BarcodeScan({
+          formats: [Format.QR_CODE], // you can specify multiple formats if needed
+          onBarcodeSearch: (value) => {
+            console.log(value);
+            alert(JSON.stringify(value, null, 2)); // Alert the scanned value as a formatted JSON string
+          },
+        });
+      })
+      .catch((err) => {
+        console.error('Camera access denied:', err);
+        alert('Camera access is required to scan barcodes.');
+      });
   }, []); // Empty dependency array means this effect runs once on mount
 
   return (

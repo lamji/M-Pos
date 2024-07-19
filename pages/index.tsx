@@ -1,7 +1,7 @@
 import { Box, Button } from '@mui/material';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
-
+import BarcodeScanner from '../src/components/wt2Scanner';
 import Nav from '@/src/components/Nav';
 
 export default function Home() {
@@ -100,6 +100,7 @@ export default function Home() {
             DASHBOARD
           </Button>
         </Box>
+        <BarcodeScanner />
       </main>
     </>
   );

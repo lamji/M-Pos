@@ -34,7 +34,6 @@ import Nav from '../../Nav';
 import { getData, setData } from '@/src/common/reducers/data';
 import { getAllUtang } from '@/src/common/api/testApi';
 import { setUtangData } from '@/src/common/reducers/utangData';
-import BarcodeScanner from '../../wt2Scanner/index';
 
 // Debounce function to limit how frequently a function can be invoked
 const debounce = (func, delay) => {
@@ -198,7 +197,7 @@ const ComboBox = () => {
         }}
       >
         {/* Conditionally render the Html5QrcodePlugin based on isScanning state */}
-        <BarcodeScanner />
+
         {isScanning && (
           <Html5QrcodePlugin
             fps={10}
