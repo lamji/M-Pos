@@ -1,45 +1,23 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Format, BarcodeScan } from 'webtonative/barcode';
 
-const BarcodeScanner = () => {
-  useEffect(() => {
-    // Check for camera permissions if needed
-    navigator.mediaDevices
-      .getUserMedia({ video: true })
-      .then(() => {
-        // Initialize barcode scanner
-        BarcodeScan({
-          formats: [Format.QR_CODE], // you can specify multiple formats if needed
-          onBarcodeSearch: (value) => {
-            console.log(value);
-            alert(JSON.stringify(value, null, 2)); // Alert the scanned value as a formatted JSON string
-          },
-        });
-      })
-      .catch((err) => {
-        console.error('Camera access denied:', err);
-        alert('Camera access is required to scan barcodes.');
-      });
-  }, []); // Empty dependency array means this effect runs once on mount
+const BarcodeScannerComponent = () => {
+  const handleScan = () => {
+    BarcodeScan({
+      formats: Format.QR_CODE, // optional
+      onBarcodeSearch: (value) => {
+        alert(value);
+      },
+    });
+  };
 
   return (
     <div>
-      <h1>Barcode Scanner</h1>
-      <button
-        onClick={() =>
-          BarcodeScan({
-            formats: [Format.QR_CODE],
-            onBarcodeSearch: (value) => {
-              console.log(value);
-              alert(JSON.stringify(value, null, 2)); // Alert the scanned value as a formatted JSON string
-            },
-          })
-        }
-      >
-        Scan Barcode
-      </button>
+      <h1>Scan your barcode</h1>
+      <p>Please scan your barcode using the camera.</p>
+      <button onClick={handleScan}>Open Scanner</button>
     </div>
   );
 };
 
-export default BarcodeScanner;
+export default BarcodeScannerComponent;
