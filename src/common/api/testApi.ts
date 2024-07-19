@@ -5,9 +5,18 @@ import { TObjectAny } from '../types/common';
 export const getClearBatchReports = async (params?: TObjectAny) => {
   return instance.get('/api/reports/clear-batch', { params });
 };
-
+export const getItemByBarcode = async (barcode: string) => {
+  try {
+    const response = await instance.get('/api/items2', {
+      params: { barcode },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Failed to fetch item', error);
+    throw error;
+  }
+};
 export const postTransaction = async (params?: TObjectAny) => {
-  console.log('params', params);
   return axios.post('/api/transactions', params);
 };
 
