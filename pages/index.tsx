@@ -99,7 +99,6 @@ export default function Home() {
             DASHBOARD
           </Button>
         </Box>
-        {/* <BarcodeScannerComponent /> */}
       </main>
     </>
   );

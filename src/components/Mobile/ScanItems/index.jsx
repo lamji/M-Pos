@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -34,23 +34,14 @@ import { getAllUtang } from '@/src/common/api/testApi';
 import { setUtangData } from '@/src/common/reducers/utangData';
 import BarcodeScannerComponent from '../../wt2Scanner/index';
 
-// Debounce function to limit how frequently a function can be invoked
-const debounce = (func, delay) => {
-  let timeout;
-  return (...args) => {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => func(...args), delay);
-  };
-};
-
 const ComboBox = () => {
   const dispatch = useDispatch();
   const { items } = useSelector(getSelectedItems);
   const state = useSelector(getData);
 
   const [allItems, setAllItems] = useState([]);
-  const [lastScan, setLastScan] = useState(0);
-  const [isScanning, setIsScanning] = useState(false); // State to manage scanner visibility
+  // const [lastScan, setLastScan] = useState(0);
+  // const [isScanning, setIsScanning] = useState(false); // State to manage scanner visibility
 
   // const [jsonResponse, setJsonResponse] = useState(null); // State to hold the API response
 
@@ -114,12 +105,7 @@ const ComboBox = () => {
 
   const onNewScanResult = async (decodedText) => {
     // Debounce logic to avoid handling the same scan multiple times
-    const currentTime = Date.now();
-    if (currentTime - lastScan < 4000) {
-      console.log('Ignoring scan due to debounce');
-      return;
-    }
-    setLastScan(currentTime);
+
     if (typeof window !== 'undefined' && window.SCAN_SUCCESS_SOUND) {
       try {
         window.SCAN_SUCCESS_SOUND.currentTime = 0; // Reset time to start from the beginning
@@ -137,11 +123,6 @@ const ComboBox = () => {
       if (data.length > 0) {
         const matchedItem = data[0];
         dispatch(addItem({ id: matchedItem.id, name: matchedItem.name, price: matchedItem.price }));
-
-        // Stop scanning after a successful scan
-        if (isScanning) {
-          setIsScanning(false);
-        }
       } else {
         toast.error('Barcode not found');
       }
@@ -149,9 +130,6 @@ const ComboBox = () => {
       toast.error('Error fetching item data');
     }
   };
-
-  // Apply debouncing to the scan result
-  const debouncedOnNewScanResult = useCallback(debounce(onNewScanResult, 500), [onNewScanResult]);
 
   /**Utang updates */
 
@@ -205,7 +183,7 @@ const ComboBox = () => {
           />
         )} */}
 
-        <BarcodeScannerComponent handleScan={debouncedOnNewScanResult} />
+        <BarcodeScannerComponent dataOut={(data) => onNewScanResult(data)} size={'200px'} />
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <Autocomplete
             disablePortal

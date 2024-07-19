@@ -1,22 +1,13 @@
 // components/AddItemForm.js
 
 import React, { useState } from 'react';
-import {
-  Button,
-  TextField,
-  Box,
-  Typography,
-  InputAdornment,
-  IconButton,
-  Switch,
-} from '@mui/material';
+import { Button, TextField, Box, Typography, Switch } from '@mui/material';
 import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
-import Html5QrcodePlugin from '../../src/components/Scanner';
-import QrCodeScannerIcon from '@mui/icons-material/QrCodeScanner';
+import BarcodeScannerComponent from '../../src/components/wt2Scanner';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-
+import Swal from 'sweetalert2';
 import Nav from '@/src/components/Nav';
 
 // Validation Schema
@@ -38,10 +29,7 @@ const initialValues = {
 const AddItemForm = () => {
   const [scannedBarcode, setScannedBarcode] = useState('');
   const [generatedId, setGeneratedId] = useState('');
-  const [isScanning, setIsScanning] = useState(false);
-  const [stopScanning, setStopScanning] = useState(false);
-  const [apiResponse, setApiResponse] = useState(null);
-  const [checked, setChecked] = React.useState(true);
+  const [checked, setChecked] = React.useState(false);
 
   const handleChange = (event) => {
     setChecked(event.target.checked);
@@ -59,16 +47,30 @@ const AddItemForm = () => {
       });
 
       if (response.ok) {
-        const data = await response.json();
-        setApiResponse(data); // Set the API response state
+        Swal.fire({
+          title: 'Success!',
+          text: 'Item added successfully',
+          icon: 'success',
+          confirmButtonText: 'OK',
+        });
         resetForm();
         setGeneratedId('');
         setScannedBarcode('');
       } else {
-        console.error('Failed to add item');
+        Swal.fire({
+          title: 'Error!',
+          text: 'Failed to add item',
+          icon: 'error',
+          confirmButtonText: 'OK',
+        });
       }
     } catch (error) {
-      console.error('Error:', error);
+      Swal.fire({
+        title: 'Error!',
+        text: 'An error occurred while adding the item',
+        icon: 'error',
+        confirmButtonText: 'OK',
+      });
     } finally {
       setSubmitting(false);
     }
@@ -79,27 +81,11 @@ const AddItemForm = () => {
     setScannedBarcode(decodedText);
     const randomId = `${decodedText}-${Math.floor(Math.random() * 1000)}`;
     setGeneratedId(randomId);
-    setIsScanning(false);
-    setStopScanning(true);
-  };
-
-  const handleScanClick = () => {
-    setIsScanning(!isScanning);
-    setStopScanning(false);
   };
 
   return (
     <>
-      <Nav>
-        {/* <Box display="flex" alignItems="center">
-          <IconButton onClick={() => router.push('/')}>
-            <ArrowBackIcon sx={{ color: 'white' }} />
-          </IconButton>
-          <Typography variant="h6" fontWeight={700}>
-            AKHIRO POS
-          </Typography>
-        </Box> */}
-      </Nav>
+      <Nav></Nav>
       <Box
         sx={{
           maxWidth: 600,
@@ -138,7 +124,6 @@ const AddItemForm = () => {
           <>for update</>
         ) : (
           <>
-            {' '}
             <Formik
               initialValues={{ ...initialValues, barcode: scannedBarcode, id: generatedId }}
               enableReinitialize
@@ -184,20 +169,18 @@ const AddItemForm = () => {
                       label="Barcode"
                       variant="outlined"
                       fullWidth
+                      disabled
                       value={scannedBarcode}
                       error={touched.barcode && Boolean(errors.barcode)}
                       helperText={touched.barcode && errors.barcode}
-                      InputProps={{
-                        endAdornment: (
-                          <InputAdornment position="end">
-                            <IconButton onClick={handleScanClick}>
-                              <QrCodeScannerIcon />
-                            </IconButton>
-                          </InputAdornment>
-                        ),
-                      }}
                       onChange={(event) => setFieldValue('barcode', event.target.value)}
                     />
+                    <Box sx={{ mt: '40px' }}>
+                      <BarcodeScannerComponent
+                        dataOut={(data) => handleBarcodeScan(data)}
+                        size={'100px'}
+                      />
+                    </Box>
                     <Button
                       type="submit"
                       variant="contained"
@@ -207,15 +190,6 @@ const AddItemForm = () => {
                       {isSubmitting ? 'Submitting...' : 'Submit'}
                     </Button>
                   </Box>
-                  {isScanning && (
-                    <Html5QrcodePlugin
-                      fps={10}
-                      qrbox={250}
-                      disableFlip={false}
-                      qrCodeSuccessCallback={handleBarcodeScan}
-                      stopScanning={stopScanning}
-                    />
-                  )}
                 </Form>
               )}
             </Formik>
@@ -223,12 +197,6 @@ const AddItemForm = () => {
         )}
 
         <ToastContainer />
-        {apiResponse && (
-          <Box mt={4}>
-            <Typography variant="h6">API Response</Typography>
-            <pre>{JSON.stringify(apiResponse, null, 2)}</pre>
-          </Box>
-        )}
       </Box>
     </>
   );
