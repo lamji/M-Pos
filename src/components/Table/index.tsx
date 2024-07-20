@@ -15,7 +15,6 @@ import {
   Select,
   FormControl,
   InputLabel,
-  Typography,
 } from '@mui/material';
 import 'react-date-range/dist/styles.css'; // Import the styles
 import 'react-date-range/dist/theme/default.css'; // Import the theme
@@ -23,6 +22,12 @@ import { useSelector, useDispatch } from 'react-redux';
 import { getData, setData } from '@/src/common/reducers/data';
 import { formatCurrency } from '@/src/common/helpers';
 import Swal from 'sweetalert2';
+import { styled } from '@mui/material/styles';
+import ArrowForwardIosSharpIcon from '@mui/icons-material/ArrowForwardIosSharp';
+import MuiAccordion, { AccordionProps } from '@mui/material/Accordion';
+import MuiAccordionSummary, { AccordionSummaryProps } from '@mui/material/AccordionSummary';
+import MuiAccordionDetails from '@mui/material/AccordionDetails';
+import Typography from '@mui/material/Typography';
 
 interface Item {
   _id: string;
@@ -35,16 +40,54 @@ interface Item {
   regularPrice: number;
 }
 
+const Accordion = styled((props: AccordionProps) => (
+  <MuiAccordion disableGutters elevation={0} square {...props} />
+))(({ theme }) => ({
+  border: `1px solid ${theme.palette.divider}`,
+  '&:not(:last-child)': {
+    borderBottom: 0,
+  },
+  '&::before': {
+    display: 'none',
+  },
+}));
+
+const AccordionSummary = styled((props: AccordionSummaryProps) => (
+  <MuiAccordionSummary
+    expandIcon={<ArrowForwardIosSharpIcon sx={{ fontSize: '0.9rem' }} />}
+    {...props}
+  />
+))(({ theme }) => ({
+  backgroundColor:
+    theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, .05)' : 'rgba(0, 0, 0, .03)',
+  flexDirection: 'row-reverse',
+  '& .MuiAccordionSummary-expandIconWrapper.Mui-expanded': {
+    transform: 'rotate(90deg)',
+  },
+  '& .MuiAccordionSummary-content': {
+    marginLeft: theme.spacing(1),
+  },
+}));
+
+const AccordionDetails = styled(MuiAccordionDetails)(({ theme }) => ({
+  padding: theme.spacing(2),
+  borderTop: '1px solid rgba(0, 0, 0, .125)',
+}));
+
 const EditableTable: React.FC = () => {
+  const [expanded, setExpanded] = React.useState<string | false>('panel1');
   const [items, setItems] = useState<Item[]>([]);
   const [editItem, setEditItem] = useState<Item | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [sortField, setSortField] = useState<keyof Item>('name');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
-  const [minDate, setMinDate] = useState<string>('');
-  const [maxDate, setMaxDate] = useState<string>('');
   const state = useSelector(getData);
   const dispatch = useDispatch();
+
+  const handleChangeAccordion =
+    (panel: string) => (event: React.SyntheticEvent, newExpanded: boolean) => {
+      setExpanded(newExpanded ? panel : false);
+    };
 
   const handleSave = async () => {
     if (editItem) {
@@ -109,7 +152,7 @@ const EditableTable: React.FC = () => {
     <Box sx={{ p: 1, m: 2, width: '100%', maxWidth: '1200px', mx: 'auto', mt: '-120px' }}>
       <Box sx={{ mb: 2 }}>
         <TextField
-          label="Search"
+          label="Item Look up"
           variant="outlined"
           size="small"
           value={searchTerm}
@@ -120,52 +163,6 @@ const EditableTable: React.FC = () => {
           }}
           fullWidth
         />
-        <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
-          <TextField
-            type="date"
-            variant="outlined"
-            size="small"
-            value={minDate}
-            onChange={(e) => setMinDate(e.target.value)}
-            sx={{ mr: '2px', width: '48%' }}
-          />
-          <TextField
-            type="date"
-            variant="outlined"
-            size="small"
-            value={maxDate}
-            onChange={(e) => setMaxDate(e.target.value)}
-            sx={{ mr: '2px', width: '48%' }}
-          />
-        </Box>
-
-        <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
-          <FormControl variant="outlined" size="small" sx={{ mr: '2px', width: '48%' }}>
-            <InputLabel>Sort By</InputLabel>
-            <Select
-              value={sortField}
-              onChange={(e) => setSortField(e.target.value as keyof Item)}
-              label="Sort By"
-            >
-              <MenuItem value="name">Name</MenuItem>
-              <MenuItem value="price">Price</MenuItem>
-              <MenuItem value="quantity">Quantity</MenuItem>
-              <MenuItem value="regularPrice">Regular Price</MenuItem>
-              <MenuItem value="date">Date</MenuItem>
-            </Select>
-          </FormControl>
-          <FormControl variant="outlined" size="small" sx={{ mr: '2px', width: '48%' }}>
-            <InputLabel>Order</InputLabel>
-            <Select
-              value={sortOrder}
-              onChange={(e) => setSortOrder(e.target.value as 'asc' | 'desc')}
-              label="Order"
-            >
-              <MenuItem value="asc">Ascending</MenuItem>
-              <MenuItem value="desc">Descending</MenuItem>
-            </Select>
-          </FormControl>
-        </Box>
       </Box>
       {editItem && (
         <Box sx={{ mb: 2, border: '1px solid gray', p: 2, borderRadius: '4px' }}>
@@ -226,50 +223,90 @@ const EditableTable: React.FC = () => {
           </Box>
         </Box>
       )}
-      <TableContainer
-        component={Paper}
-        sx={{ p: 3, border: '1px solid gray', width: '100%', height: '400px', overflow: 'auto' }}
-      >
+      <TableContainer component={Paper} sx={{ px: 3, width: '100%', paddingBottom: '100px' }}>
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell>Name</TableCell>
-              <TableCell>Price</TableCell>
-              <TableCell>Date</TableCell>
-              <TableCell>Quantity</TableCell>
-              <TableCell>Regular Price</TableCell>
-              <TableCell>Actions</TableCell>
+              <TableCell>All Items - {filteredItems.length}</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {filteredItems.map((item) => (
-              <TableRow key={item._id}>
-                <TableCell>
-                  <Typography sx={{ width: '170px', fontSize: '12px' }}>{item.name}</Typography>
-                </TableCell>
-                <TableCell>
-                  <Typography sx={{ width: '170px', fontSize: '12px' }}>
-                    {formatCurrency(item.price)}
-                  </Typography>
-                </TableCell>
-                <TableCell>{new Date(item.date).toLocaleDateString()}</TableCell>
-                <TableCell>
-                  <Typography sx={{ width: '70px', fontSize: '12px' }}>
-                    {item.quantity || 0}
-                  </Typography>
-                </TableCell>
-                <TableCell>
-                  <Typography sx={{ width: '170px', fontSize: '12px' }}>
-                    {formatCurrency(item.regularPrice || 0)}
-                  </Typography>
-                </TableCell>
-                <TableCell>
-                  <Button sx={{ textTransform: 'capitalize' }} onClick={() => setEditItem(item)}>
-                    Edit
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
+            {filteredItems.map((item, idx) => {
+              return (
+                <>
+                  {/* <TableRow key={item._id}>
+                    <TableCell>
+                      <Typography sx={{ width: '170px', fontSize: '12px' }}>{item.name}</Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Typography sx={{ width: '170px', fontSize: '12px' }}>
+                        {formatCurrency(item.price)}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>{new Date(item.date).toLocaleDateString()}</TableCell>
+                    <TableCell>
+                      <Typography sx={{ width: '70px', fontSize: '12px' }}>
+                        {item.quantity || 0}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Typography sx={{ width: '170px', fontSize: '12px' }}>
+                        {formatCurrency(item.regularPrice || 0)}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        sx={{ textTransform: 'capitalize' }}
+                        onClick={() => setEditItem(item)}
+                      >
+                        Edit
+                      </Button>
+                    </TableCell>
+                  </TableRow> */}
+                  <Accordion
+                    expanded={expanded === `panel${idx}`}
+                    onChange={handleChangeAccordion(`panel${idx}`)}
+                  >
+                    <AccordionSummary aria-controls="panel2d-content" id="panel2d-header">
+                      <Typography>{item.name}</Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                      <Typography sx={{ fontSize: '12px' }}>
+                        <strong>Product Name: </strong>
+                        {item.name}
+                      </Typography>
+                      <Typography sx={{ fontSize: '12px' }}>
+                        <strong>Price: </strong>
+                        {formatCurrency(item.price)}
+                      </Typography>
+                      <Typography sx={{ fontSize: '12px' }}>
+                        <strong>Stocks: </strong>
+                        {item.quantity}
+                      </Typography>
+                      <Typography sx={{ fontSize: '12px' }}>
+                        <strong>Regular Price: </strong>
+                        {formatCurrency(item.regularPrice || 0)}
+                      </Typography>
+                      <Typography sx={{ fontSize: '12px' }}>
+                        <strong>Interest: </strong>
+                        {formatCurrency(item.price - item.regularPrice)}
+                      </Typography>
+                      {!editItem && (
+                        <>
+                          <Button
+                            variant="contained"
+                            sx={{ textTransform: 'capitalize', p: 0 }}
+                            onClick={() => setEditItem(item)}
+                          >
+                            Edit
+                          </Button>
+                        </>
+                      )}
+                    </AccordionDetails>
+                  </Accordion>
+                </>
+              );
+            })}
           </TableBody>
         </Table>
       </TableContainer>
