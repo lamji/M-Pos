@@ -41,6 +41,7 @@ export default async function handler(req, res) {
     case 'POST':
       try {
         const { items, name, _id, payment } = req.body;
+        const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
         // console.log(items, name, _id, payment);
         // // Calculate the total amount based on items
         // const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
@@ -57,7 +58,6 @@ export default async function handler(req, res) {
             // utang.remainingBalance -= payment.amount;
             const totalDb = utang.total;
             const type = payment.amount >= totalDb ? 'full' : 'partial';
-            console.log(items, name, _id, payment, totalDb, type);
             utang.transactions.push({ date: new Date(), amount: payment.amount });
             if (type === 'full') {
               // If full payment, empty the items array
@@ -80,15 +80,27 @@ export default async function handler(req, res) {
             }
           } else {
             // Update the existing utang
-            // utang.items = items; // Update the items list
-            // utang.total = total; // Recalculate the total amount
-            // // No need to set remainingBalance from body; it's recalculated based on total - previous payments
-            // utang.remainingBalance =
-            //   total - utang.transactions.reduce((sum, transaction) => sum + transaction.amount, 0);
+            utang.items = items; // Update the items list
+            utang.total = total; // Recalculate the total amount
+            // No need to set remainingBalance from body; it's recalculated based on total - previous payments
+            utang.remainingBalance =
+              total - utang.transactions.reduce((sum, transaction) => sum + transaction.amount, 0);
           }
           await utang.save();
 
-          res.status(200).json(utang);
+          res.status(200).json({ utang: 'success' });
+        } else {
+          // Create a new utang
+          const remainingBalance = total;
+          const newUtang = new Utang({
+            items,
+            name,
+            total,
+            remainingBalance,
+            transactions: payment ? [{ date: new Date(), amount: payment.amount }] : [],
+          });
+          await newUtang.save();
+          res.status(201).json(newUtang);
         }
       } catch (error) {
         res.status(500).json({ error: 'Failed to add/update utang' });

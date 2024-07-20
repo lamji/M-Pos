@@ -136,18 +136,6 @@ export default async function handler(req, res) {
         const change = cash ? cash - total : undefined;
         const remainingBalance = partialAmount ? total - partialAmount : undefined;
         const returnTotal = total;
-        console.log(
-          'items:',
-          items,
-          'personName,personName',
-          'cash',
-          'total:',
-          total,
-          partialAmount,
-          type,
-          _id,
-          payment
-        );
 
         if (type === 'Utang') {
           if (_id) {
@@ -178,7 +166,6 @@ export default async function handler(req, res) {
             utangRecord.remainingBalance = utangRecord.remainingBalance; // Ensure this is updated
             utangRecord.transactionType = type;
 
-            console.log(utangRecord);
             // Save the updated 'utang' record
             // await utangRecord.save();
 
@@ -195,6 +182,7 @@ export default async function handler(req, res) {
             };
 
             const newTransaction = new Transaction(transactionData);
+            await utangRecord.save();
             await newTransaction.save();
 
             // Send the response

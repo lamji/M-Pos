@@ -229,6 +229,7 @@ export default function Dashboard() {
                   ?.map((transaction: any, transactionIdx: number) => (
                     <Box key={transactionIdx}>
                       {transaction?.items?.map((item: any, itemIdx: number) => {
+                        console.log(item);
                         return (
                           <Box
                             key={itemIdx}
@@ -258,7 +259,7 @@ export default function Dashboard() {
                                   transaction.transactionType === 'Cash' ? '#9bc39b' : '#ff8e8e',
                               }}
                             >
-                              {formatCurrency(transaction.total)}
+                              {formatCurrency(item.quantity * item.price)}
                             </Typography>
                           </Box>
                         );

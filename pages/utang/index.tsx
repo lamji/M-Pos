@@ -382,7 +382,6 @@ const UtangTransactions: React.FC = () => {
                   ))}
                 </>
               )}
-              <Box sx={{ marginTop: '10px', height: '50vh', overflow: 'scroll' }}></Box>
             </Box>
           </DialogContent>
           <DialogActions>
