@@ -110,7 +110,7 @@ const BottomNav = () => {
         }} // Adjust font size here
       />
       <BottomNavigationAction
-        label="Listahan"
+        label="Utang"
         icon={<FormatListNumberedIcon />}
         sx={{
           '& .Mui-selected': {
