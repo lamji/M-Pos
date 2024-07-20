@@ -33,6 +33,21 @@ export const getSalesData = async () => {
   }
 };
 
+export const fetchItemsWithPagination = async (page: any, limit: any, filters = {}) => {
+  try {
+    const response = await axios.get('/items', {
+      params: {
+        page,
+        limit,
+        ...filters,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    throw new Error('Failed to fetch items with pagination');
+  }
+};
+
 export const getTransactionsByType = async (transactionType: string) => {
   const response = await axios.get('/api/transactions', {
     params: { transactionType },

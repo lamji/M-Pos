@@ -1,4 +1,4 @@
-import { Box, Typography } from '@mui/material';
+import { Box, Button, Typography } from '@mui/material';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import Nav from '@/src/components/Nav';
@@ -44,6 +44,7 @@ export default function Home() {
               track sales, and handle inventory on the go.
             </Typography>
           </Box>
+          <Button onClick={() => router.push('/admin')}>Admin</Button>
         </Box>
       </main>
     </>

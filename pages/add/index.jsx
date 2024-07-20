@@ -165,6 +165,7 @@ const AddItemForm = () => {
   return (
     <>
       <Nav />
+
       <Box
         sx={{
           maxWidth: 600,
@@ -308,6 +309,7 @@ const AddItemForm = () => {
               >
                 {formik.isSubmitting ? 'Submitting...' : checked ? 'Update' : 'Submit'}
               </Button>
+
               <BarcodeScannerComponent
                 dataOut={(data) => handleBarcodeScanUpdate(data)}
                 size={50}

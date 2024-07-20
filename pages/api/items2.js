@@ -6,27 +6,80 @@ export default async function handler(req, res) {
 
   await connectToDatabase();
 
+  async function getItemsWithPagination(req, res) {
+    try {
+      const { page = 1, limit = 10, barcode, name } = req.query;
+
+      // Convert page and limit to integers
+      const pageNumber = parseInt(page, 10);
+      const limitNumber = parseInt(limit, 10);
+
+      // Build the query object
+      const query = {};
+      if (barcode) {
+        query.barcode = barcode.toLowerCase();
+      }
+      if (name) {
+        query.name = { $regex: name, $options: 'i' };
+      }
+
+      // Find items with pagination
+      const items = await Item.find(query)
+        .skip((pageNumber - 1) * limitNumber)
+        .limit(limitNumber);
+
+      // Get the total count of items matching the query
+      const totalItems = await Item.countDocuments(query);
+
+      // Calculate the total number of pages
+      const totalPages = Math.ceil(totalItems / limitNumber);
+
+      res.status(200).json({
+        items,
+        pagination: {
+          totalItems,
+          totalPages,
+          currentPage: pageNumber,
+          limit: limitNumber,
+        },
+      });
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch items with pagination' });
+    }
+  }
+
+  async function getAllItems(req, res) {
+    try {
+      const { barcode, name } = req.query;
+
+      // Build the query object
+      const query = {};
+      if (barcode) {
+        query.barcode = barcode.toLowerCase();
+      }
+      if (name) {
+        query.name = { $regex: name, $options: 'i' };
+      }
+
+      // Find all items matching the query
+      const items = await Item.find(query);
+
+      res.status(200).json(items);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch all items' });
+    }
+  }
+
   switch (method) {
     case 'GET':
       try {
-        const items = await Item.find({});
+        const { page, limit } = req.query;
 
-        // Handle filtering by barcode
-        if (req.query.barcode) {
-          const barcode = req.query.barcode.toLowerCase();
-          const filteredItems = items.filter((item) => item.barcode.toLowerCase() === barcode);
-          return res.status(200).json(filteredItems);
+        if (page && limit) {
+          await getItemsWithPagination(req, res);
+        } else {
+          await getAllItems(req, res);
         }
-
-        // Example: Filtering by `name` query parameter
-        if (req.query.name) {
-          const filteredItems = items.filter((item) =>
-            item.name.toLowerCase().includes(req.query.name.toLowerCase())
-          );
-          return res.status(200).json(filteredItems);
-        }
-
-        res.status(200).json(items);
       } catch (error) {
         res.status(500).json({ error: 'Failed to fetch items' });
       }
@@ -54,7 +107,12 @@ export default async function handler(req, res) {
           // Update item fields
           existingItem.name = name || existingItem.name;
           existingItem.price = price || existingItem.price;
-          existingItem.quantity = newQty;
+          if (type === 'Add' || type === 'Adjustment') {
+            existingItem.quantity = newQty;
+          } else {
+            existingItem.quantity = quantity;
+          }
+
           existingItem.regularPrice = regularPrice || existingItem.regularPrice;
           existingItem.quantityHistory.push({
             quantityChanged: quantity,

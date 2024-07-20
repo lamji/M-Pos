@@ -1,4 +1,4 @@
-import React, { useState, ChangeEvent } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Table,
   TableBody,
@@ -15,11 +15,14 @@ import {
   Select,
   FormControl,
   InputLabel,
+  Typography,
 } from '@mui/material';
-// import { DateRange, DateRangePicker } from 'react-date-range';
-// import { addDays } from 'date-fns';
 import 'react-date-range/dist/styles.css'; // Import the styles
 import 'react-date-range/dist/theme/default.css'; // Import the theme
+import { useSelector, useDispatch } from 'react-redux';
+import { getData, setData } from '@/src/common/reducers/data';
+import { formatCurrency } from '@/src/common/helpers';
+import Swal from 'sweetalert2';
 
 interface Item {
   _id: string;
@@ -32,40 +35,75 @@ interface Item {
   regularPrice: number;
 }
 
-interface EditableTableProps {
-  initialItems: Item[];
-}
-
-const EditableTable: React.FC<EditableTableProps> = ({ initialItems }) => {
-  const [items, setItems] = useState<Item[]>(initialItems);
-  const [editIdx, setEditIdx] = useState<number>(-1);
+const EditableTable: React.FC = () => {
+  const [items, setItems] = useState<Item[]>([]);
+  const [editItem, setEditItem] = useState<Item | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [sortField, setSortField] = useState<keyof Item>('name');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [minDate, setMinDate] = useState<string>('');
   const [maxDate, setMaxDate] = useState<string>('');
+  const state = useSelector(getData);
+  const dispatch = useDispatch();
 
-  const handleSave = () => {
-    setEditIdx(-1);
+  const handleSave = async () => {
+    if (editItem) {
+      const updatedItems = items.map((item) => (item._id === editItem._id ? editItem : item));
+      setItems(updatedItems);
+      dispatch(setData(updatedItems as any)); // Update Redux store if needed
+      setEditItem(null); // Clear edit item
+      try {
+        const endpoint = '/api/items2';
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ ...editItem, type: 'none' }),
+        });
+
+        if (response.ok) {
+          Swal.fire({
+            title: 'Success!',
+            text: 'Item updated successfully',
+            icon: 'success',
+            confirmButtonText: 'OK',
+          });
+        } else {
+          Swal.fire({
+            title: 'Error!',
+            text: 'Failed to update item',
+            icon: 'error',
+            confirmButtonText: 'OK',
+          });
+        }
+      } catch (error) {
+        Swal.fire({
+          title: 'Error!',
+          text: `${JSON.stringify(error)}`,
+          icon: 'error',
+          confirmButtonText: 'OK',
+        });
+      }
+    }
   };
 
-  const handleChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-    name: keyof Item,
-    index: number
-  ) => {
-    const { value } = e.target;
-    const updatedItems = items.map((item, i) =>
-      index === i ? { ...item, [name]: name === 'name' ? value : Number(value) } : item
-    );
-    setItems(updatedItems);
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>, field: keyof Item) => {
+    if (editItem) {
+      setEditItem({
+        ...editItem,
+        [field]: field === 'name' ? e.target.value : Number(e.target.value),
+      });
+    }
   };
 
-  const startEditing = (index: number) => {
-    setEditIdx(index);
-  };
+  const filteredItems = items.filter((item) =>
+    item.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
-  // Log filtered items
+  useEffect(() => {
+    setItems(state);
+  }, [state]);
 
   return (
     <Box sx={{ p: 1, m: 2, width: '100%', maxWidth: '1200px', mx: 'auto', mt: '-120px' }}>
@@ -129,7 +167,69 @@ const EditableTable: React.FC<EditableTableProps> = ({ initialItems }) => {
           </FormControl>
         </Box>
       </Box>
-      <TableContainer component={Paper} sx={{ p: 3, border: '1px solid gray', width: '100%' }}>
+      {editItem && (
+        <Box sx={{ mb: 2, border: '1px solid gray', p: 2, borderRadius: '4px' }}>
+          <Typography variant="h6" gutterBottom>
+            Edit Item
+          </Typography>
+          <TextField
+            label="Name"
+            variant="outlined"
+            size="small"
+            value={editItem.name}
+            onChange={(e: any) => handleChange(e, 'name')}
+            sx={{ mb: 2, mr: 2 }}
+            fullWidth
+          />
+          <TextField
+            type="number"
+            label="Price"
+            variant="outlined"
+            size="small"
+            value={editItem.price}
+            onChange={(e: any) => handleChange(e, 'price')}
+            sx={{ mb: 2, mr: 2 }}
+            fullWidth
+          />
+          <TextField
+            type="number"
+            label="Quantity"
+            variant="outlined"
+            size="small"
+            value={editItem.quantity}
+            onChange={(e: any) => handleChange(e, 'quantity')}
+            sx={{ mb: 2, mr: 2 }}
+            fullWidth
+          />
+          <TextField
+            type="number"
+            label="Regular Price"
+            variant="outlined"
+            size="small"
+            value={editItem.regularPrice}
+            onChange={(e: any) => handleChange(e, 'regularPrice')}
+            sx={{ mb: 2, mr: 2 }}
+            fullWidth
+          />
+          <Box display="flex" justifyContent="flex-end">
+            <Button variant="contained" color="primary" onClick={handleSave}>
+              Save
+            </Button>
+            <Button
+              variant="outlined"
+              color="secondary"
+              sx={{ ml: 2 }}
+              onClick={() => setEditItem(null)}
+            >
+              Cancel
+            </Button>
+          </Box>
+        </Box>
+      )}
+      <TableContainer
+        component={Paper}
+        sx={{ p: 3, border: '1px solid gray', width: '100%', height: '400px', overflow: 'auto' }}
+      >
         <Table>
           <TableHead>
             <TableRow>
@@ -142,62 +242,31 @@ const EditableTable: React.FC<EditableTableProps> = ({ initialItems }) => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {initialItems.map((item, index) => (
+            {filteredItems.map((item) => (
               <TableRow key={item._id}>
                 <TableCell>
-                  <TextField
-                    size="small"
-                    value={item.name}
-                    onChange={(e) => handleChange(e, 'name', index)}
-                    fullWidth
-                    disabled={editIdx === index ? false : true}
-                    sx={{ width: '170px' }}
-                  />
+                  <Typography sx={{ width: '170px', fontSize: '12px' }}>{item.name}</Typography>
                 </TableCell>
                 <TableCell>
-                  <TextField
-                    type="number"
-                    size="small"
-                    value={item.price}
-                    sx={{ width: '70px' }}
-                    onChange={(e) => handleChange(e, 'price', index)}
-                    disabled={editIdx === index ? false : true}
-                  />
+                  <Typography sx={{ width: '170px', fontSize: '12px' }}>
+                    {formatCurrency(item.price)}
+                  </Typography>
                 </TableCell>
                 <TableCell>{new Date(item.date).toLocaleDateString()}</TableCell>
                 <TableCell>
-                  <TextField
-                    sx={{ width: '70px' }}
-                    size="small"
-                    type="number"
-                    value={item.quantity || 0}
-                    onChange={(e) => handleChange(e, 'quantity', index)}
-                    disabled={editIdx === index ? false : true}
-                  />
+                  <Typography sx={{ width: '70px', fontSize: '12px' }}>
+                    {item.quantity || 0}
+                  </Typography>
                 </TableCell>
                 <TableCell>
-                  <TextField
-                    sx={{ width: '70px' }}
-                    size="small"
-                    type="number"
-                    value={item.regularPrice || 0}
-                    onChange={(e) => handleChange(e, 'regularPrice', index)}
-                    disabled={editIdx === index ? false : true}
-                  />
+                  <Typography sx={{ width: '170px', fontSize: '12px' }}>
+                    {formatCurrency(item.regularPrice || 0)}
+                  </Typography>
                 </TableCell>
                 <TableCell>
-                  {editIdx === index ? (
-                    <Button sx={{ textTransform: 'capitalize' }} onClick={handleSave}>
-                      Save
-                    </Button>
-                  ) : (
-                    <Button
-                      sx={{ textTransform: 'capitalize' }}
-                      onClick={() => startEditing(index)}
-                    >
-                      Edit
-                    </Button>
-                  )}
+                  <Button sx={{ textTransform: 'capitalize' }} onClick={() => setEditItem(item)}>
+                    Edit
+                  </Button>
                 </TableCell>
               </TableRow>
             ))}

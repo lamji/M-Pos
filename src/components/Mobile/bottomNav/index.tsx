@@ -78,7 +78,7 @@ const BottomNav = () => {
         icon={<GridViewIcon />}
         sx={{
           '& .Mui-selected': {
-            fontSize: '0.85rem',
+            fontSize: '10px',
           },
           '& .MuiBottomNavigationAction-label': {
             fontSize: '10px',
@@ -90,7 +90,7 @@ const BottomNav = () => {
         icon={<PointOfSaleIcon />}
         sx={{
           '& .Mui-selected': {
-            fontSize: '0.85rem',
+            fontSize: '10px',
           },
           '& .MuiBottomNavigationAction-label': {
             fontSize: '10px',
@@ -102,7 +102,7 @@ const BottomNav = () => {
         icon={<PostAddIcon />}
         sx={{
           '& .Mui-selected': {
-            fontSize: '0.85rem',
+            fontSize: '10px',
           },
           '& .MuiBottomNavigationAction-label': {
             fontSize: '10px',
@@ -114,7 +114,7 @@ const BottomNav = () => {
         icon={<FormatListNumberedIcon />}
         sx={{
           '& .Mui-selected': {
-            fontSize: '0.85rem',
+            fontSize: '10px',
           },
           '& .MuiBottomNavigationAction-label': {
             fontSize: '10px',
