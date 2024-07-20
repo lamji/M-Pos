@@ -151,7 +151,7 @@ const EditableTable: React.FC = () => {
           size="small"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          sx={{ mr: 2, mb: '10px' }}
+          sx={{ mr: 2 }}
           InputProps={{
             startAdornment: <InputAdornment position="start">🔍</InputAdornment>,
           }}
