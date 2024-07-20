@@ -22,7 +22,12 @@ import * as Yup from 'yup';
 import { useDispatch, useSelector } from 'react-redux';
 import { setIsBackDropOpen } from '@/src/common/reducers/items';
 import Nav from '@/src/components/Nav';
-import { getUtangData, setPayment, setUtangData } from '@/src/common/reducers/utangData';
+import {
+  getUtangData,
+  setPayment,
+  setUtangData,
+  setUtangTotal,
+} from '@/src/common/reducers/utangData';
 import { useRouter } from 'next/router';
 
 // types.ts
@@ -154,6 +159,7 @@ const UtangTransactions: React.FC = () => {
       const data = await getAllUtang();
       if (data) {
         dispatch(setUtangData(data));
+        dispatch(setUtangTotal(100 as any));
       }
     } catch (error) {
       console.log(error);

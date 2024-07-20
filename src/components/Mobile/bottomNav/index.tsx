@@ -58,22 +58,44 @@ const BottomNav = () => {
         borderTop: '1px solid',
         borderColor: 'divider',
         zIndex: 9,
+        padding: '10px',
       }}
     >
       <BottomNavigationAction
         label="Home"
         icon={<HomeIcon />}
-        sx={{ typography: 'body2', fontSize: '0.75rem' }} // Adjust font size here
+        sx={{
+          '& .Mui-selected': {
+            fontSize: '0.85rem',
+          },
+          '& .MuiBottomNavigationAction-label': {
+            fontSize: '10px',
+          },
+        }} // Adjust font size here
       />
       <BottomNavigationAction
         label="Dashboard"
         icon={<GridViewIcon />}
-        sx={{ typography: 'body2', fontSize: '0.75rem' }} // Adjust font size here
+        sx={{
+          '& .Mui-selected': {
+            fontSize: '0.85rem',
+          },
+          '& .MuiBottomNavigationAction-label': {
+            fontSize: '10px',
+          },
+        }} // Adjust font size here
       />
       <BottomNavigationAction
         label="POS"
         icon={<PointOfSaleIcon />}
-        sx={{ typography: 'body2', fontSize: '0.75rem' }} // Adjust font size here
+        sx={{
+          '& .Mui-selected': {
+            fontSize: '0.85rem',
+          },
+          '& .MuiBottomNavigationAction-label': {
+            fontSize: '10px',
+          },
+        }} // Adjust font size here
       />
       <BottomNavigationAction
         label="Add Item"
@@ -82,12 +104,22 @@ const BottomNav = () => {
           '& .Mui-selected': {
             fontSize: '0.85rem',
           },
+          '& .MuiBottomNavigationAction-label': {
+            fontSize: '10px',
+          },
         }} // Adjust font size here
       />
       <BottomNavigationAction
         label="Listahan"
         icon={<FormatListNumberedIcon />}
-        sx={{ typography: 'body2', fontSize: '0.75rem' }} // Adjust font size here
+        sx={{
+          '& .Mui-selected': {
+            fontSize: '0.85rem',
+          },
+          '& .MuiBottomNavigationAction-label': {
+            fontSize: '10px',
+          },
+        }} // Adjust font size here
       />
     </BottomNavigation>
   );

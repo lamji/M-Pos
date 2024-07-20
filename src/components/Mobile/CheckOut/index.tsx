@@ -220,7 +220,7 @@ export default function Checkout() {
           <>
             <Button
               onClick={handleClickOpen}
-              sx={{ ...classes.button, mx: '10px', background: 'white', color: 'black' }}
+              sx={{ ...classes.button, mx: '10px', background: 'white', color: 'black', py: 0 }}
               variant="contained"
             >
               Check Out
@@ -263,6 +263,7 @@ export default function Checkout() {
                   border: '2px solid',
                   borderColor: selectedOption === 'cash' ? '#0A736C' : 'gray',
                   background: selectedOption === 'cash' ? '#0A736C' : '#d1d1d1',
+                  color: selectedOption === 'cash' ? 'white' : 'unset',
                   padding: '10px',
                   borderRadius: '10px',
                   width: '90px',
@@ -280,6 +281,7 @@ export default function Checkout() {
                   border: '2px solid',
                   borderColor: selectedOption === 'utang' ? '#0A736C' : 'gray',
                   background: selectedOption === 'utang' ? '#0A736C' : '#d1d1d1',
+                  color: selectedOption === 'utang' ? 'white' : 'unset',
                   padding: '10px',
                   borderRadius: '10px',
                   width: '90px',
@@ -304,6 +306,7 @@ export default function Checkout() {
                   border: '2px solid',
                   borderColor: selectedOption === 'partial' ? '#0A736C' : 'gray',
                   background: selectedOption === 'partial' ? '#0A736C' : '#d1d1d1',
+                  color: selectedOption === 'partial' ? 'white' : 'unset',
                 }}
               >
                 Partial

@@ -7,6 +7,7 @@ const initialState: any = {
     amount: 0, // Payment amount
     id: '',
   },
+  totalUtang: 0,
 };
 
 const utangDataSlice = createSlice({
@@ -25,13 +26,16 @@ const utangDataSlice = createSlice({
     setPayment: (state, action: PayloadAction<{ name: string; amount: number; id: string }>) => {
       state.payment = action.payload;
     },
+    setUtangTotal: (state, action: any) => {
+      state.totalUtang = action.payload;
+    },
     clearPayment: (state) => {
       state.payment = { name: '', amount: 0 };
     },
   },
 });
 
-export const { setUtangData, addItem, clearData, setPayment, clearPayment } =
+export const { setUtangData, addItem, clearData, setPayment, clearPayment, setUtangTotal } =
   utangDataSlice.actions;
 
 export const getUtangData = (state: any) => state.utangData.utangData;

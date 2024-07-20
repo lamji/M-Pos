@@ -1,18 +1,20 @@
 import { Box, Typography } from '@mui/material';
 import SimpleDialogDemo from '../Loader/backdrop';
 import { useRouter } from 'next/router';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { setData } from '@/src/common/reducers/data';
-import { setUtangData } from '@/src/common/reducers/utangData';
+import { getUtangData, setUtangData } from '@/src/common/reducers/utangData';
 import { enablePullToRefresh, statusBar } from 'webtonative';
 import BottomNav from '../Mobile/bottomNav';
 import Checkout from '../Mobile/CheckOut';
 import { useEffect } from 'react';
+import { formatCurrency } from '@/src/common/helpers';
 
 export default function Nav() {
   const router = useRouter();
   const currentPath = router.pathname;
   const dispatch = useDispatch();
+  const state = useSelector(getUtangData);
 
   enablePullToRefresh(true);
   statusBar({
@@ -60,13 +62,14 @@ export default function Nav() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
+          height: '60px',
         }}
       >
         <Typography fontWeight={700} textAlign="center" mt={2}>
           {currentPath === '/dashboard' && 'Dashboard'}
           {currentPath === '/' && 'AKHIRO-POS'}
 
-          {currentPath === '/utang' && 'LIST'}
+          {currentPath === '/utang' && 'Total Utang:  ' + formatCurrency(state.totalUtang)}
           {currentPath === '/add' && 'ADD / UPDATE'}
           {currentPath === '/payment' && 'PAYMENT'}
           {currentPath === '/admin' && 'ADMIN'}
