@@ -159,7 +159,7 @@ const EditableTable: React.FC<EditableTableProps> = ({ initialItems }) => {
                     type="number"
                     size="small"
                     value={item.price}
-                    sx={{ width: '60px' }}
+                    sx={{ width: '70px' }}
                     onChange={(e) => handleChange(e, 'price', index)}
                     disabled={editIdx === index ? false : true}
                   />
@@ -167,7 +167,7 @@ const EditableTable: React.FC<EditableTableProps> = ({ initialItems }) => {
                 <TableCell>{new Date(item.date).toLocaleDateString()}</TableCell>
                 <TableCell>
                   <TextField
-                    sx={{ width: '50px' }}
+                    sx={{ width: '70px' }}
                     size="small"
                     type="number"
                     value={item.quantity || 0}
@@ -177,10 +177,10 @@ const EditableTable: React.FC<EditableTableProps> = ({ initialItems }) => {
                 </TableCell>
                 <TableCell>
                   <TextField
-                    sx={{ width: '50px' }}
+                    sx={{ width: '70px' }}
                     size="small"
                     type="number"
-                    value={item.regularPrice}
+                    value={item.regularPrice || 0}
                     onChange={(e) => handleChange(e, 'regularPrice', index)}
                     disabled={editIdx === index ? false : true}
                   />
