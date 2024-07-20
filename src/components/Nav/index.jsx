@@ -88,6 +88,7 @@ export default function Nav() {
           {currentPath === '/utang' && 'LIST'}
           {currentPath === '/add' && 'ADD / UPDATE'}
           {currentPath === '/payment' && 'PAYMENT'}
+          {currentPath === '/admin' && 'ADMIN'}
         </Typography>
       </Box>
       <SimpleDialogDemo />

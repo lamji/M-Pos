@@ -170,39 +170,51 @@ export default function Dashboard() {
               mb: '10px',
             }}
           >
-            Top 5 fast moving items
+            Weekly fast moving
           </Typography>
-          <Box sx={{ display: 'flex' }}>
-            {data.top5Items &&
-              data.top5Items.map((items: any, idx: number) => {
-                return (
-                  <Box
-                    key={idx}
-                    sx={{
-                      padding: '9px',
-                      borderRadius: 2,
-                      border: '1px solid #007550',
-                      gap: 2,
-                      width: '130px',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      margin: '1px',
-                      background: '#abd7ab',
-                    }}
-                  >
-                    <Box>
-                      <Typography sx={{ fontSize: '9px', fontWeight: 700 }}>
-                        {items?.name}
-                      </Typography>
-                      <Typography sx={{ fontSize: '9px', fontWeight: 700 }}>
-                        Qty: {items.quantity}
-                      </Typography>
+          <Box sx={{ overflowX: 'auto', display: 'flex', whiteSpace: 'wrap' }}>
+            <Box sx={{ display: 'flex' }}>
+              {data.top5ItemsWithQuantities &&
+                data.top5ItemsWithQuantities.map((items: any, idx: number) => {
+                  return (
+                    <Box
+                      key={idx}
+                      sx={{
+                        padding: '9px',
+                        borderRadius: 2,
+                        border: '1px solid #007550',
+                        gap: 2,
+                        width: '90px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'left',
+                        justifyContent: 'center',
+                        margin: '1px',
+                        background: '#abd7ab',
+                        flexShrink: 0, // Prevent the items from shrinking
+                      }}
+                    >
+                      <Box>
+                        <Typography sx={{ fontSize: '10px', fontWeight: 700 }}>
+                          {items?.name}
+                        </Typography>
+                        <Typography sx={{ fontSize: '9px', fontWeight: 700 }}>
+                          Sold: {items.sold}
+                        </Typography>
+                        <Typography
+                          sx={{
+                            fontSize: '9px',
+                            fontWeight: 700,
+                            color: items.quantity <= 5 ? 'red' : 'unset',
+                          }}
+                        >
+                          Stocks: {items.quantity}
+                        </Typography>
+                      </Box>
                     </Box>
-                  </Box>
-                );
-              })}
+                  );
+                })}
+            </Box>
           </Box>
         </Box>
         <Box>

@@ -29,6 +29,7 @@ export default function Home() {
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
+            marginTop: '-80px',
             padding: '0 20px', // Optional: Add some horizontal padding
           }}
         >
@@ -70,26 +71,23 @@ export default function Home() {
                 sx={{
                   textAlign: 'center',
                   width: '100%',
+                  mb: '5px',
                 }}
               >
                 DASHBOARD
               </Button>
+              <Button
+                variant="contained"
+                onClick={() => router.push('/admin')}
+                sx={{
+                  textAlign: 'center',
+                  width: '100%',
+                }}
+              >
+                ITEMS
+              </Button>
             </Box>
           </Box>
-          {/* <Button
-            variant="contained"
-            onClick={() => router.push('/pos')}
-            sx={{
-              padding: '50px 30px',
-              border: '1px solid gray',
-              borderRadius: '20px',
-              textAlign: 'center',
-              width: '100%',
-              maxWidth: '400px', // Optional: Set a maximum width for the button
-            }}
-          >
-            POS
-          </Button> */}
           <Box p={2} pt={5}>
             <Typography textAlign="center" fontSize="10px">
               Streamline your sales process with our Mobile POS system! Easily manage transactions,
