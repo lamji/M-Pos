@@ -350,36 +350,39 @@ const UtangTransactions: React.FC = () => {
                 </>
               ) : (
                 <>
-                  {selectedData?.items?.map((item: any) => (
-                    <Box
-                      key={item._id}
-                      sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        marginBottom: '5px',
-                        borderBottom: '1px solid gray',
-                      }}
-                    >
-                      <Box>
-                        <Typography fontSize={'10px'} fontWeight={700}>
-                          {item.name}
-                        </Typography>
-                        <Typography fontSize={'9px'}>
-                          {`Quantity: ${item.quantity} x ${formatCurrency(item.price)}`}
-                        </Typography>
-                        <Typography fontSize={'9px'}>
-                          Date: {moment(item.date).format('llll')}
-                        </Typography>
-                      </Box>
+                  {selectedData?.items
+                    ?.slice()
+                    .reverse()
+                    .map((item: any) => (
+                      <Box
+                        key={item._id}
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          marginBottom: '5px',
+                          borderBottom: '1px solid gray',
+                        }}
+                      >
+                        <Box>
+                          <Typography fontSize={'10px'} fontWeight={700}>
+                            {item.name}
+                          </Typography>
+                          <Typography fontSize={'9px'}>
+                            {`Quantity: ${item.quantity} x ${formatCurrency(item.price)}`}
+                          </Typography>
+                          <Typography fontSize={'9px'}>
+                            Date: {moment(item.date).format('llll')}
+                          </Typography>
+                        </Box>
 
-                      <Box>
-                        <Typography fontSize={'10px'}>
-                          {formatCurrency(item.quantity * item.price)}
-                        </Typography>
+                        <Box>
+                          <Typography fontSize={'10px'}>
+                            {formatCurrency(item.quantity * item.price)}
+                          </Typography>
+                        </Box>
                       </Box>
-                    </Box>
-                  ))}
+                    ))}
                 </>
               )}
             </Box>

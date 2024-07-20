@@ -24,7 +24,11 @@ export default async function handler(req, res) {
           utang = await Utang.find({});
           utang = utang.filter((entry) => entry.total > 0);
         }
-        utang.reverse().forEach((entry, index) => {
+
+        // Sort utang by date in descending order (latest items first)
+        utang.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        utang.forEach((entry, index) => {
           entry.number = index + 1;
         });
 
@@ -36,6 +40,7 @@ export default async function handler(req, res) {
       } catch (error) {
         res.status(500).json({ error: 'Failed to fetch utang' });
       }
+
       break;
 
     case 'POST':

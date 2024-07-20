@@ -15,8 +15,8 @@ export default function Nav() {
 
   enablePullToRefresh(true);
   statusBar({
-    style: 'light',
-    color: '#A0153E',
+    style: 'dark',
+    color: '#0A736C',
     overlay: true, //Only for android
   });
 
