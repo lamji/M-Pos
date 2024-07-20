@@ -11,10 +11,6 @@ import {
   Button,
   Box,
   InputAdornment,
-  MenuItem,
-  Select,
-  FormControl,
-  InputLabel,
 } from '@mui/material';
 import 'react-date-range/dist/styles.css'; // Import the styles
 import 'react-date-range/dist/theme/default.css'; // Import the theme
@@ -79,8 +75,6 @@ const EditableTable: React.FC = () => {
   const [items, setItems] = useState<Item[]>([]);
   const [editItem, setEditItem] = useState<Item | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>('');
-  const [sortField, setSortField] = useState<keyof Item>('name');
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const state = useSelector(getData);
   const dispatch = useDispatch();
 
