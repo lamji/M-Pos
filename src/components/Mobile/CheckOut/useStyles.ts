@@ -3,7 +3,6 @@ import { CSSProperties } from 'react';
 export const useStyles = () => {
   return {
     root: {
-      padding: '10px',
       borderRadius: '5px',
       display: 'flex',
       justifyContent: 'space-between',

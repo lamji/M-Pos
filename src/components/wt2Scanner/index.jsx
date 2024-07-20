@@ -1,7 +1,8 @@
 import React from 'react';
 import { Format, BarcodeScan } from 'webtonative/barcode';
 import { Box } from '@mui/material';
-import Image from 'next/image';
+// import Image from 'next/image';
+import DocumentScannerIcon from '@mui/icons-material/DocumentScanner';
 
 const BarcodeScannerComponent = ({ dataOut, size }) => {
   const handleScan = () => {
@@ -16,7 +17,8 @@ const BarcodeScannerComponent = ({ dataOut, size }) => {
   return (
     <div style={{ textAlign: 'center', marginTop: '-50px' }}>
       <Box sx={{ width: '100%', textAlign: 'center' }} onClick={handleScan}>
-        <Image src="/barcode.png" width={size} height={size} alt="Picture of the author" />
+        <DocumentScannerIcon style={{ fontSize: size }} />
+        {/* <Image src="/barcode.png" width={size} height={size} alt="Picture of the author" /> */}
       </Box>
     </div>
   );

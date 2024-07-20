@@ -284,27 +284,35 @@ const AddItemForm = () => {
                 </FormControl>
               </>
             )}
-            <Box sx={{ mt: '40px' }}>
+            <Box
+              sx={{
+                mt: '40px',
+                display: 'flex',
+                alignItems: 'center',
+                width: '100%',
+                marginBottom: '200px',
+              }}
+            >
               {/* <Html5QrcodePlugin
                 fps={10}
                 qrbox={250}
                 disableFlip={false}
                 qrCodeSuccessCallback={(decodedText) => handleBarcodeScanUpdate(decodedText)}
               /> */}
-
+              <Button
+                type="submit"
+                variant="contained"
+                color="primary"
+                disabled={formik.isSubmitting}
+                sx={{ width: '400px', marginTop: '-60px' }}
+              >
+                {formik.isSubmitting ? 'Submitting...' : checked ? 'Update' : 'Submit'}
+              </Button>
               <BarcodeScannerComponent
                 dataOut={(data) => handleBarcodeScanUpdate(data)}
-                size={100}
+                size={50}
               />
             </Box>
-            <Button
-              type="submit"
-              variant="contained"
-              color="primary"
-              disabled={formik.isSubmitting}
-            >
-              {formik.isSubmitting ? 'Submitting...' : checked ? 'Update' : 'Submit'}
-            </Button>
           </Box>
         </form>
 

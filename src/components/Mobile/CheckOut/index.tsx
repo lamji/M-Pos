@@ -15,7 +15,6 @@ import CloseIcon from '@mui/icons-material/Close';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import useViewModel from './useViewModel';
-
 import { useDispatch, useSelector } from 'react-redux';
 import { formatCurrency } from '@/src/common/helpers';
 import { getSelectedItems, setIsBackDropOpen } from '@/src/common/reducers/items';
@@ -219,11 +218,13 @@ export default function Checkout() {
         {/* Use total here */}
         {total > 0 && (
           <>
-            <Box>
-              <Button sx={classes.button} onClick={handleClickOpen}>
-                Check Out
-              </Button>
-            </Box>
+            <Button
+              onClick={handleClickOpen}
+              sx={{ ...classes.button, mx: '10px', background: 'white', color: 'black' }}
+              variant="contained"
+            >
+              Check Out
+            </Button>
           </>
         )}
       </Box>
@@ -261,7 +262,7 @@ export default function Checkout() {
                 sx={{
                   border: '2px solid',
                   borderColor: selectedOption === 'cash' ? '#0A736C' : 'gray',
-                  background: selectedOption === 'cash' ? '#91c991' : '#d1d1d1',
+                  background: selectedOption === 'cash' ? '#0A736C' : '#d1d1d1',
                   padding: '10px',
                   borderRadius: '10px',
                   width: '90px',
@@ -278,7 +279,7 @@ export default function Checkout() {
                 sx={{
                   border: '2px solid',
                   borderColor: selectedOption === 'utang' ? '#0A736C' : 'gray',
-                  background: selectedOption === 'utang' ? '#91c991' : '#d1d1d1',
+                  background: selectedOption === 'utang' ? '#0A736C' : '#d1d1d1',
                   padding: '10px',
                   borderRadius: '10px',
                   width: '90px',
@@ -302,7 +303,7 @@ export default function Checkout() {
                   alignItems: 'center',
                   border: '2px solid',
                   borderColor: selectedOption === 'partial' ? '#0A736C' : 'gray',
-                  background: selectedOption === 'partial' ? '#91c991' : '#d1d1d1',
+                  background: selectedOption === 'partial' ? '#0A736C' : '#d1d1d1',
                 }}
               >
                 Partial

@@ -1,12 +1,13 @@
-import { Box, IconButton, Typography } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import SimpleDialogDemo from '../Loader/backdrop';
 import { useRouter } from 'next/router';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import { clearItems } from '@/src/common/reducers/items';
 import { useDispatch } from 'react-redux';
 import { setData } from '@/src/common/reducers/data';
 import { setUtangData } from '@/src/common/reducers/utangData';
 import { enablePullToRefresh, statusBar } from 'webtonative';
+import BottomNav from '../Mobile/bottomNav';
+import Checkout from '../Mobile/CheckOut';
+import { useEffect } from 'react';
 
 export default function Nav() {
   const router = useRouter();
@@ -22,11 +23,7 @@ export default function Nav() {
 
   const refetch = async () => {
     try {
-      const [utang, items] = await Promise.all([
-        fetch('/api/utang'),
-        fetch('/api/items2'),
-        // fetch('https://api.example.com/endpoint3'),
-      ]);
+      const [utang, items] = await Promise.all([fetch('/api/utang'), fetch('/api/items2')]);
 
       if (!utang.ok || !items.ok) {
         throw new Error('One or more requests failed');
@@ -34,11 +31,6 @@ export default function Nav() {
 
       const data1 = await utang.json();
       const data2 = await items.json();
-      // const data3 = await response3.json();
-
-      // console.log('Data from endpoint1:', data1);
-      // console.log('Data from endpoint2:', data2);
-      // console.log('Data from endpoint3:', data3);
       dispatch(setData(data2));
       dispatch(setUtangData(data1));
 
@@ -49,21 +41,15 @@ export default function Nav() {
     }
   };
 
-  const handleBackClick = () => {
-    if (currentPath === '/pos') {
-      router.push('/');
-      dispatch(clearItems());
-    } else {
-      router.push('/');
-    }
+  useEffect(() => {
     refetch();
-  };
+  }, []);
 
   return (
     <div>
       <Box
         sx={{
-          padding: '20px 10px',
+          padding: '10px',
           background: '#0A736C',
           color: 'white',
           position: 'fixed',
@@ -76,20 +62,25 @@ export default function Nav() {
           justifyContent: 'center',
         }}
       >
-        {currentPath !== '/' && (
-          <IconButton onClick={handleBackClick} sx={{ position: 'absolute', left: '10px' }}>
-            <ArrowBackIcon sx={{ color: 'white' }} />
-          </IconButton>
-        )}
-        <Typography fontWeight={700}>
+        <Typography fontWeight={700} textAlign="center" mt={2}>
           {currentPath === '/dashboard' && 'Dashboard'}
           {currentPath === '/' && 'AKHIRO-POS'}
-          {currentPath === '/pos' && 'POS'}
+
           {currentPath === '/utang' && 'LIST'}
           {currentPath === '/add' && 'ADD / UPDATE'}
           {currentPath === '/payment' && 'PAYMENT'}
           {currentPath === '/admin' && 'ADMIN'}
         </Typography>
+        <Box
+          sx={{
+            textAlign: 'center',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          {currentPath === '/pos' && <Checkout />}
+        </Box>
       </Box>
       <SimpleDialogDemo />
       <Box
@@ -98,6 +89,7 @@ export default function Nav() {
           position: 'relative',
         }}
       ></Box>
+      <BottomNav />
     </div>
   );
 }

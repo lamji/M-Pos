@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
 import {
@@ -28,7 +27,6 @@ import {
   updateItemQuantity,
 } from '@/src/common/reducers/items';
 import { formatCurrency } from '@/src/common/helpers';
-import Nav from '../../Nav';
 import { getData, setData } from '@/src/common/reducers/data';
 import { getAllUtang } from '@/src/common/api/testApi';
 import { setUtangData } from '@/src/common/reducers/utangData';
@@ -150,21 +148,10 @@ const ComboBox = () => {
 
   return (
     <>
-      <Nav>
-        {/* <Box display="flex" alignItems="center">
-          <IconButton onClick={handleClearItems}>
-            <ArrowBackIcon sx={{ color: 'white' }} />
-          </IconButton>
-          <Typography variant="h6" fontWeight={700}>
-            SCAN ITEM
-          </Typography>
-        </Box> */}
-      </Nav>
       <Box
         sx={{
           padding: '20px',
           paddingBottom: '60px',
-          position: 'relative',
           borderRadius: 10,
           background: 'white',
           marginTop: '-130px',
@@ -183,7 +170,7 @@ const ComboBox = () => {
           />
         )} */}
 
-        <Box>
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <Autocomplete
             disablePortal
             id="combo-box-demo"
@@ -208,6 +195,7 @@ const ComboBox = () => {
               <TextField
                 {...params}
                 label="Search Item"
+                size="small"
                 InputProps={{
                   ...params.InputProps,
                   endAdornment: (
@@ -224,12 +212,12 @@ const ComboBox = () => {
               />
             )}
           />
-        </Box>
-        <Box sx={{ mt: '60px' }}>
-          <BarcodeScannerComponent dataOut={(data) => onNewScanResult(data)} size={150} />
+          <Box sx={{ marginTop: '50px', marginLeft: '20px' }}>
+            <BarcodeScannerComponent dataOut={(data) => onNewScanResult(data)} size={50} />
+          </Box>
         </Box>
 
-        <Typography mt={4} sx={{ marginBottom: '-5px' }} fontWeight={700}>
+        <Typography mt={1} sx={{ marginBottom: '-5px' }} fontWeight={700}>
           Scanned Items
         </Typography>
         <List sx={{ marginTop: '10px', height: '50vh', overflow: 'scroll' }}>

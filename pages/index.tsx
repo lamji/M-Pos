@@ -1,4 +1,4 @@
-import { Box, Button, Typography } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import Nav from '@/src/components/Nav';
@@ -36,56 +36,6 @@ export default function Home() {
           <Box>
             <Box sx={{ width: '100%', textAlign: 'center' }} onClick={() => router.push('/pos')}>
               <Image src="/logoscan2.png" width={300} height={200} alt="Picture of the author" />
-            </Box>
-
-            <Box
-              sx={{
-                width: '100%',
-              }}
-            >
-              <Button
-                variant="contained"
-                onClick={() => router.push('/utang')}
-                sx={{
-                  textAlign: 'center',
-                  width: '100%',
-                  mb: '5px',
-                }}
-              >
-                LISTAHAN
-              </Button>
-              <Button
-                variant="contained"
-                onClick={() => router.push('/add')}
-                sx={{
-                  textAlign: 'center',
-                  width: '100%',
-                  mb: '5px',
-                }}
-              >
-                ADD ITEM
-              </Button>
-              <Button
-                variant="contained"
-                onClick={() => router.push('/dashboard')}
-                sx={{
-                  textAlign: 'center',
-                  width: '100%',
-                  mb: '5px',
-                }}
-              >
-                DASHBOARD
-              </Button>
-              <Button
-                variant="contained"
-                onClick={() => router.push('/admin')}
-                sx={{
-                  textAlign: 'center',
-                  width: '100%',
-                }}
-              >
-                ITEMS
-              </Button>
             </Box>
           </Box>
           <Box p={2} pt={5}>

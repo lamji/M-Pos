@@ -241,7 +241,6 @@ export default function Dashboard() {
                   ?.map((transaction: any, transactionIdx: number) => (
                     <Box key={transactionIdx}>
                       {transaction?.items?.map((item: any, itemIdx: number) => {
-                        console.log(item);
                         return (
                           <Box
                             key={itemIdx}
