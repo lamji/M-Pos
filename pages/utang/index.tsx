@@ -129,6 +129,7 @@ const UtangTransactions: React.FC = () => {
           handleClose();
         }
       } catch (error) {
+        alert(JSON.stringify(error));
         console.error('Error:', error);
         setIsLoading(false);
         dispatch(setIsBackDropOpen(false));
@@ -234,11 +235,11 @@ const UtangTransactions: React.FC = () => {
         </Box>
         <Box
           sx={{
-            height: '60vh',
             width: '100%',
             borderRadius: '0px 0px 10px 10px',
             border: '1px solid #ccd2d7',
             overflow: 'scroll',
+            marginBottom: '100px',
           }}
         >
           {isLoading ? (
@@ -249,7 +250,7 @@ const UtangTransactions: React.FC = () => {
                   flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  height: '50vh', // Full viewport height
+
                   padding: '0 20px', // Optional: Add some horizontal padding
                   gap: '10px',
                 }}
@@ -282,11 +283,11 @@ const UtangTransactions: React.FC = () => {
             })
           )}
         </Box>
-        <Box display="flex" alignItems="center" justifyContent="end">
+        {/* <Box display="flex" alignItems="center" justifyContent="end">
           <Typography fontWeight={700} py={2}>
             Total: {formatCurrency(transactions?.totalUtang ?? 0)}
           </Typography>
-        </Box>
+        </Box> */}
 
         <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
           {type === 'adjustment' ? (

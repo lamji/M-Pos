@@ -96,7 +96,6 @@ export default function Checkout() {
         _id: values._id || undefined,
       };
       try {
-        console.log('formikUtang', transactionData);
         const data = await postTransaction(transactionData);
 
         if (data) {
@@ -110,7 +109,7 @@ export default function Checkout() {
           dispatch(setIsBackDropOpen(false));
         }
       } catch (error) {
-        console.error('Error:', error);
+        alert(JSON.stringify(error, null, 2));
         setIsLoading(false);
         dispatch(setIsBackDropOpen(false));
       }

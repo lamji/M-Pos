@@ -46,11 +46,11 @@ export default async function handler(req, res) {
     case 'POST':
       try {
         const { items, name, _id, payment } = req.body;
-        const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+        const total = items && items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
         // console.log(items, name, _id, payment);
         // // Calculate the total amount based on items
-        // const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-
+        // const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
         if (_id) {
           // If _id is provided, determine if it is a payment or an update
           let utang = await Utang.findById(_id);
@@ -63,6 +63,7 @@ export default async function handler(req, res) {
             // utang.remainingBalance -= payment.amount;
             const totalDb = utang.total;
             const type = payment.amount >= totalDb ? 'full' : 'partial';
+
             utang.transactions.push({ date: new Date(), amount: payment.amount });
             if (type === 'full') {
               // If full payment, empty the items array
@@ -108,6 +109,7 @@ export default async function handler(req, res) {
           res.status(201).json(newUtang);
         }
       } catch (error) {
+        console.log(error);
         res.status(500).json({ error: 'Failed to add/update utang' });
       }
       break;

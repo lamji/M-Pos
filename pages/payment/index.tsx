@@ -72,7 +72,7 @@ const AmountForm = () => {
       } catch (error) {
         Swal.fire({
           title: 'Error!',
-          text: 'Failed to add payment',
+          text: `Failed to add payment`,
           icon: 'error',
           confirmButtonText: 'OK',
         });
