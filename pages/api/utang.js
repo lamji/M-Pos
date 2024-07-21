@@ -36,7 +36,15 @@ export default async function handler(req, res) {
           return sum + entry.total;
         }, 0);
 
-        res.status(200).json({ utang, totalUtang });
+        const utangList = await await Utang.find({});
+        const listUtangName = utangList.map((item) => {
+          return {
+            _id: item._id,
+            personName: item.personName,
+          };
+        });
+
+        res.status(200).json({ utang, totalUtang, listUtangName });
       } catch (error) {
         res.status(500).json({ error: 'Failed to fetch utang' });
       }
@@ -46,7 +54,6 @@ export default async function handler(req, res) {
     case 'POST':
       try {
         const { items, name, _id, payment } = req.body;
-        const total = items && items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
         // console.log(items, name, _id, payment);
         // // Calculate the total amount based on items
@@ -54,6 +61,7 @@ export default async function handler(req, res) {
         if (_id) {
           // If _id is provided, determine if it is a payment or an update
           let utang = await Utang.findById(_id);
+          var change = 0;
           if (!utang) {
             return res.status(404).json({ error: 'Utang not found' });
           }
@@ -66,6 +74,7 @@ export default async function handler(req, res) {
 
             utang.transactions.push({ date: new Date(), amount: payment.amount });
             if (type === 'full') {
+              change = utang.total;
               // If full payment, empty the items array
               utang.items = [];
               utang.total = 0;
@@ -85,6 +94,7 @@ export default async function handler(req, res) {
               utang.remainingBalance = remainingBalance;
             }
           } else {
+            const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
             // Update the existing utang
             utang.items = items; // Update the items list
             utang.total = total; // Recalculate the total amount
@@ -92,10 +102,12 @@ export default async function handler(req, res) {
             utang.remainingBalance =
               total - utang.transactions.reduce((sum, transaction) => sum + transaction.amount, 0);
           }
+
           await utang.save();
 
-          res.status(200).json({ utang: 'success' });
+          res.status(200).json({ utang: 'success', change: change });
         } else {
+          const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
           // Create a new utang
           const remainingBalance = total;
           const newUtang = new Utang({

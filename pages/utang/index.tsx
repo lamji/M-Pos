@@ -159,6 +159,7 @@ const UtangTransactions: React.FC = () => {
     try {
       const data = await getAllUtang();
       if (data) {
+        console.log('data ===============>', data);
         dispatch(setUtangData(data));
         dispatch(setUtangTotal(100 as any));
       }
@@ -171,6 +172,8 @@ const UtangTransactions: React.FC = () => {
     updateUtang();
   }, []);
 
+  console.log(transactions);
+
   return (
     <>
       <Nav></Nav>
@@ -179,7 +182,7 @@ const UtangTransactions: React.FC = () => {
         <Autocomplete
           disablePortal
           id="combo-box-demo"
-          options={transactions?.utang || []}
+          options={transactions?.listUtangName || []}
           getOptionLabel={(option: any) => option?.personName}
           sx={{
             width: '100%',

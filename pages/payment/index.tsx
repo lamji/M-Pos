@@ -60,7 +60,7 @@ const AmountForm = () => {
         if (data) {
           Swal.fire({
             title: 'Success!',
-            text: 'Payment added successfully',
+            text: `${data.change > 0 ? 'Change:' + formatCurrency(data.change) : 'Paid'}`,
             icon: 'success',
             confirmButtonText: 'OK',
           });
@@ -72,7 +72,7 @@ const AmountForm = () => {
       } catch (error) {
         Swal.fire({
           title: 'Error!',
-          text: `Failed to add payment`,
+          text: `Failed to add payment ${error}`,
           icon: 'error',
           confirmButtonText: 'OK',
         });

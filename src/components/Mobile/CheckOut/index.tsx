@@ -58,15 +58,18 @@ export default function Checkout() {
       setIsLoading(true);
       try {
         const data = await postTransaction(transactionData);
-        setAllItems(data.data);
-        handleClearItems();
-        setReceiptOpen(true);
-        handleClose();
-        setIsLoading(false);
-        resetForm();
-        dispatch(setIsBackDropOpen(false));
+        if (data) {
+          setAllItems(data.data);
+          handleClearItems();
+          setReceiptOpen(true);
+          handleClose();
+          setIsLoading(false);
+          resetForm();
+          dispatch(setIsBackDropOpen(false));
+        }
       } catch (error) {
         console.error('Error:', error);
+        alert(JSON.stringify(error, null, 2));
         setIsLoading(false);
         dispatch(setIsBackDropOpen(false));
       }
@@ -97,7 +100,6 @@ export default function Checkout() {
       };
       try {
         const data = await postTransaction(transactionData);
-
         if (data) {
           setAllItems(data.data);
           setReceiptOpen(true);
@@ -167,6 +169,7 @@ export default function Checkout() {
           dispatch(setIsBackDropOpen(false));
         }
       } catch (error) {
+        alert(JSON.stringify(error, null, 2));
         console.error('Error:', error);
         dispatch(setIsBackDropOpen(false));
       }
@@ -352,7 +355,7 @@ export default function Checkout() {
                             }}
                             disablePortal
                             id="combo-box-demo"
-                            options={allItemsUtang.utang}
+                            options={allItemsUtang.listUtangName}
                             getOptionLabel={(option: any) => option?.personName}
                             sx={{ width: 300, marginBottom: 2 }}
                             renderInput={(params) => (
@@ -472,7 +475,7 @@ export default function Checkout() {
                         }}
                         disablePortal
                         id="combo-box-demo"
-                        options={allItemsUtang.utang}
+                        options={allItemsUtang.listUtangName}
                         getOptionLabel={(option: any) => option?.personName}
                         sx={{ width: '100%', marginBottom: 2 }}
                         renderInput={(params) => (

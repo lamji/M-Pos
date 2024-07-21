@@ -4,6 +4,7 @@ import Transaction from '../../src/common/app/model/transaction';
 import Utang from '../../src/common/app/model/utang';
 import timeZone from 'moment-timezone';
 import { updateItem, getItemQuantities, getTopFastMovingItems } from '../../utils/updateItem';
+import moment from 'moment/moment';
 
 export default async function handler(req, res) {
   const { method, body, query } = req;
@@ -23,6 +24,8 @@ export default async function handler(req, res) {
           const transactionsToday = await Transaction.find({
             date: { $gte: today, $lt: tomorrow },
           });
+
+          console.log(transactionsToday);
 
           const transactionsYesterday = await Transaction.find({
             date: { $gte: yesterday, $lt: today },
@@ -159,7 +162,7 @@ export default async function handler(req, res) {
             // Update the personName, cash, total, remainingBalance, and transactionType fields
             utangRecord.personName = personName;
             utangRecord.cash = cash;
-            utangRecord.total = utangRecord.remainingBalance; // This line is technically redundant but keeps the clarity
+            utangRecord.total += total; // This line is technically redundant but keeps the clarity
             utangRecord.remainingBalance = utangRecord.remainingBalance; // Ensure this is updated
             utangRecord.transactionType = type;
             utangRecord.date = new Date();
@@ -181,13 +184,12 @@ export default async function handler(req, res) {
             await utangRecord.save();
             await newTransaction.save();
 
-            // Send the response
+            // // Send the response
             return res.status(201).json({
               data: newTransaction,
               total: returnTotal,
               remainingBalance: remainingBalance,
             });
-            // return res.status(201).json({ test: 'Utang person name not found' });
           } else {
             // Create a new 'utang' record
             const newUtangRecord = new Utang({
@@ -219,6 +221,7 @@ export default async function handler(req, res) {
               total: returnTotal,
               remainingBalance: remainingBalance,
             });
+            // return res.status(201).json({ test: 'Utang person name not found' });
           }
         }
 
@@ -230,19 +233,28 @@ export default async function handler(req, res) {
               return res.status(404).json({ error: 'Utang person name not found' });
             }
 
+            const utangToAdd = total - partialAmount;
+
             // Add the incoming items to the existing items array
-            utangRecord.items = [...utangRecord.items, ...items];
+            const partialItems = [
+              {
+                name: 'Balance for ' + moment(new Date()).format('LLL'),
+                id: items[0].id,
+                price: utangToAdd,
+                quantity: 1,
+              },
+            ];
+            utangRecord.items = [...utangRecord.items, ...partialItems];
 
             // Recalculate the total amount including the incoming items and the new total to add
             const newTotal = utangRecord.total;
 
-            const utangToAdd = total - partialAmount;
             utangRecord.total = newTotal + utangToAdd; // Update total to include the new amount
 
             // Recalculate the remaining balance based on the new total and previous payments
-            utangRecord.remainingBalance =
-              utangRecord.total -
-              utangRecord.transactions.reduce((sum, transaction) => sum + transaction.amount, 0);
+            utangRecord.remainingBalance = total - partialAmount;
+            // utangRecord.total -
+            // utangRecord.transactions.reduce((sum, transaction) => sum + transaction.amount, 0);
 
             // Update the personName, cash, transactionType fields
             utangRecord.personName = personName;
@@ -250,21 +262,23 @@ export default async function handler(req, res) {
             utangRecord.transactionType = type;
 
             // Save the updated 'utang' record
-            await utangRecord.save();
-
+            // await utangRecord.save();
+            const newUtangToAdd = total - partialAmount;
             // Create and save the new transaction record for the partial payment
             const transactionData = {
               items,
               personName,
               cash,
               total: partialAmount, // The amount paid in this transaction
-              remainingBalance: remainingBalance, // Updated remaining balance
+              remainingBalance: newUtangToAdd, // Updated remaining balance
               partialAmount,
-              change,
+              change: change <= 0 ? 0 : change,
               transactionType: type,
             };
 
             const newTransaction = new Transaction(transactionData);
+
+            await newTransaction.save();
             await newTransaction.save();
 
             // Send the response
@@ -295,11 +309,12 @@ export default async function handler(req, res) {
               total: partialAmount, // The amount paid in this transaction
               remainingBalance: utangToAdd, // Remaining balance to be paid later
               partialAmount,
-              change,
+              change: change <= 0 ? 0 : change,
               transactionType: type,
             };
 
             const newTransaction = new Transaction(transactionData);
+
             await newTransaction.save();
 
             return res.status(201).json({
