@@ -24,6 +24,7 @@ import MuiAccordion, { AccordionProps } from '@mui/material/Accordion';
 import MuiAccordionSummary, { AccordionSummaryProps } from '@mui/material/AccordionSummary';
 import MuiAccordionDetails from '@mui/material/AccordionDetails';
 import Typography from '@mui/material/Typography';
+import Barcode from 'react-barcode';
 
 interface Item {
   _id: string;
@@ -228,35 +229,6 @@ const EditableTable: React.FC = () => {
             {filteredItems.map((item, idx) => {
               return (
                 <>
-                  {/* <TableRow key={item._id}>
-                    <TableCell>
-                      <Typography sx={{ width: '170px', fontSize: '12px' }}>{item.name}</Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography sx={{ width: '170px', fontSize: '12px' }}>
-                        {formatCurrency(item.price)}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>{new Date(item.date).toLocaleDateString()}</TableCell>
-                    <TableCell>
-                      <Typography sx={{ width: '70px', fontSize: '12px' }}>
-                        {item.quantity || 0}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography sx={{ width: '170px', fontSize: '12px' }}>
-                        {formatCurrency(item.regularPrice || 0)}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Button
-                        sx={{ textTransform: 'capitalize' }}
-                        onClick={() => setEditItem(item)}
-                      >
-                        Edit
-                      </Button>
-                    </TableCell>
-                  </TableRow> */}
                   <Accordion
                     expanded={expanded === `panel${idx}`}
                     onChange={handleChangeAccordion(`panel${idx}`)}
@@ -265,6 +237,7 @@ const EditableTable: React.FC = () => {
                       <Typography>{item.name}</Typography>
                     </AccordionSummary>
                     <AccordionDetails>
+                      <Barcode value={item.barcode} />
                       <Typography sx={{ fontSize: '12px' }}>
                         <strong>Product Name: </strong>
                         {item.name}

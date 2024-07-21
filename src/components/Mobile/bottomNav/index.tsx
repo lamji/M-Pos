@@ -66,7 +66,7 @@ const BottomNav = () => {
         icon={<HomeIcon />}
         sx={{
           '& .Mui-selected': {
-            fontSize: '0.85rem',
+            fontSize: '10px !important',
           },
           '& .MuiBottomNavigationAction-label': {
             fontSize: '10px',
@@ -78,7 +78,7 @@ const BottomNav = () => {
         icon={<GridViewIcon />}
         sx={{
           '& .Mui-selected': {
-            fontSize: '10px',
+            fontSize: '10px !important',
           },
           '& .MuiBottomNavigationAction-label': {
             fontSize: '10px',
@@ -90,19 +90,19 @@ const BottomNav = () => {
         icon={<PointOfSaleIcon />}
         sx={{
           '& .Mui-selected': {
-            fontSize: '10px',
+            fontSize: '10px !important',
           },
           '& .MuiBottomNavigationAction-label': {
             fontSize: '10px',
           },
-        }} // Adjust font size here
+        }} // Adjust font size here/ Adjust font size here
       />
       <BottomNavigationAction
         label="Add Item"
         icon={<PostAddIcon />}
         sx={{
           '& .Mui-selected': {
-            fontSize: '10px',
+            fontSize: '10px !important',
           },
           '& .MuiBottomNavigationAction-label': {
             fontSize: '10px',

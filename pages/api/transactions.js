@@ -2,82 +2,23 @@
 import { connectToDatabase } from '../../src/common/app/lib/mongodb';
 import Transaction from '../../src/common/app/model/transaction';
 import Utang from '../../src/common/app/model/utang';
-import Item from '../../src/common/app/model/Item';
+import timeZone from 'moment-timezone';
+import { updateItem, getItemQuantities, getTopFastMovingItems } from '../../utils/updateItem';
 
 export default async function handler(req, res) {
   const { method, body, query } = req;
 
-  const getTopFastMovingItems = async () => {
-    // Calculate the date one week ago from today
-    const oneWeekAgo = new Date();
-    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-
-    // Retrieve all transactions within the last week
-    const allTransactions = await Transaction.find({
-      date: { $gte: oneWeekAgo },
-    });
-
-    // Aggregate items and calculate their total quantities
-    const itemMap = new Map();
-
-    allTransactions.forEach((transaction) => {
-      transaction.items.forEach((item) => {
-        if (itemMap.has(item.name)) {
-          itemMap.set(item.name, itemMap.get(item.name) + item.quantity);
-        } else {
-          itemMap.set(item.name, item.quantity);
-        }
-      });
-    });
-
-    // Convert map to array and sort by quantity in descending order
-    const sortedItems = Array.from(itemMap.entries()).sort((a, b) => b[1] - a[1]);
-
-    // Get top 5 fast-moving items with their names and quantities
-    const top5Items = sortedItems.slice(0, 20).map(([name, quantity]) => ({ name, quantity }));
-
-    return top5Items;
-  };
-
-  const getItemQuantities = async (top5Items) => {
-    // Extract item names from top5Items
-    const itemNames = top5Items.map((item) => item.name);
-
-    // Retrieve items from the Item collection based on item names
-    const items = await Item.find({ name: { $in: itemNames } }).select('name _id quantity');
-
-    // Create a map to easily access quantities by item name
-    const itemQuantityMap = new Map();
-    items.forEach((item) => {
-      itemQuantityMap.set(item.name, { _id: item._id, quantity: item.quantity || 0 });
-    });
-
-    // Update top5Items with the quantities from the database
-    return top5Items.map((item) => {
-      console.log(item);
-      const sold = item.quantity;
-      return {
-        ...item,
-        ...itemQuantityMap.get(item.name),
-        sold,
-      };
-    });
-  };
   await connectToDatabase();
 
   switch (method) {
     case 'GET':
       try {
         if (query.sales) {
-          // Retrieve sales from yesterday and today
-          const today = new Date();
-          today.setHours(0, 0, 0, 0); // Set to the beginning of today
+          const today = timeZone().tz('Asia/Manila').startOf('day'); // Set to the beginning of today in PH time zone
 
-          const yesterday = new Date(today);
-          yesterday.setDate(today.getDate() - 1); // Set to yesterday
+          const yesterday = timeZone(today).subtract(1, 'days'); // Set to the beginning of yesterday in PH time zone
 
-          const tomorrow = new Date(today);
-          tomorrow.setDate(today.getDate() + 1); // Set to tomorrow
+          const tomorrow = timeZone(today).add(1, 'days'); // Set to the beginning of tomorrow in PH time zone
 
           const transactionsToday = await Transaction.find({
             date: { $gte: today, $lt: tomorrow },
@@ -187,7 +128,7 @@ export default async function handler(req, res) {
     case 'POST':
       try {
         const { items, personName, cash, total, partialAmount, type, _id, payment } = body;
-
+        updateItem(req);
         // Calculate remaining balance and change
         const change = cash ? cash - total : undefined;
         const remainingBalance = partialAmount ? total - partialAmount : undefined;
@@ -221,9 +162,7 @@ export default async function handler(req, res) {
             utangRecord.total = utangRecord.remainingBalance; // This line is technically redundant but keeps the clarity
             utangRecord.remainingBalance = utangRecord.remainingBalance; // Ensure this is updated
             utangRecord.transactionType = type;
-
-            // Save the updated 'utang' record
-            // await utangRecord.save();
+            utangRecord.date = new Date();
 
             // Create and save the new transaction record
             const transactionData = {
@@ -238,6 +177,7 @@ export default async function handler(req, res) {
             };
 
             const newTransaction = new Transaction(transactionData);
+
             await utangRecord.save();
             await newTransaction.save();
 
@@ -247,6 +187,7 @@ export default async function handler(req, res) {
               total: returnTotal,
               remainingBalance: remainingBalance,
             });
+            // return res.status(201).json({ test: 'Utang person name not found' });
           } else {
             // Create a new 'utang' record
             const newUtangRecord = new Utang({

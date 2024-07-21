@@ -96,6 +96,7 @@ export default function Checkout() {
         _id: values._id || undefined,
       };
       try {
+        console.log('formikUtang', transactionData);
         const data = await postTransaction(transactionData);
 
         if (data) {

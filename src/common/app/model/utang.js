@@ -23,6 +23,7 @@ const utangSchema = new mongoose.Schema({
   total: { type: Number, required: true },
   remainingBalance: { type: Number, required: true },
   transactions: [transactionSchema],
+  date: { type: Date, default: Date.now },
 });
 
 const Utang = mongoose.models.Utang || mongoose.model('Utang', utangSchema);

@@ -6,7 +6,7 @@ const transactionSchema = new mongoose.Schema({
     required: true,
   },
   items: {
-    type: [{ id: String, name: String, quantity: Number, price: Number }], // Update id to String
+    type: [{ id: String, name: String, quantity: Number, price: Number }],
     required: true,
   },
   date: {
@@ -54,4 +54,4 @@ transactionSchema.pre('save', function (next) {
 });
 
 const Transaction = mongoose.models.Transaction || mongoose.model('Transaction', transactionSchema);
-module.exports = Transaction;
+export default Transaction;

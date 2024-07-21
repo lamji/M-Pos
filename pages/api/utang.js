@@ -25,8 +25,8 @@ export default async function handler(req, res) {
           utang = utang.filter((entry) => entry.total > 0);
         }
 
-        // Sort utang by date in descending order (latest items first)
-        utang.sort((a, b) => new Date(b.date) - new Date(a.date));
+        // Sort utang by date in ascending order (earliest items first)
+        utang.sort((a, b) => new Date(a.date) - new Date(b.date));
 
         utang.forEach((entry, index) => {
           entry.number = index + 1;

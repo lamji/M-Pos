@@ -7,9 +7,9 @@ export const authPersistConfig = {
 };
 
 export const itemsPersistConfig = {
-  key: 'items',
+  key: 'selectedItems',
   storage,
-  whitelist: ['user'],
+  whitelist: ['items', 'total'],
 };
 
 export const dataPersistConfig = {

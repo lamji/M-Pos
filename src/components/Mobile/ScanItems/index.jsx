@@ -31,6 +31,7 @@ import { getData, setData } from '@/src/common/reducers/data';
 import { getAllUtang } from '@/src/common/api/testApi';
 import { setUtangData } from '@/src/common/reducers/utangData';
 import BarcodeScannerComponent from '../../wt2Scanner/index';
+import Swal from 'sweetalert2';
 
 const ComboBox = () => {
   const dispatch = useDispatch();
@@ -74,8 +75,18 @@ const ComboBox = () => {
   // };
 
   const handleAddItem = (event, value) => {
+    console.log(value);
     if (value) {
-      dispatch(addItem({ id: value.id, name: value.name, price: value.price }));
+      if (value.quantity <= 0) {
+        Swal.fire({
+          title: 'Error!',
+          text: `Item ${value.name} is out of stock`,
+          icon: 'error',
+          confirmButtonText: 'OK',
+        });
+      } else {
+        dispatch(addItem({ id: value.id, name: value.name, price: value.price, _id: value._id }));
+      }
     }
   };
 
@@ -120,7 +131,23 @@ const ComboBox = () => {
 
       if (data.length > 0) {
         const matchedItem = data[0];
-        dispatch(addItem({ id: matchedItem.id, name: matchedItem.name, price: matchedItem.price }));
+        if (matchedItem?.quantity <= 0) {
+          Swal.fire({
+            title: 'Error!',
+            text: `Item ${matchedItem.name} is out of stock`,
+            icon: 'error',
+            confirmButtonText: 'OK',
+          });
+        } else {
+          dispatch(
+            addItem({
+              id: matchedItem.id,
+              name: matchedItem.name,
+              price: matchedItem.price,
+              _id: matchedItem?._id,
+            })
+          );
+        }
       } else {
         toast.error('Barcode not found');
       }
