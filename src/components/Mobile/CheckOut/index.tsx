@@ -469,7 +469,6 @@ export default function Checkout() {
                     <>
                       <Autocomplete
                         onChange={(event, value) => {
-                          console.log('value', value);
                           formikPartial.setFieldValue('_id', value?._id ?? ''); // Set _id
                           formikPartial.setFieldValue('personName', value?.personName ?? ''); // Set personName
                         }}

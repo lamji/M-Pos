@@ -4,6 +4,7 @@ const ItemSchema = new mongoose.Schema({
   id: { type: String, required: true },
   name: { type: String, required: true },
   price: { type: Number, required: true },
+  partial: { type: Number, required: false },
   barcode: { type: String, required: true },
   quantity: { type: Number, required: false }, // remaining stocks
   regularPrice: { type: Number, required: false }, // regular price

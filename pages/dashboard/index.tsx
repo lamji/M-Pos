@@ -231,6 +231,7 @@ export default function Dashboard() {
             sx={{
               background: '#F6F5F2',
               borderRadius: 2,
+              marginBottom: '100px',
             }}
           >
             {data ? (
@@ -259,6 +260,12 @@ export default function Dashboard() {
                               </Typography>
                               <Typography sx={{ width: '100px', color: 'gray' }} fontSize="10px">
                                 {moment(transaction.date).format('LTS')}
+                              </Typography>
+                              <Typography
+                                sx={{ width: '100px', color: 'gray', textTransform: 'capitalize' }}
+                                fontSize="10px"
+                              >
+                                {transaction.transactionType}
                               </Typography>
                             </Box>
 

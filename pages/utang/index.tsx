@@ -151,6 +151,7 @@ const UtangTransactions: React.FC = () => {
     dispatch(setPayment(props as any));
     router.push('/payment');
   };
+
   useEffect(() => {
     setTransactions(state);
   }, [state]);
@@ -159,7 +160,6 @@ const UtangTransactions: React.FC = () => {
     try {
       const data = await getAllUtang();
       if (data) {
-        console.log('data ===============>', data);
         dispatch(setUtangData(data));
         dispatch(setUtangTotal(100 as any));
       }
@@ -171,8 +171,6 @@ const UtangTransactions: React.FC = () => {
   useEffect(() => {
     updateUtang();
   }, []);
-
-  console.log(transactions);
 
   return (
     <>

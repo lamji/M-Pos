@@ -28,7 +28,6 @@ const ResultContainerTable = ({ data }) => {
       </thead>
       <tbody>
         {results.map((result, i) => {
-          console.log(result);
           return (
             <tr key={i}>
               <td>{typeof result.decodedText}</td>

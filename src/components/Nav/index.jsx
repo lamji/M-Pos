@@ -1,19 +1,16 @@
 import { Box, Typography } from '@mui/material';
 import SimpleDialogDemo from '../Loader/backdrop';
 import { useRouter } from 'next/router';
-import { useDispatch, useSelector } from 'react-redux';
-import { setData } from '@/src/common/reducers/data';
-import { getUtangData, setUtangData } from '@/src/common/reducers/utangData';
+import { useSelector } from 'react-redux';
+import { getUtangData } from '@/src/common/reducers/utangData';
 import { enablePullToRefresh, statusBar } from 'webtonative';
 import BottomNav from '../Mobile/bottomNav';
 import Checkout from '../Mobile/CheckOut';
-import { useEffect } from 'react';
 import { formatCurrency } from '@/src/common/helpers';
 
 export default function Nav() {
   const router = useRouter();
   const currentPath = router.pathname;
-  const dispatch = useDispatch();
   const state = useSelector(getUtangData);
 
   enablePullToRefresh(true);
@@ -22,30 +19,6 @@ export default function Nav() {
     color: '#0A736C',
     overlay: true, //Only for android
   });
-
-  const refetch = async () => {
-    try {
-      const [utang, items] = await Promise.all([fetch('/api/utang'), fetch('/api/items2')]);
-
-      if (!utang.ok || !items.ok) {
-        throw new Error('One or more requests failed');
-      }
-
-      const data1 = await utang.json();
-      const data2 = await items.json();
-      dispatch(setData(data2));
-      dispatch(setUtangData(data1));
-
-      // Handle the fetched data as needed
-      // For example, updating state if you are using a framework/library like React
-    } catch (error) {
-      console.error('Failed to refetch APIs:', error);
-    }
-  };
-
-  useEffect(() => {
-    refetch();
-  }, []);
 
   return (
     <div>
