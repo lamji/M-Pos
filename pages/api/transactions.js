@@ -25,8 +25,6 @@ export default async function handler(req, res) {
             date: { $gte: today, $lt: tomorrow },
           });
 
-          console.log(transactionsToday);
-
           const transactionsYesterday = await Transaction.find({
             date: { $gte: yesterday, $lt: today },
           });
