@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Table,
   TableBody,
@@ -25,6 +25,9 @@ import MuiAccordionSummary, { AccordionSummaryProps } from '@mui/material/Accord
 import MuiAccordionDetails from '@mui/material/AccordionDetails';
 import Typography from '@mui/material/Typography';
 import Barcode from 'react-barcode';
+import Pagination from '@mui/material/Pagination';
+import Stack from '@mui/material/Stack';
+import debounce from 'lodash/debounce';
 
 interface Item {
   _id: string;
@@ -70,14 +73,22 @@ const AccordionDetails = styled(MuiAccordionDetails)(({ theme }) => ({
   padding: theme.spacing(2),
   borderTop: '1px solid rgba(0, 0, 0, .125)',
 }));
-
-const EditableTable: React.FC = () => {
-  const [expanded, setExpanded] = React.useState<string | false>('panel1');
+interface Props {
+  handlePagination: (i: number) => void;
+}
+const EditableTable = ({ handlePagination }: Props) => {
+  const [expanded, setExpanded] = React.useState<string | false>('');
   const [items, setItems] = useState<Item[]>([]);
+  const [items2, setItems2] = useState<Item[]>([]);
   const [editItem, setEditItem] = useState<Item | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const state = useSelector(getData);
   const dispatch = useDispatch();
+  const [page, setPage] = React.useState(1);
+  const handleChangePages = (event: React.ChangeEvent<unknown>, value: number) => {
+    setPage(value);
+    handlePagination(value);
+  };
 
   const handleChangeAccordion =
     (panel: string) => (event: React.SyntheticEvent, newExpanded: boolean) => {
@@ -135,12 +146,49 @@ const EditableTable: React.FC = () => {
     }
   };
 
-  const filteredItems = items.filter((item) =>
-    item.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // const filteredItems = items?.filter((item) =>
+  //   item.name.toLowerCase().includes(searchTerm.toLowerCase())
+  // );
+  const fetchItems = async (searchTerm: string) => {
+    try {
+      const endpoint = `/api/items2?&name=${searchTerm}`;
+      const response = await fetch(endpoint);
+      if (response.ok) {
+        const data = await response.json();
 
+        setItems2(data);
+      } else {
+        Swal.fire({
+          title: 'Error!',
+          text: 'Failed to fetch items',
+          icon: 'error',
+          confirmButtonText: 'OK',
+        });
+      }
+    } catch (error) {
+      Swal.fire({
+        title: 'Error!',
+        text: `${JSON.stringify(error)}`,
+        icon: 'error',
+        confirmButtonText: 'OK',
+      });
+    }
+  };
+
+  console.log(items);
+  const dataItem = searchTerm ? items2 : items;
+
+  // Debounce the fetchItems function
+  const debouncedFetchItems = useCallback(debounce(fetchItems, 500), [page]);
+
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const searchTerm = e.target.value;
+    setSearchTerm(searchTerm);
+    debouncedFetchItems(searchTerm);
+  };
+  // console.log(state);
   useEffect(() => {
-    setItems(state);
+    setItems(state.items);
   }, [state]);
 
   return (
@@ -151,7 +199,7 @@ const EditableTable: React.FC = () => {
           variant="outlined"
           size="small"
           value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          onChange={(e: any) => handleSearch(e)}
           sx={{ mr: 2 }}
           InputProps={{
             startAdornment: <InputAdornment position="start">🔍</InputAdornment>,
@@ -188,7 +236,7 @@ const EditableTable: React.FC = () => {
             label="Quantity"
             variant="outlined"
             size="small"
-            value={editItem.quantity}
+            value={editItem.quantity || ''}
             onChange={(e: any) => handleChange(e, 'quantity')}
             sx={{ mb: 2, mr: 2 }}
             fullWidth
@@ -198,7 +246,7 @@ const EditableTable: React.FC = () => {
             label="Regular Price"
             variant="outlined"
             size="small"
-            value={editItem.regularPrice}
+            value={editItem.regularPrice || ''}
             onChange={(e: any) => handleChange(e, 'regularPrice')}
             sx={{ mb: 2, mr: 2 }}
             fullWidth
@@ -222,11 +270,11 @@ const EditableTable: React.FC = () => {
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell>All Items - {filteredItems.length}</TableCell>
+              <TableCell>All Items - {items?.length}</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {filteredItems.map((item, idx) => {
+            {dataItem?.map((item, idx) => {
               return (
                 <>
                   <Accordion
@@ -276,6 +324,16 @@ const EditableTable: React.FC = () => {
             })}
           </TableBody>
         </Table>
+        <Box sx={{ py: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <Stack spacing={2}>
+            <Typography sx={{ textAlign: 'left' }}>Page: {page}</Typography>
+            <Pagination
+              count={state?.pagination?.totalPages || 0}
+              page={page}
+              onChange={handleChangePages}
+            />
+          </Stack>
+        </Box>
       </TableContainer>
     </Box>
   );

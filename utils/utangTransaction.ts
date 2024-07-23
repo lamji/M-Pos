@@ -11,6 +11,8 @@ export const addTransactionUtang = async (req: any) => {
         return { success: false, error: 'Utang record not found' };
       }
 
+      console.log(items);
+
       utangRecord.items.push(...items);
       utangRecord.total += total;
       utangRecord.date = new Date();

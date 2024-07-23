@@ -19,6 +19,7 @@ export default async function handler(req, res) {
       if (barcode) {
         query.barcode = barcode.toLowerCase();
       }
+
       if (name) {
         query.name = { $regex: name, $options: 'i' };
       }
@@ -58,7 +59,7 @@ export default async function handler(req, res) {
         query.barcode = barcode.toLowerCase();
       }
       if (name) {
-        query.name = { $regex: name, $options: 'i' };
+        query.name = { $regex: name.toLowerCase(), $options: 'i' };
       }
 
       // Find all items matching the query

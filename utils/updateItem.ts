@@ -3,22 +3,35 @@ import Item from '../src/common/app/model/Item';
 import Transaction from '../src/common/app/model/transaction';
 
 export const updateItem = async (req: any) => {
-  // Mock data; replace this with actual data fetching logic if needed
-  const { items } = req.body;
+  try {
+    // Mock data; replace this with actual data fetching logic if needed
+    const { items } = req.body;
 
-  for (const item of items) {
-    const { id, quantity } = item;
-    const existingItem = await Item.findOne({ id });
-    if (existingItem) {
-      existingItem.quantity -= quantity;
-      await existingItem.save();
-      console.log(`Updated item ${id}: new quantity is ${existingItem.quantity}`);
-    } else {
-      console.log(`Item with id ${id} not found`);
+    for (const item of items) {
+      const { id, quantity } = item;
+
+      // Check if quantity is a valid number
+
+      const existingItem = await Item.findOne({ id });
+      if (existingItem) {
+        if (isNaN(existingItem.quantity)) {
+          console.log(`Invalid quantity for item ${id}: ${quantity}`);
+          continue;
+        } else {
+          existingItem.quantity -= quantity;
+        }
+        await existingItem.save();
+        console.log(`Updated item ${id}: new quantity is ${existingItem.quantity}`);
+      } else {
+        console.log(`Item with id ${id} not found`);
+      }
     }
-  }
 
-  return { status: 'success' };
+    return { status: 'success' };
+  } catch (error) {
+    console.error('Error updating items:', error);
+    return { status: 'error', message: error };
+  }
 };
 
 export const getTopFastMovingItems = async () => {
