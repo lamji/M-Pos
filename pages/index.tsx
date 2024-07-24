@@ -2,10 +2,12 @@ import { Box, Button, Typography } from '@mui/material';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import Nav from '@/src/components/Nav';
-import Image from 'next/image';
+import MobileWalletLoginComponent from '@/src/components/Mobile/accessCode';
+import { getCookie } from '@/src/common/app/cookie';
 
 export default function Home() {
   const router = useRouter();
+  const token = getCookie('t');
   return (
     <>
       <Head>
@@ -29,11 +31,29 @@ export default function Home() {
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            marginTop: '-80px',
+            marginTop: token ? '0px' : '-250px',
             padding: '0 20px', // Optional: Add some horizontal padding
           }}
         >
-          <Box>
+          {token ? (
+            <>
+              <Box p={2} pt={5}>
+                <Typography textAlign="center" fontSize="10px">
+                  Streamline your sales process with our Mobile POS system! Easily manage
+                  transactions, track sales, and handle inventory on the go.
+                </Typography>
+                <Box sx={{ textAlign: 'center' }}>
+                  <Button onClick={() => router.push('/admin')}>Admin</Button>
+                </Box>
+              </Box>
+            </>
+          ) : (
+            <>
+              <MobileWalletLoginComponent />
+            </>
+          )}
+
+          {/* <Box>
             <Box sx={{ width: '100%', textAlign: 'center' }} onClick={() => router.push('/pos')}>
               <Image src="/logoscan2.png" width={300} height={200} alt="Picture of the author" />
             </Box>
@@ -44,7 +64,7 @@ export default function Home() {
               track sales, and handle inventory on the go.
             </Typography>
           </Box>
-          <Button onClick={() => router.push('/admin')}>Admin</Button>
+          <Button onClick={() => router.push('/admin')}>Admin</Button> */}
         </Box>
       </main>
     </>

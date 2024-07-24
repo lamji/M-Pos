@@ -28,6 +28,7 @@ import Barcode from 'react-barcode';
 import Pagination from '@mui/material/Pagination';
 import Stack from '@mui/material/Stack';
 import debounce from 'lodash/debounce';
+import LinearIndeterminate from '../Loader/linear';
 
 interface Item {
   _id: string;
@@ -193,148 +194,157 @@ const EditableTable = ({ handlePagination }: Props) => {
 
   return (
     <Box sx={{ p: 1, m: 2, width: '100%', maxWidth: '1200px', mx: 'auto', mt: '-120px' }}>
-      <Box sx={{ mb: 2 }}>
-        <TextField
-          label="Item Look up"
-          variant="outlined"
-          size="small"
-          value={searchTerm}
-          onChange={(e: any) => handleSearch(e)}
-          sx={{ mr: 2 }}
-          InputProps={{
-            startAdornment: <InputAdornment position="start">🔍</InputAdornment>,
-          }}
-          fullWidth
-        />
-      </Box>
-      {editItem && (
-        <Box sx={{ mb: 2, border: '1px solid gray', p: 2, borderRadius: '4px' }}>
-          <Typography variant="h6" gutterBottom>
-            Edit Item
-          </Typography>
-          <TextField
-            label="Name"
-            variant="outlined"
-            size="small"
-            value={editItem.name}
-            onChange={(e: any) => handleChange(e, 'name')}
-            sx={{ mb: 2, mr: 2 }}
-            fullWidth
-          />
-          <TextField
-            type="number"
-            label="Price"
-            variant="outlined"
-            size="small"
-            value={editItem.price}
-            onChange={(e: any) => handleChange(e, 'price')}
-            sx={{ mb: 2, mr: 2 }}
-            fullWidth
-          />
-          <TextField
-            type="number"
-            label="Quantity"
-            variant="outlined"
-            size="small"
-            value={editItem.quantity || ''}
-            onChange={(e: any) => handleChange(e, 'quantity')}
-            sx={{ mb: 2, mr: 2 }}
-            fullWidth
-          />
-          <TextField
-            type="number"
-            label="Regular Price"
-            variant="outlined"
-            size="small"
-            value={editItem.regularPrice || ''}
-            onChange={(e: any) => handleChange(e, 'regularPrice')}
-            sx={{ mb: 2, mr: 2 }}
-            fullWidth
-          />
-          <Box display="flex" justifyContent="flex-end">
-            <Button variant="contained" color="primary" onClick={handleSave}>
-              Save
-            </Button>
-            <Button
+      {items ? (
+        <>
+          {' '}
+          <Box sx={{ mb: 2 }}>
+            <TextField
+              label="Item Look up"
               variant="outlined"
-              color="secondary"
-              sx={{ ml: 2 }}
-              onClick={() => setEditItem(null)}
-            >
-              Cancel
-            </Button>
-          </Box>
-        </Box>
-      )}
-      <TableContainer component={Paper} sx={{ px: 3, width: '100%', paddingBottom: '100px' }}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>All Items - {items?.length}</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {dataItem?.map((item, idx) => {
-              return (
-                <>
-                  <Accordion
-                    expanded={expanded === `panel${idx}`}
-                    onChange={handleChangeAccordion(`panel${idx}`)}
-                  >
-                    <AccordionSummary aria-controls="panel2d-content" id="panel2d-header">
-                      <Typography>{item.name}</Typography>
-                    </AccordionSummary>
-                    <AccordionDetails>
-                      <Barcode value={item.barcode} />
-                      <Typography sx={{ fontSize: '12px' }}>
-                        <strong>Product Name: </strong>
-                        {item.name}
-                      </Typography>
-                      <Typography sx={{ fontSize: '12px' }}>
-                        <strong>Price: </strong>
-                        {formatCurrency(item.price)}
-                      </Typography>
-                      <Typography sx={{ fontSize: '12px' }}>
-                        <strong>Stocks: </strong>
-                        {item.quantity}
-                      </Typography>
-                      <Typography sx={{ fontSize: '12px' }}>
-                        <strong>Regular Price: </strong>
-                        {formatCurrency(item.regularPrice || 0)}
-                      </Typography>
-                      <Typography sx={{ fontSize: '12px' }}>
-                        <strong>Interest: </strong>
-                        {formatCurrency(item.price - item.regularPrice)}
-                      </Typography>
-                      {!editItem && (
-                        <>
-                          <Button
-                            variant="contained"
-                            sx={{ textTransform: 'capitalize', p: 0 }}
-                            onClick={() => setEditItem(item)}
-                          >
-                            Edit
-                          </Button>
-                        </>
-                      )}
-                    </AccordionDetails>
-                  </Accordion>
-                </>
-              );
-            })}
-          </TableBody>
-        </Table>
-        <Box sx={{ py: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <Stack spacing={2}>
-            <Typography sx={{ textAlign: 'left' }}>Page: {page}</Typography>
-            <Pagination
-              count={state?.pagination?.totalPages || 0}
-              page={page}
-              onChange={handleChangePages}
+              size="small"
+              value={searchTerm}
+              onChange={(e: any) => handleSearch(e)}
+              sx={{ mr: 2 }}
+              InputProps={{
+                startAdornment: <InputAdornment position="start">🔍</InputAdornment>,
+              }}
+              fullWidth
             />
-          </Stack>
-        </Box>
-      </TableContainer>
+          </Box>
+          {editItem && (
+            <Box sx={{ mb: 2, border: '1px solid gray', p: 2, borderRadius: '4px' }}>
+              <Typography variant="h6" gutterBottom>
+                Edit Item
+              </Typography>
+              <TextField
+                label="Name"
+                variant="outlined"
+                size="small"
+                value={editItem.name}
+                onChange={(e: any) => handleChange(e, 'name')}
+                sx={{ mb: 2, mr: 2 }}
+                fullWidth
+              />
+              <TextField
+                type="number"
+                label="Price"
+                variant="outlined"
+                size="small"
+                value={editItem.price}
+                onChange={(e: any) => handleChange(e, 'price')}
+                sx={{ mb: 2, mr: 2 }}
+                fullWidth
+              />
+              <TextField
+                type="number"
+                label="Quantity"
+                variant="outlined"
+                size="small"
+                value={editItem.quantity || ''}
+                onChange={(e: any) => handleChange(e, 'quantity')}
+                sx={{ mb: 2, mr: 2 }}
+                fullWidth
+              />
+              <TextField
+                type="number"
+                label="Regular Price"
+                variant="outlined"
+                size="small"
+                value={editItem.regularPrice || ''}
+                onChange={(e: any) => handleChange(e, 'regularPrice')}
+                sx={{ mb: 2, mr: 2 }}
+                fullWidth
+              />
+              <Box display="flex" justifyContent="flex-end">
+                <Button variant="contained" color="primary" onClick={handleSave}>
+                  Save
+                </Button>
+                <Button
+                  variant="outlined"
+                  color="secondary"
+                  sx={{ ml: 2 }}
+                  onClick={() => setEditItem(null)}
+                >
+                  Cancel
+                </Button>
+              </Box>
+            </Box>
+          )}
+          <TableContainer component={Paper} sx={{ px: 3, width: '100%', paddingBottom: '100px' }}>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>All Items - {items?.length}</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {dataItem?.map((item, idx) => {
+                  return (
+                    <>
+                      <Accordion
+                        expanded={expanded === `panel${idx}`}
+                        onChange={handleChangeAccordion(`panel${idx}`)}
+                      >
+                        <AccordionSummary aria-controls="panel2d-content" id="panel2d-header">
+                          <Typography>{item.name}</Typography>
+                        </AccordionSummary>
+                        <AccordionDetails>
+                          <Barcode value={item.barcode} />
+                          <Typography sx={{ fontSize: '12px' }}>
+                            <strong>Product Name: </strong>
+                            {item.name}
+                          </Typography>
+                          <Typography sx={{ fontSize: '12px' }}>
+                            <strong>Price: </strong>
+                            {formatCurrency(item.price)}
+                          </Typography>
+                          <Typography sx={{ fontSize: '12px' }}>
+                            <strong>Stocks: </strong>
+                            {item.quantity}
+                          </Typography>
+                          <Typography sx={{ fontSize: '12px' }}>
+                            <strong>Regular Price: </strong>
+                            {formatCurrency(item.regularPrice || 0)}
+                          </Typography>
+                          <Typography sx={{ fontSize: '12px' }}>
+                            <strong>Interest: </strong>
+                            {formatCurrency(item.price - item.regularPrice)}
+                          </Typography>
+                          {!editItem && (
+                            <>
+                              <Button
+                                variant="contained"
+                                sx={{ textTransform: 'capitalize', p: 0 }}
+                                onClick={() => setEditItem(item)}
+                              >
+                                Edit
+                              </Button>
+                            </>
+                          )}
+                        </AccordionDetails>
+                      </Accordion>
+                    </>
+                  );
+                })}
+              </TableBody>
+            </Table>
+            <Box sx={{ py: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Stack spacing={2}>
+                <Typography sx={{ textAlign: 'left' }}>Page: {page}</Typography>
+                <Pagination
+                  count={state?.pagination?.totalPages || 0}
+                  page={page}
+                  onChange={handleChangePages}
+                />
+              </Stack>
+            </Box>
+          </TableContainer>
+        </>
+      ) : (
+        <>
+          <LinearIndeterminate />
+        </>
+      )}
     </Box>
   );
 };
