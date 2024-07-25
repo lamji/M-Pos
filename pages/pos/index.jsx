@@ -1,5 +1,3 @@
-import ScanItems from '@/src/components/Mobile/ScanItems';
-import { Box } from '@mui/material';
 import Nav from '../../src/components/Nav';
 
 export default function Home() {
@@ -7,9 +5,9 @@ export default function Home() {
     <>
       <main>
         <Nav />
-        <Box>
+        {/* <Box>
           <ScanItems />
-        </Box>
+        </Box> */}
         {/* <div className={styles.footer}>
           <Checkout />
         </div> */}

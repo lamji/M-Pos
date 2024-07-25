@@ -33,17 +33,26 @@ import { setUtangData } from '@/src/common/reducers/utangData';
 import BarcodeScannerComponent from '../../wt2Scanner/index';
 import Swal from 'sweetalert2';
 import LinearIndeterminate from '../../Loader/linear';
+import DeleteConfirmationDialog from '../DeleteModal';
 
 const ComboBox = () => {
   const dispatch = useDispatch();
   const { items } = useSelector(getSelectedItems);
   const state = useSelector(getData);
+  const [open, setOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState('');
+  const [itemToDeleteId, setItemToDeleteId] = useState('');
 
   const [allItems, setAllItems] = useState([]);
   // const [lastScan, setLastScan] = useState(0);
   // const [isScanning, setIsScanning] = useState(false); // State to manage scanner visibility
 
   // const [jsonResponse, setJsonResponse] = useState(null); // State to hold the API response
+
+  const handleClose = () => {
+    setOpen(false);
+    setItemToDelete(null);
+  };
 
   // Initialize Audio only on the client side
   useEffect(() => {
@@ -109,13 +118,18 @@ const ComboBox = () => {
     }
   };
 
-  const handleDeleteItem = (id) => {
-    const confirmed = window.confirm(
-      'Are you sure you want to delete this item? This action cannot be undone.'
-    );
-    if (confirmed) {
-      dispatch(removeItem(id));
-    }
+  const handleConfirm = () => {
+    dispatch(removeItem(itemToDeleteId));
+    handleClose();
+  };
+
+  const handleDeleteItem = (id, name) => {
+    setOpen(true);
+    setItemToDelete(name);
+    setItemToDeleteId(id);
+    // if (confirmed) {
+    //   dispatch(removeItem(id));
+    // }
   };
 
   const onNewScanResult = async (decodedText) => {
@@ -285,7 +299,7 @@ const ComboBox = () => {
                         </IconButton>
                         <IconButton
                           edge="end"
-                          onClick={() => handleDeleteItem(item.id)}
+                          onClick={() => handleDeleteItem(item.id, item.name)}
                           sx={{ color: 'error.main' }}
                         >
                           <DeleteIcon />
@@ -302,6 +316,12 @@ const ComboBox = () => {
               )}
             </List>
             <ToastContainer />
+            <DeleteConfirmationDialog
+              open={open}
+              onClose={handleClose}
+              onConfirm={handleConfirm}
+              item={itemToDelete}
+            />
           </Box>
         </>
       ) : (

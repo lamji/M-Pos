@@ -1,7 +1,6 @@
 // BottomNav.js
 import React from 'react';
 import { BottomNavigation, BottomNavigationAction } from '@mui/material';
-import HomeIcon from '@mui/icons-material/Home';
 import GridViewIcon from '@mui/icons-material/GridView';
 import PointOfSaleIcon from '@mui/icons-material/PointOfSale';
 import PostAddIcon from '@mui/icons-material/PostAdd';
@@ -62,8 +61,8 @@ const BottomNav = () => {
       }}
     >
       <BottomNavigationAction
-        label="Home"
-        icon={<HomeIcon />}
+        label="Pos"
+        icon={<PointOfSaleIcon />}
         sx={{
           '& .Mui-selected': {
             fontSize: '10px !important',
@@ -84,18 +83,6 @@ const BottomNav = () => {
             fontSize: '10px',
           },
         }} // Adjust font size here
-      />
-      <BottomNavigationAction
-        label="POS"
-        icon={<PointOfSaleIcon />}
-        sx={{
-          '& .Mui-selected': {
-            fontSize: '10px !important',
-          },
-          '& .MuiBottomNavigationAction-label': {
-            fontSize: '10px',
-          },
-        }} // Adjust font size here/ Adjust font size here
       />
       <BottomNavigationAction
         label="Add Item"

@@ -7,13 +7,18 @@ import { enablePullToRefresh, statusBar } from 'webtonative';
 import BottomNav from '../Mobile/bottomNav';
 import Checkout from '../Mobile/CheckOut';
 import { formatCurrency } from '@/src/common/helpers';
-import { getCookie, clearCookie } from '@/src/common/app/cookie';
-import LogoutIcon from '@mui/icons-material/Logout';
+import { getCookie } from '@/src/common/app/cookie';
+import MobileDrawer from '../Mobile/Drawer';
+import MenuIcon from '@mui/icons-material/Menu';
+import { useState } from 'react';
+
+// import LogoutIcon from '@mui/icons-material/Logout';
 
 export default function Nav() {
   const router = useRouter();
   const currentPath = router.pathname;
   const state = useSelector(getUtangData);
+  const [open, setOpen] = useState(false);
   const token = getCookie('t');
   enablePullToRefresh(true);
   statusBar({
@@ -22,10 +27,6 @@ export default function Nav() {
     overlay: true, //Only for android
   });
 
-  const handleSignout = async () => {
-    clearCookie();
-    router.push('/');
-  };
   return (
     <div>
       <Box
@@ -43,6 +44,17 @@ export default function Nav() {
         }}
       >
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          {token && (
+            <>
+              <Box>
+                <IconButton onClick={() => setOpen(true)}>
+                  <MenuIcon style={{ color: 'white' }} />
+                </IconButton>
+                <MobileDrawer status={open} setStatus={(i) => setOpen(i)} />
+              </Box>
+            </>
+          )}
+
           {token && (
             <>
               <Typography fontWeight={700} textAlign="center" mt={2}>
@@ -66,9 +78,9 @@ export default function Nav() {
               </Box>
             </>
           )}
-          <IconButton onClick={handleSignout}>
+          {/* <IconButton onClick={handleSignout}>
             <LogoutIcon style={{ color: 'white' }} />
-          </IconButton>
+          </IconButton> */}
         </Box>
       </Box>
       <SimpleDialogDemo />
