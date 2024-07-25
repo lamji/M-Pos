@@ -203,7 +203,7 @@ const ComboBox = () => {
               paddingBottom: '60px',
               borderRadius: 10,
               background: 'white',
-              marginTop: '-130px',
+              marginTop: '-200px',
               paddingTop: '20px',
             }}
           >

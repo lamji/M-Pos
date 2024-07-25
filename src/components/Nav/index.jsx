@@ -43,7 +43,7 @@ export default function Nav() {
           height: '60px',
         }}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'left' }}>
           {token && (
             <>
               <Box>
@@ -57,33 +57,30 @@ export default function Nav() {
 
           {token && (
             <>
-              <Typography fontWeight={700} textAlign="center" mt={2}>
+              <Typography fontWeight={700} textAlign="center">
                 {currentPath === '/dashboard' && 'Dashboard'}
-                {currentPath === '/' && 'AKHIRO-POS'}
+                {currentPath === '/' && 'POS'}
 
                 {currentPath === '/utang' && 'Total Utang:  ' + formatCurrency(state.totalUtang)}
                 {currentPath === '/add' && 'ADD / UPDATE'}
                 {currentPath === '/payment' && 'PAYMENT'}
                 {currentPath === '/admin' && 'ADMIN'}
               </Typography>
-              <Box
-                sx={{
-                  textAlign: 'center',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                {currentPath === '/pos' && <Checkout />}
-              </Box>
             </>
           )}
-          {/* <IconButton onClick={handleSignout}>
-            <LogoutIcon style={{ color: 'white' }} />
-          </IconButton> */}
         </Box>
       </Box>
       <SimpleDialogDemo />
+      <Box
+        sx={{
+          textAlign: 'center',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        {currentPath === '/' && <Checkout />}
+      </Box>
       <Box
         sx={{
           marginTop: '200px',

@@ -40,13 +40,13 @@ export default function MobileDrawer({ status, setStatus }: PropsDrawer) {
     >
       <Box onClick={toggleDrawer(false)} sx={{ flexGrow: 1 }}>
         <Box
-          sx={{ display: 'flex', mx: '10px', justifyContent: 'left', mb: 1, alignItems: 'center' }}
+          sx={{ display: 'flex', m: '10px', justifyContent: 'left', mb: 1, alignItems: 'center' }}
         >
           <Image
             src="/mposlogo.png" // Placeholder logo URL
             alt="Bank Logo"
-            width={50}
-            height={50}
+            width={40}
+            height={40}
           />
           <Typography fontWeight={700} mx={2} variant="h6" textAlign={'center'}>
             M-POS v.1.0

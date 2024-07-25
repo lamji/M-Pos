@@ -217,19 +217,20 @@ export default function Checkout() {
   return (
     <div>
       <Box sx={classes.root}>
-        <Typography fontWeight={700}>Total: {formatCurrency(total)}</Typography>{' '}
-        {/* Use total here */}
-        {total > 0 && (
-          <>
-            <Button
-              onClick={handleClickOpen}
-              sx={{ ...classes.button, mx: '10px', background: 'white', color: 'black', py: 0 }}
-              variant="contained"
-            >
-              Check Out
-            </Button>
-          </>
-        )}
+        <Box sx={{ width: '300px' }}>
+          <Typography fontWeight={700}>{formatCurrency(total)}</Typography> {/* Use total here */}
+          {total > 0 && (
+            <>
+              <Button
+                onClick={handleClickOpen}
+                sx={{ ...classes.button, py: 1, width: '100%' }}
+                variant="contained"
+              >
+                PAY
+              </Button>
+            </>
+          )}
+        </Box>
       </Box>
       <div>
         <Dialog
