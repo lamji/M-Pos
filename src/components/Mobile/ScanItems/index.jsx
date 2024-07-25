@@ -28,7 +28,7 @@ import LinearIndeterminate from '../../Loader/linear';
 import DeleteConfirmationDialog from '../DeleteModal';
 import QuantityAdjuster from '../QtyConfrimatoin';
 import useViewModel from './useViewModel';
-import Html5QrcodePlugin from '../../Scanner';
+// import Html5QrcodePlugin from '../../Scanner';
 
 const ComboBox = () => {
   const {
@@ -153,6 +153,7 @@ const ComboBox = () => {
           });
         } else {
           handleOpen(true);
+          setActiveOrders(matchedItem);
           dispatch(
             addItem({
               id: matchedItem.id,
@@ -201,12 +202,12 @@ const ComboBox = () => {
               paddingTop: '20px',
             }}
           >
-            <Html5QrcodePlugin
+            {/* <Html5QrcodePlugin
               fps={10}
               qrbox={250}
               disableFlip={false}
               qrCodeSuccessCallback={onNewScanResult}
-            />
+            /> */}
 
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
               <Autocomplete
