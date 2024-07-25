@@ -76,7 +76,7 @@ const MobileBankingLoginComponent: React.FC = () => {
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        height: '100vh',
+        height: '70vh',
         padding: 2,
         position: 'relative',
         backgroundImage: 'url("https://images.unsplash.com/photo-1533149527490-1fd54d9b3da6")', // Background image

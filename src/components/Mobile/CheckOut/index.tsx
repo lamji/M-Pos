@@ -24,7 +24,7 @@ import moment from 'moment';
 export default function Checkout() {
   const dispatch = useDispatch();
   const { total, items } = useSelector(getSelectedItems); // Get total from Redux
-  const { classes, handleClickOpen, handleClose, open, fullScreen, handleClearItems } =
+  const { classes, handleClickOpen, handleClose, open, fullScreen, handleClearItems, token } =
     useViewModel();
   const [selectedOption, setSelectedOption] = React.useState<'cash' | 'utang' | 'partial' | null>(
     null
@@ -218,8 +218,9 @@ export default function Checkout() {
     <div>
       <Box sx={classes.root}>
         <Box sx={{ width: '300px' }}>
-          <Typography fontWeight={700}>{formatCurrency(total)}</Typography> {/* Use total here */}
-          {total > 0 && (
+          {token && total > 0 && <Typography fontWeight={700}>{formatCurrency(total)}</Typography>}
+          {/* Use total here */}
+          {token && total > 0 && (
             <>
               <Button
                 onClick={handleClickOpen}

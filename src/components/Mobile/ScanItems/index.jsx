@@ -11,21 +11,13 @@ import {
   List,
   ListItem,
   ListItemText,
-  ListItemSecondaryAction,
   Typography,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
-import AddCircleIcon from '@mui/icons-material/AddCircle';
-import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
-import DeleteIcon from '@mui/icons-material/Delete';
-
+import CloseIcon from '@mui/icons-material/Close';
+import EditIcon from '@mui/icons-material/Edit';
 import { useDispatch, useSelector } from 'react-redux';
-import {
-  addItem,
-  getSelectedItems,
-  removeItem,
-  updateItemQuantity,
-} from '@/src/common/reducers/items';
+import { addItem, getSelectedItems, removeItem } from '@/src/common/reducers/items';
 import { formatCurrency } from '@/src/common/helpers';
 import { getData, setData } from '@/src/common/reducers/data';
 import { getAllUtang } from '@/src/common/api/testApi';
@@ -34,8 +26,25 @@ import BarcodeScannerComponent from '../../wt2Scanner/index';
 import Swal from 'sweetalert2';
 import LinearIndeterminate from '../../Loader/linear';
 import DeleteConfirmationDialog from '../DeleteModal';
+import QuantityAdjuster from '../QtyConfrimatoin';
+import useViewModel from './useViewModel';
+import Html5QrcodePlugin from '../../Scanner';
 
 const ComboBox = () => {
+  const {
+    handleIncrement,
+    handleDecrement,
+    handleChange,
+    handleOpen,
+    handleCloseQty,
+    handleConfirmQty,
+    handleCancel,
+    quantity,
+    modalOpen,
+    activeOrders,
+    setActiveOrders,
+    setIsEdit,
+  } = useViewModel();
   const dispatch = useDispatch();
   const { items } = useSelector(getSelectedItems);
   const state = useSelector(getData);
@@ -85,7 +94,6 @@ const ComboBox = () => {
   // };
 
   const handleAddItem = (event, value) => {
-    console.log(value);
     if (value) {
       if (value.quantity <= 0) {
         Swal.fire({
@@ -95,26 +103,10 @@ const ComboBox = () => {
           confirmButtonText: 'OK',
         });
       } else {
-        dispatch(addItem({ id: value.id, name: value.name, price: value.price, _id: value._id }));
+        setActiveOrders(value);
+        handleOpen(true);
+        //dispatch(addItem({ id: value.id, name: value.name, price: value.price, _id: value._id }));
       }
-    }
-  };
-
-  const handleIncreaseQuantity = (id) => {
-    dispatch(
-      updateItemQuantity({
-        id,
-        quantity: (items.find((item) => item.id === id)?.quantity ?? 0) + 1,
-      })
-    );
-  };
-
-  const handleDecreaseQuantity = (id) => {
-    const quantity = items.find((item) => item.id === id)?.quantity ?? 0;
-    if (quantity > 1) {
-      dispatch(updateItemQuantity({ id, quantity: quantity - 1 }));
-    } else {
-      dispatch(removeItem(id));
     }
   };
 
@@ -133,6 +125,7 @@ const ComboBox = () => {
   };
 
   const onNewScanResult = async (decodedText) => {
+    setIsEdit(true);
     // Debounce logic to avoid handling the same scan multiple times
 
     if (typeof window !== 'undefined' && window.SCAN_SUCCESS_SOUND) {
@@ -159,6 +152,7 @@ const ComboBox = () => {
             confirmButtonText: 'OK',
           });
         } else {
+          handleOpen(true);
           dispatch(
             addItem({
               id: matchedItem.id,
@@ -207,17 +201,12 @@ const ComboBox = () => {
               paddingTop: '20px',
             }}
           >
-            {/* Conditionally render the Html5QrcodePlugin based on isScanning state */}
-
-            {/* {isScanning && (
-          <Html5QrcodePlugin
-            fps={10}
-            qrbox={250}
-            disableFlip={false}
-            qrCodeSuccessCallback={debouncedOnNewScanResult}
-            stopScanning={stopScanning} // Pass the stopScanning state as a prop
-          />
-        )} */}
+            <Html5QrcodePlugin
+              fps={10}
+              qrbox={250}
+              disableFlip={false}
+              qrCodeSuccessCallback={onNewScanResult}
+            />
 
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
               <Autocomplete
@@ -266,46 +255,89 @@ const ComboBox = () => {
               </Box>
             </Box>
 
-            <Typography mt={1} sx={{ marginBottom: '-5px' }} fontWeight={700}>
-              Scanned Items
-            </Typography>
-            <List sx={{ marginTop: '10px', height: '50vh', overflow: 'scroll' }}>
+            <List sx={{ marginTop: '0px', height: '50vh', overflow: 'scroll' }}>
               {items.length > 0 ? (
                 items
                   .slice()
                   .reverse()
                   .map((item) => (
-                    <ListItem key={item.id}>
-                      <ListItemText
-                        sx={{
-                          fontSize: '10px',
-                          '& .MuiTypography-root': {
-                            fontSize: '10px !important',
-                          },
-                        }}
-                        primary={`${item.name} - ${formatCurrency(item.price)}`}
-                        secondary={`Quantity: ${item.quantity}`}
-                      />
-                      <ListItemSecondaryAction>
+                    <Box
+                      key={item.id}
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        width: '98%',
+                        margin: '0 auto',
+                        background: '#f7f7f7',
+                        padding: '5px',
+                        mb: '3px',
+                        borderRadius: '5px',
+                      }}
+                    >
+                      <Box sx={{ width: '130px' }}>
+                        <Typography fontSize={'10px'} fontWeight={700}>{`${item.name}`}</Typography>
+                        <Typography fontSize={'9px'} fontWeight={700}>{`${formatCurrency(
+                          item.price
+                        )}`}</Typography>
+                        <Typography
+                          color={'gray'}
+                          fontSize={'10px'}
+                        >{`Quantity: ${item.quantity}`}</Typography>
+                      </Box>
+                      <Box>
+                        <Typography fontSize={'12px'}>
+                          {formatCurrency(item.price * item.quantity)}
+                        </Typography>
+                      </Box>
+                      <Box sx={{ textAlign: 'right', p: '5px' }}>
                         <IconButton
                           edge="end"
-                          onClick={() => handleDecreaseQuantity(item.id)}
-                          disabled={item.quantity === 1}
+                          onClick={() => handleDeleteItem(item.id, item.name)}
+                          sx={{ color: 'primary.main' }}
                         >
-                          <RemoveCircleIcon color="error" />
-                        </IconButton>
-                        <IconButton edge="end" onClick={() => handleIncreaseQuantity(item.id)}>
-                          <AddCircleIcon color="primary" />
+                          <EditIcon sx={{ fontSize: '19px' }} />
                         </IconButton>
                         <IconButton
                           edge="end"
                           onClick={() => handleDeleteItem(item.id, item.name)}
-                          sx={{ color: 'error.main' }}
+                          sx={{ color: 'error.main', ml: '20px' }}
                         >
-                          <DeleteIcon />
+                          <CloseIcon sx={{ fontSize: '19px' }} />
                         </IconButton>
-                      </ListItemSecondaryAction>
-                    </ListItem>
+                      </Box>
+                    </Box>
+                    // <ListItem key={item.id}>
+                    //   <ListItemText
+                    //     sx={{
+                    //       fontSize: '10px',
+                    //       '& .MuiTypography-root': {
+                    //         fontSize: '10px !important',
+                    //       },
+                    //     }}
+                    //     primary={`${item.name} - ${formatCurrency(item.price)}`}
+                    //     secondary={`Quantity: ${item.quantity}`}
+                    //   />
+                    //   <ListItemSecondaryAction>
+                    //     {/* <IconButton
+                    //       edge="end"
+                    //       onClick={() => handleDecreaseQuantity(item.id)}
+                    //       disabled={item.quantity === 1}
+                    //     >
+                    //       <RemoveCircleIcon color="error" />
+                    //     </IconButton>
+                    //     <IconButton edge="end" onClick={() => handleIncreaseQuantity(item.id)}>
+                    //       <AddCircleIcon color="primary" />
+                    //     </IconButton> */}
+                    //     <IconButton
+                    //       edge="end"
+                    //       onClick={() => handleDeleteItem(item.id, item.name)}
+                    //       sx={{ color: 'error.main' }}
+                    //     >
+                    //       <CloseIcon />
+                    //     </IconButton>
+                    //   </ListItemSecondaryAction>
+                    // </ListItem>
                   ))
               ) : (
                 <ListItem>
@@ -323,6 +355,21 @@ const ComboBox = () => {
               item={itemToDelete}
             />
           </Box>
+          {/* <Button variant="contained" color="primary" onClick={handleOpen}>
+            Adjust Quantity
+          </Button> */}
+
+          <QuantityAdjuster
+            open={modalOpen}
+            handleClose={handleCloseQty}
+            onIncrement={handleIncrement}
+            onDecrement={handleDecrement}
+            onChange={handleChange}
+            quantity={quantity}
+            onConfirm={handleConfirmQty}
+            onCancel={handleCancel}
+            items={activeOrders}
+          />
         </>
       ) : (
         <>
