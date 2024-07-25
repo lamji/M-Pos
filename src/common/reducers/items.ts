@@ -50,9 +50,13 @@ const selectedItemsSlice = createSlice({
     },
     removeItem: (state, action: PayloadAction<string>) => {
       const id = action.payload;
-      state.items = state.items.filter((item) => item.id !== id);
-      state.total = calculateTotal(state.items);
+      const item = state.items.find((item) => item.id === id);
+      if (item && item.quantity > 1) {
+        state.items = state.items.filter((item) => item.id !== id);
+        state.total = calculateTotal(state.items);
+      }
     },
+
     updateItemQuantity: (state, action: PayloadAction<{ id: string; quantity: number }>) => {
       const { id, quantity } = action.payload;
       const item = state.items.find((item) => item.id === id);

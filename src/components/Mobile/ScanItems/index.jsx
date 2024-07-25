@@ -17,7 +17,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import CloseIcon from '@mui/icons-material/Close';
 import EditIcon from '@mui/icons-material/Edit';
 import { useDispatch, useSelector } from 'react-redux';
-import { addItem, getSelectedItems, removeItem } from '@/src/common/reducers/items';
+import { getSelectedItems, removeItem } from '@/src/common/reducers/items';
 import { formatCurrency } from '@/src/common/helpers';
 import { getData, setData } from '@/src/common/reducers/data';
 import { getAllUtang } from '@/src/common/api/testApi';
@@ -28,7 +28,6 @@ import LinearIndeterminate from '../../Loader/linear';
 import DeleteConfirmationDialog from '../DeleteModal';
 import QuantityAdjuster from '../QtyConfrimatoin';
 import useViewModel from './useViewModel';
-// import Html5QrcodePlugin from '../../Scanner';
 
 const ComboBox = () => {
   const {
@@ -43,7 +42,7 @@ const ComboBox = () => {
     modalOpen,
     activeOrders,
     setActiveOrders,
-    setIsEdit,
+    handleEditItem,
   } = useViewModel();
   const dispatch = useDispatch();
   const { items } = useSelector(getSelectedItems);
@@ -125,7 +124,6 @@ const ComboBox = () => {
   };
 
   const onNewScanResult = async (decodedText) => {
-    setIsEdit(true);
     // Debounce logic to avoid handling the same scan multiple times
 
     if (typeof window !== 'undefined' && window.SCAN_SUCCESS_SOUND) {
@@ -152,16 +150,8 @@ const ComboBox = () => {
             confirmButtonText: 'OK',
           });
         } else {
-          handleOpen(true);
           setActiveOrders(matchedItem);
-          dispatch(
-            addItem({
-              id: matchedItem.id,
-              name: matchedItem.name,
-              price: matchedItem.price,
-              _id: matchedItem?._id,
-            })
-          );
+          handleOpen(true);
         }
       } else {
         toast.error('Barcode not found');
@@ -202,12 +192,17 @@ const ComboBox = () => {
               paddingTop: '20px',
             }}
           >
-            {/* <Html5QrcodePlugin
-              fps={10}
-              qrbox={250}
-              disableFlip={false}
-              qrCodeSuccessCallback={onNewScanResult}
-            /> */}
+            {/* Conditionally render the Html5QrcodePlugin based on isScanning state */}
+
+            {/* {isScanning && (
+          <Html5QrcodePlugin
+            fps={10}
+            qrbox={250}
+            disableFlip={false}
+            qrCodeSuccessCallback={debouncedOnNewScanResult}
+            stopScanning={stopScanning} // Pass the stopScanning state as a prop
+          />
+        )} */}
 
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
               <Autocomplete
@@ -273,7 +268,7 @@ const ComboBox = () => {
                         background: '#f7f7f7',
                         padding: '5px',
                         mb: '3px',
-                        borderRadius: '5px',
+                        borderRadius: '10px',
                       }}
                     >
                       <Box sx={{ width: '130px' }}>
@@ -294,7 +289,7 @@ const ComboBox = () => {
                       <Box sx={{ textAlign: 'right', p: '5px' }}>
                         <IconButton
                           edge="end"
-                          onClick={() => handleDeleteItem(item.id, item.name)}
+                          onClick={() => handleEditItem(item)}
                           sx={{ color: 'primary.main' }}
                         >
                           <EditIcon sx={{ fontSize: '19px' }} />
@@ -308,37 +303,6 @@ const ComboBox = () => {
                         </IconButton>
                       </Box>
                     </Box>
-                    // <ListItem key={item.id}>
-                    //   <ListItemText
-                    //     sx={{
-                    //       fontSize: '10px',
-                    //       '& .MuiTypography-root': {
-                    //         fontSize: '10px !important',
-                    //       },
-                    //     }}
-                    //     primary={`${item.name} - ${formatCurrency(item.price)}`}
-                    //     secondary={`Quantity: ${item.quantity}`}
-                    //   />
-                    //   <ListItemSecondaryAction>
-                    //     {/* <IconButton
-                    //       edge="end"
-                    //       onClick={() => handleDecreaseQuantity(item.id)}
-                    //       disabled={item.quantity === 1}
-                    //     >
-                    //       <RemoveCircleIcon color="error" />
-                    //     </IconButton>
-                    //     <IconButton edge="end" onClick={() => handleIncreaseQuantity(item.id)}>
-                    //       <AddCircleIcon color="primary" />
-                    //     </IconButton> */}
-                    //     <IconButton
-                    //       edge="end"
-                    //       onClick={() => handleDeleteItem(item.id, item.name)}
-                    //       sx={{ color: 'error.main' }}
-                    //     >
-                    //       <CloseIcon />
-                    //     </IconButton>
-                    //   </ListItemSecondaryAction>
-                    // </ListItem>
                   ))
               ) : (
                 <ListItem>

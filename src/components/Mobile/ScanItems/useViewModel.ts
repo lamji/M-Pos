@@ -16,6 +16,8 @@ export default function useViewModel() {
   const [isEdit, setIsEdit] = useState(false);
 
   const handleIncreaseQuantity = (id: any) => {
+    console.log('quantity', quantity);
+    setQuantity((prevQuantity) => prevQuantity + 1);
     dispatch(
       updateItemQuantity({
         id,
@@ -45,7 +47,9 @@ export default function useViewModel() {
     if (isEdit) {
       handleDecreaseQuantity(activeOrders.id);
     }
-    setQuantity((prevQuantity) => (prevQuantity > 1 ? prevQuantity - 1 : 1));
+    if (quantity > 1) {
+      setQuantity((prevQuantity) => (prevQuantity > 1 ? prevQuantity - 1 : 1));
+    }
   };
 
   const handleChange = (value: number) => {
@@ -83,11 +87,11 @@ export default function useViewModel() {
 
   const handleCancel = () => {
     setModalOpen(false);
+    setQuantity(1);
   };
 
   const handleEditItem = (data: any) => {
     setIsEdit(true);
-    console.log(data);
     setActiveOrders(data);
     setQuantity(data.quantity);
     handleOpen();
