@@ -7,7 +7,7 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import FormatListNumberedIcon from '@mui/icons-material/FormatListNumbered';
+import ListAltIcon from '@mui/icons-material/ListAlt';
 import AssessmentIcon from '@mui/icons-material/Assessment';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import PaymentsIcon from '@mui/icons-material/Payments';
@@ -38,23 +38,27 @@ export default function MobileDrawer({ status, setStatus }: PropsDrawer) {
       sx={{ width: 250, display: 'flex', flexDirection: 'column', height: '100%' }}
       role="presentation"
     >
-      <Box onClick={toggleDrawer(false)} sx={{ flexGrow: 1, mt: '40px' }}>
-        <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
+      <Box onClick={toggleDrawer(false)} sx={{ flexGrow: 1 }}>
+        <Box
+          sx={{ display: 'flex', mx: '10px', justifyContent: 'left', mb: 1, alignItems: 'center' }}
+        >
           <Image
             src="/mposlogo.png" // Placeholder logo URL
             alt="Bank Logo"
-            width={80}
-            height={75}
+            width={50}
+            height={50}
           />
+          <Typography fontWeight={700} mx={2} variant="h6" textAlign={'center'}>
+            M-POS v.1.0
+          </Typography>
         </Box>
-        <Typography fontWeight={700} variant="h6" textAlign={'center'}>
-          M-POS
-        </Typography>
+
+        <Divider />
         <List>
           <ListItem disablePadding>
             <ListItemButton onClick={() => router.push('/admin')}>
               <ListItemIcon>
-                <FormatListNumberedIcon />
+                <ListAltIcon />
               </ListItemIcon>
               <ListItemText primary={'All Items'} />
             </ListItemButton>
