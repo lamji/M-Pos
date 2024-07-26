@@ -1,12 +1,11 @@
-import { Box, Button, Typography } from '@mui/material';
+import { Box } from '@mui/material';
 import Head from 'next/head';
-import { useRouter } from 'next/router';
 import Nav from '@/src/components/Nav';
 import MobileWalletLoginComponent from '@/src/components/Mobile/accessCode';
 import { getCookie } from '@/src/common/app/cookie';
+import ScanItems from '@/src/components/Mobile/ScanItems';
 
 export default function Home() {
-  const router = useRouter();
   const token = getCookie('t');
   return (
     <>
@@ -18,53 +17,20 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main>
-        <Nav>
-          {/* <Typography variant="h6" fontWeight={700} className={styles.title}>
-            AKHIRO POS
-          </Typography> */}
-        </Nav>
+        <Nav />
 
-        <Box
-          sx={{
-            borderRadius: 5,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            marginTop: token ? '0px' : '-250px',
-            padding: '0 20px', // Optional: Add some horizontal padding
-          }}
-        >
+        <Box sx={{}}>
           {token ? (
             <>
-              <Box p={2} pt={5}>
-                <Typography textAlign="center" fontSize="10px">
-                  Streamline your sales process with our Mobile POS system! Easily manage
-                  transactions, track sales, and handle inventory on the go.
-                </Typography>
-                <Box sx={{ textAlign: 'center' }}>
-                  <Button onClick={() => router.push('/admin')}>Admin</Button>
-                </Box>
+              <Box>
+                <ScanItems />
               </Box>
             </>
           ) : (
-            <>
+            <Box sx={{ marginTop: '-210px' }}>
               <MobileWalletLoginComponent />
-            </>
-          )}
-
-          {/* <Box>
-            <Box sx={{ width: '100%', textAlign: 'center' }} onClick={() => router.push('/pos')}>
-              <Image src="/logoscan2.png" width={300} height={200} alt="Picture of the author" />
             </Box>
-          </Box>
-          <Box p={2} pt={5}>
-            <Typography textAlign="center" fontSize="10px">
-              Streamline your sales process with our Mobile POS system! Easily manage transactions,
-              track sales, and handle inventory on the go.
-            </Typography>
-          </Box>
-          <Button onClick={() => router.push('/admin')}>Admin</Button> */}
+          )}
         </Box>
       </main>
     </>

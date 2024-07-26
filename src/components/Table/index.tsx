@@ -196,7 +196,6 @@ const EditableTable = ({ handlePagination }: Props) => {
     <Box sx={{ p: 1, m: 2, width: '100%', maxWidth: '1200px', mx: 'auto', mt: '-120px' }}>
       {items ? (
         <>
-          {' '}
           <Box sx={{ mb: 2 }}>
             <TextField
               label="Item Look up"

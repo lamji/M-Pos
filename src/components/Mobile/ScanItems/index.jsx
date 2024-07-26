@@ -11,21 +11,13 @@ import {
   List,
   ListItem,
   ListItemText,
-  ListItemSecondaryAction,
   Typography,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
-import AddCircleIcon from '@mui/icons-material/AddCircle';
-import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
-import DeleteIcon from '@mui/icons-material/Delete';
-
+import CloseIcon from '@mui/icons-material/Close';
+import EditIcon from '@mui/icons-material/Edit';
 import { useDispatch, useSelector } from 'react-redux';
-import {
-  addItem,
-  getSelectedItems,
-  removeItem,
-  updateItemQuantity,
-} from '@/src/common/reducers/items';
+import { getSelectedItems, removeItem } from '@/src/common/reducers/items';
 import { formatCurrency } from '@/src/common/helpers';
 import { getData, setData } from '@/src/common/reducers/data';
 import { getAllUtang } from '@/src/common/api/testApi';
@@ -33,17 +25,42 @@ import { setUtangData } from '@/src/common/reducers/utangData';
 import BarcodeScannerComponent from '../../wt2Scanner/index';
 import Swal from 'sweetalert2';
 import LinearIndeterminate from '../../Loader/linear';
+import DeleteConfirmationDialog from '../DeleteModal';
+import QuantityAdjuster from '../QtyConfrimatoin';
+import useViewModel from './useViewModel';
 
 const ComboBox = () => {
+  const {
+    handleIncrement,
+    handleDecrement,
+    handleChange,
+    handleOpen,
+    handleCloseQty,
+    handleConfirmQty,
+    handleCancel,
+    quantity,
+    modalOpen,
+    activeOrders,
+    setActiveOrders,
+    handleEditItem,
+  } = useViewModel();
   const dispatch = useDispatch();
   const { items } = useSelector(getSelectedItems);
   const state = useSelector(getData);
+  const [open, setOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState('');
+  const [itemToDeleteId, setItemToDeleteId] = useState('');
 
   const [allItems, setAllItems] = useState([]);
   // const [lastScan, setLastScan] = useState(0);
   // const [isScanning, setIsScanning] = useState(false); // State to manage scanner visibility
 
   // const [jsonResponse, setJsonResponse] = useState(null); // State to hold the API response
+
+  const handleClose = () => {
+    setOpen(false);
+    setItemToDelete(null);
+  };
 
   // Initialize Audio only on the client side
   useEffect(() => {
@@ -76,7 +93,6 @@ const ComboBox = () => {
   // };
 
   const handleAddItem = (event, value) => {
-    console.log(value);
     if (value) {
       if (value.quantity <= 0) {
         Swal.fire({
@@ -86,36 +102,25 @@ const ComboBox = () => {
           confirmButtonText: 'OK',
         });
       } else {
-        dispatch(addItem({ id: value.id, name: value.name, price: value.price, _id: value._id }));
+        setActiveOrders(value);
+        handleOpen(true);
+        //dispatch(addItem({ id: value.id, name: value.name, price: value.price, _id: value._id }));
       }
     }
   };
 
-  const handleIncreaseQuantity = (id) => {
-    dispatch(
-      updateItemQuantity({
-        id,
-        quantity: (items.find((item) => item.id === id)?.quantity ?? 0) + 1,
-      })
-    );
+  const handleConfirm = () => {
+    dispatch(removeItem(itemToDeleteId));
+    handleClose();
   };
 
-  const handleDecreaseQuantity = (id) => {
-    const quantity = items.find((item) => item.id === id)?.quantity ?? 0;
-    if (quantity > 1) {
-      dispatch(updateItemQuantity({ id, quantity: quantity - 1 }));
-    } else {
-      dispatch(removeItem(id));
-    }
-  };
-
-  const handleDeleteItem = (id) => {
-    const confirmed = window.confirm(
-      'Are you sure you want to delete this item? This action cannot be undone.'
-    );
-    if (confirmed) {
-      dispatch(removeItem(id));
-    }
+  const handleDeleteItem = (id, name) => {
+    setOpen(true);
+    setItemToDelete(name);
+    setItemToDeleteId(id);
+    // if (confirmed) {
+    //   dispatch(removeItem(id));
+    // }
   };
 
   const onNewScanResult = async (decodedText) => {
@@ -145,14 +150,8 @@ const ComboBox = () => {
             confirmButtonText: 'OK',
           });
         } else {
-          dispatch(
-            addItem({
-              id: matchedItem.id,
-              name: matchedItem.name,
-              price: matchedItem.price,
-              _id: matchedItem?._id,
-            })
-          );
+          setActiveOrders(matchedItem);
+          handleOpen(true);
         }
       } else {
         toast.error('Barcode not found');
@@ -189,7 +188,7 @@ const ComboBox = () => {
               paddingBottom: '60px',
               borderRadius: 10,
               background: 'white',
-              marginTop: '-130px',
+              marginTop: '-200px',
               paddingTop: '20px',
             }}
           >
@@ -252,46 +251,58 @@ const ComboBox = () => {
               </Box>
             </Box>
 
-            <Typography mt={1} sx={{ marginBottom: '-5px' }} fontWeight={700}>
-              Scanned Items
-            </Typography>
-            <List sx={{ marginTop: '10px', height: '50vh', overflow: 'scroll' }}>
+            <List sx={{ marginTop: '0px', height: '50vh', overflow: 'scroll' }}>
               {items.length > 0 ? (
                 items
                   .slice()
                   .reverse()
                   .map((item) => (
-                    <ListItem key={item.id}>
-                      <ListItemText
-                        sx={{
-                          fontSize: '10px',
-                          '& .MuiTypography-root': {
-                            fontSize: '10px !important',
-                          },
-                        }}
-                        primary={`${item.name} - ${formatCurrency(item.price)}`}
-                        secondary={`Quantity: ${item.quantity}`}
-                      />
-                      <ListItemSecondaryAction>
+                    <Box
+                      key={item.id}
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        width: '98%',
+                        margin: '0 auto',
+                        background: '#f7f7f7',
+                        padding: '5px',
+                        mb: '3px',
+                        borderRadius: '10px',
+                      }}
+                    >
+                      <Box sx={{ width: '130px' }}>
+                        <Typography fontSize={'10px'} fontWeight={700}>{`${item.name}`}</Typography>
+                        <Typography fontSize={'9px'} fontWeight={700}>{`${formatCurrency(
+                          item.price
+                        )}`}</Typography>
+                        <Typography
+                          color={'gray'}
+                          fontSize={'10px'}
+                        >{`Quantity: ${item.quantity}`}</Typography>
+                      </Box>
+                      <Box>
+                        <Typography fontSize={'12px'}>
+                          {formatCurrency(item.price * item.quantity)}
+                        </Typography>
+                      </Box>
+                      <Box sx={{ textAlign: 'right', p: '5px' }}>
                         <IconButton
                           edge="end"
-                          onClick={() => handleDecreaseQuantity(item.id)}
-                          disabled={item.quantity === 1}
+                          onClick={() => handleEditItem(item)}
+                          sx={{ color: 'primary.main' }}
                         >
-                          <RemoveCircleIcon color="error" />
-                        </IconButton>
-                        <IconButton edge="end" onClick={() => handleIncreaseQuantity(item.id)}>
-                          <AddCircleIcon color="primary" />
+                          <EditIcon sx={{ fontSize: '19px' }} />
                         </IconButton>
                         <IconButton
                           edge="end"
-                          onClick={() => handleDeleteItem(item.id)}
-                          sx={{ color: 'error.main' }}
+                          onClick={() => handleDeleteItem(item.id, item.name)}
+                          sx={{ color: 'error.main', ml: '20px' }}
                         >
-                          <DeleteIcon />
+                          <CloseIcon sx={{ fontSize: '19px' }} />
                         </IconButton>
-                      </ListItemSecondaryAction>
-                    </ListItem>
+                      </Box>
+                    </Box>
                   ))
               ) : (
                 <ListItem>
@@ -302,7 +313,28 @@ const ComboBox = () => {
               )}
             </List>
             <ToastContainer />
+            <DeleteConfirmationDialog
+              open={open}
+              onClose={handleClose}
+              onConfirm={handleConfirm}
+              item={itemToDelete}
+            />
           </Box>
+          {/* <Button variant="contained" color="primary" onClick={handleOpen}>
+            Adjust Quantity
+          </Button> */}
+
+          <QuantityAdjuster
+            open={modalOpen}
+            handleClose={handleCloseQty}
+            onIncrement={handleIncrement}
+            onDecrement={handleDecrement}
+            onChange={handleChange}
+            quantity={quantity}
+            onConfirm={handleConfirmQty}
+            onCancel={handleCancel}
+            items={activeOrders}
+          />
         </>
       ) : (
         <>

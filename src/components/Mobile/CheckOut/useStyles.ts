@@ -4,9 +4,8 @@ export const useStyles = () => {
   return {
     root: {
       borderRadius: '5px',
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
+
+      marginTop: '70px',
     } as CSSProperties,
     button: {
       fontWeight: 700,

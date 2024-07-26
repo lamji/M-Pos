@@ -17,6 +17,8 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Swal from 'sweetalert2';
 import Nav from '@/src/components/Nav';
+import { generateRandomBarcode } from '@/src/common/helpers';
+
 // import Html5QrcodePlugin from '@/src/components/Scanner';
 
 // Validation Schema
@@ -57,6 +59,12 @@ const AddItemForm = () => {
     quantity: checked ? '' : 0,
     regularPrice: checked ? '' : 0,
     type: checked ? '' : 'new',
+  };
+
+  const handleGenerateBarcode = () => {
+    const generatedCode = generateRandomBarcode(12);
+    setScannedBarcode(generatedCode);
+    setGeneratedId(`${generatedCode}-id`);
   };
 
   // Formik hook
@@ -206,6 +214,7 @@ const AddItemForm = () => {
               name="id"
               label="ID"
               variant="outlined"
+              size="small"
               fullWidth
               value={formik.values.id}
               error={formik.touched.id && Boolean(formik.errors.id)}
@@ -214,6 +223,7 @@ const AddItemForm = () => {
               disabled
             />
             <TextField
+              size="small"
               name="name"
               label="Name"
               variant="outlined"
@@ -224,6 +234,7 @@ const AddItemForm = () => {
               onChange={formik.handleChange}
             />
             <TextField
+              size="small"
               name="price"
               label="Price"
               type="number"
@@ -236,6 +247,7 @@ const AddItemForm = () => {
             />
             <TextField
               name="barcode"
+              size="small"
               label="Barcode"
               variant="outlined"
               fullWidth
@@ -245,35 +257,38 @@ const AddItemForm = () => {
               onChange={formik.handleChange}
               disabled
             />
+            <TextField
+              name="quantity"
+              label="Quantity"
+              size="small"
+              type="number"
+              variant="outlined"
+              fullWidth
+              value={formik.values.quantity || ''}
+              error={formik.touched.quantity && Boolean(formik.errors.quantity)}
+              helperText={formik.touched.quantity && formik.errors.quantity}
+              onChange={formik.handleChange}
+            />
+            <TextField
+              name="regularPrice"
+              label="Regular Price"
+              size="small"
+              type="number"
+              variant="outlined"
+              fullWidth
+              value={formik.values.regularPrice || ''}
+              error={formik.touched.regularPrice && Boolean(formik.errors.regularPrice)}
+              helperText={formik.touched.regularPrice && formik.errors.regularPrice}
+              onChange={formik.handleChange}
+            />
             {checked && (
               <>
-                <TextField
-                  name="quantity"
-                  label="Quantity"
-                  type="number"
-                  variant="outlined"
-                  fullWidth
-                  value={formik.values.quantity}
-                  error={formik.touched.quantity && Boolean(formik.errors.quantity)}
-                  helperText={formik.touched.quantity && formik.errors.quantity}
-                  onChange={formik.handleChange}
-                />
-                <TextField
-                  name="regularPrice"
-                  label="Regular Price"
-                  type="number"
-                  variant="outlined"
-                  fullWidth
-                  value={formik.values.regularPrice}
-                  error={formik.touched.regularPrice && Boolean(formik.errors.regularPrice)}
-                  helperText={formik.touched.regularPrice && formik.errors.regularPrice}
-                  onChange={formik.handleChange}
-                />
                 <FormControl fullWidth>
                   <InputLabel>Type</InputLabel>
                   <Select
                     name="type"
                     label="Type"
+                    size="small"
                     value={formik.values.type}
                     onChange={formik.handleChange}
                     error={formik.touched.type && Boolean(formik.errors.type)}
@@ -291,7 +306,7 @@ const AddItemForm = () => {
                 display: 'flex',
                 alignItems: 'center',
                 width: '100%',
-                marginBottom: '200px',
+                // marginBottom: '200px',
               }}
             >
               {/* <Html5QrcodePlugin
@@ -315,6 +330,19 @@ const AddItemForm = () => {
                 size={50}
               />
             </Box>
+            {!checked && (
+              <>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <Typography fontSize={'12px'}>No Barcode?</Typography>
+                  <Box
+                    onClick={() => handleGenerateBarcode()}
+                    sx={{ fontSize: '12px', color: 'blue', textDecoration: 'underline', mx: '2px' }}
+                  >
+                    Generate here
+                  </Box>
+                </Box>
+              </>
+            )}
           </Box>
         </form>
 

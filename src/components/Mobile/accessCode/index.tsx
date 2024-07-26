@@ -6,7 +6,6 @@ import Image from 'next/image';
 import { saveCookie } from '@/src/common/app/cookie';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { useRouter } from 'next/router';
 
 // Define TypeScript types for form values
 interface FormValues {
@@ -37,7 +36,6 @@ const mockApiCall = async (username: string) => {
 };
 
 const MobileBankingLoginComponent: React.FC = () => {
-  const navigate = useRouter();
   // Initialize Formik with TypeScript types
   const formik = useFormik<FormValues>({
     initialValues: {
@@ -54,7 +52,7 @@ const MobileBankingLoginComponent: React.FC = () => {
           toast.success('Login successful!', {
             position: 'top-center',
           });
-          setTimeout(() => navigate.push('/pos'), 2000); // Redirect after a short delay to show the toast
+          setTimeout(() => window.location.reload(), 2000); // Reload the page after a short delay to show the toast
         } else {
           toast.error('Invalid code. Please try again.', {
             position: 'top-center',
@@ -78,7 +76,7 @@ const MobileBankingLoginComponent: React.FC = () => {
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        height: '100vh',
+        height: '70vh',
         padding: 2,
         position: 'relative',
         backgroundImage: 'url("https://images.unsplash.com/photo-1533149527490-1fd54d9b3da6")', // Background image

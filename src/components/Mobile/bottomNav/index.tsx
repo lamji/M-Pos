@@ -1,7 +1,6 @@
 // BottomNav.js
 import React from 'react';
 import { BottomNavigation, BottomNavigationAction } from '@mui/material';
-import HomeIcon from '@mui/icons-material/Home';
 import GridViewIcon from '@mui/icons-material/GridView';
 import PointOfSaleIcon from '@mui/icons-material/PointOfSale';
 import PostAddIcon from '@mui/icons-material/PostAdd';
@@ -19,7 +18,7 @@ const BottomNav = () => {
         return 0;
       case '/dashboard':
         return 1;
-      case '/pos':
+      case '/utangs':
         return 2;
       case '/add':
         return 3;
@@ -40,7 +39,7 @@ const BottomNav = () => {
   const handleChange = (event: any, newValue: any) => {
     setValue(newValue);
     // Navigate to the corresponding route based on the index
-    const routes = ['/', '/dashboard', '/pos', '/add', '/utang'];
+    const routes = ['/', '/dashboard', '/utang', '/add'];
     router.push(routes[newValue]);
   };
 
@@ -62,8 +61,8 @@ const BottomNav = () => {
       }}
     >
       <BottomNavigationAction
-        label="Home"
-        icon={<HomeIcon />}
+        label="Pos"
+        icon={<PointOfSaleIcon />}
         sx={{
           '& .Mui-selected': {
             fontSize: '10px !important',
@@ -86,20 +85,8 @@ const BottomNav = () => {
         }} // Adjust font size here
       />
       <BottomNavigationAction
-        label="POS"
-        icon={<PointOfSaleIcon />}
-        sx={{
-          '& .Mui-selected': {
-            fontSize: '10px !important',
-          },
-          '& .MuiBottomNavigationAction-label': {
-            fontSize: '10px',
-          },
-        }} // Adjust font size here/ Adjust font size here
-      />
-      <BottomNavigationAction
-        label="Add Item"
-        icon={<PostAddIcon />}
+        label="Utang"
+        icon={<FormatListNumberedIcon />}
         sx={{
           '& .Mui-selected': {
             fontSize: '10px !important',
@@ -110,8 +97,8 @@ const BottomNav = () => {
         }} // Adjust font size here
       />
       <BottomNavigationAction
-        label="Utang"
-        icon={<FormatListNumberedIcon />}
+        label="Add"
+        icon={<PostAddIcon />}
         sx={{
           '& .Mui-selected': {
             fontSize: '10px',

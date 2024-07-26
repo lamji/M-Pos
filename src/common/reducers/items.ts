@@ -19,38 +19,50 @@ const initialState: SelectedItemsState = {
   isBackDropOpen: false,
 };
 
+const calculateTotal = (items: SelectedItem[]) => {
+  return items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+};
+
 const selectedItemsSlice = createSlice({
   name: 'selectedItems',
   initialState,
   reducers: {
-    setIsBackDropOpen: (state, action) => ({
-      ...state,
-      isBackDropOpen: action.payload,
-    }),
-    addItem: (state, action: PayloadAction<{ id: string; name: string; price: number }>) => {
-      const { id, name, price } = action.payload;
+    setIsBackDropOpen: (state, action) => {
+      state.isBackDropOpen = action.payload;
+    },
+    addItem: (
+      state,
+      action: PayloadAction<{
+        id: string;
+        name: string;
+        price: number;
+        quantity: number;
+      }>
+    ) => {
+      const { id, name, price, quantity } = action.payload;
       const existingItem = state.items.find((item) => item.id === id);
       if (existingItem) {
-        existingItem.quantity += 1;
+        existingItem.quantity += quantity;
       } else {
-        state.items.push({ id, name, price, quantity: 1 });
+        state.items.push({ id, name, price, quantity });
       }
-      state.total += price;
+      state.total = calculateTotal(state.items);
     },
     removeItem: (state, action: PayloadAction<string>) => {
       const id = action.payload;
       const item = state.items.find((item) => item.id === id);
-      if (item) {
-        state.total -= item.price * item.quantity;
+      if (item && item.quantity > 1) {
         state.items = state.items.filter((item) => item.id !== id);
+        state.total = calculateTotal(state.items);
       }
     },
+
     updateItemQuantity: (state, action: PayloadAction<{ id: string; quantity: number }>) => {
       const { id, quantity } = action.payload;
       const item = state.items.find((item) => item.id === id);
       if (item) {
-        state.total += item.price * (quantity - item.quantity);
         item.quantity = quantity;
+        state.total = calculateTotal(state.items);
       }
     },
     clearItems: (state) => {
