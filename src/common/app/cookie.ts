@@ -25,7 +25,7 @@ export const getCookie = (key: string) => {
  */
 export const clearCookie = () => {
   Cookies.remove('t');
-  Cookies.remove('rt1');
-  Cookies.remove('rt2');
-  Cookies.remove('cookieID');
+  // Cookies.remove('rt1');
+  // Cookies.remove('rt2');
+  // Cookies.remove('cookieID');
 };

@@ -73,6 +73,7 @@ const QuantityAdjuster: React.FC<QuantityAdjusterProps> = ({
             sx={{ background: '#c2e6e4' }}
             onClick={onIncrement}
             aria-label="increase quantity"
+            disabled={items.quantity <= quantity ? true : false}
           >
             <AddIcon style={{ color: '#0A736C' }} />
           </IconButton>
@@ -115,6 +116,15 @@ const QuantityAdjuster: React.FC<QuantityAdjusterProps> = ({
         </Box>
         <Typography sx={{ color: 'gray', textAlign: 'center' }}>
           {formatCurrency(items.price * quantity)}
+        </Typography>
+        <Typography
+          sx={{
+            color: items.quantity <= quantity ? 'error.main' : 'gray',
+            textAlign: 'center',
+            fontSize: '10px',
+          }}
+        >
+          {items.quantity <= quantity ? 'Out Of Stocks' : `Stocks: ${items.quantity - quantity}`}
         </Typography>
       </DialogContent>
 

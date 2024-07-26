@@ -56,7 +56,14 @@ const selectedItemsSlice = createSlice({
         state.total = calculateTotal(state.items);
       }
     },
-
+    deleteItem: (state, action: PayloadAction<string>) => {
+      const id = action.payload;
+      const item = state.items.find((item) => item.id === id);
+      if (item) {
+        state.items = state.items.filter((item) => item.id !== id);
+        state.total = calculateTotal(state.items);
+      }
+    },
     updateItemQuantity: (state, action: PayloadAction<{ id: string; quantity: number }>) => {
       const { id, quantity } = action.payload;
       const item = state.items.find((item) => item.id === id);
@@ -72,8 +79,14 @@ const selectedItemsSlice = createSlice({
   },
 });
 
-export const { addItem, removeItem, updateItemQuantity, clearItems, setIsBackDropOpen } =
-  selectedItemsSlice.actions;
+export const {
+  addItem,
+  removeItem,
+  updateItemQuantity,
+  clearItems,
+  setIsBackDropOpen,
+  deleteItem,
+} = selectedItemsSlice.actions;
 
 export const getSelectedItems = (state: any) => state.selectedItems;
 

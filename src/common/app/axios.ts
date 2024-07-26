@@ -1,12 +1,13 @@
 import axios, { AxiosError, AxiosRequestConfig } from 'axios';
+import { getCookie } from './cookie';
 // import { getCookie, saveCookie } from './cookie';
 
 const onRequest = async (config: AxiosRequestConfig) => {
-  // const token = getCookie('t');
+  const token = getCookie('t');
 
-  // if (config.headers) {
-  //   config.headers.Authorization = `Bearer ${token}`;
-  // }
+  if (config.headers) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
 
   return config;
 };

@@ -18,6 +18,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import Swal from 'sweetalert2';
 import Nav from '@/src/components/Nav';
 import { generateRandomBarcode } from '@/src/common/helpers';
+import { postItem } from '@/src/common/api/testApi';
 
 // import Html5QrcodePlugin from '@/src/components/Scanner';
 
@@ -74,16 +75,10 @@ const AddItemForm = () => {
     validationSchema: checked ? validationSchemaChecked : validationSchemaUnchecked,
     onSubmit: async (values, { resetForm, setSubmitting }) => {
       try {
-        const endpoint = '/api/items2';
-        const response = await fetch(endpoint, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(values),
-        });
+        const response = await postItem(values);
+        console.log('response data', response);
 
-        if (response.ok) {
+        if (response) {
           Swal.fire({
             title: 'Success!',
             text: checked ? 'Item updated successfully' : 'Item added successfully',
