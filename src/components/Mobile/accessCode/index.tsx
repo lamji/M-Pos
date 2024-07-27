@@ -8,6 +8,9 @@ import 'react-toastify/dist/ReactToastify.css';
 import RequestCodeModal from '../DeleteModal/requestCodeModal';
 import { saveCookie } from '@/src/common/app/cookie';
 import { useRouter } from 'next/router';
+import { setIsBackDropOpen } from '@/src/common/reducers/items';
+import { useDispatch } from 'react-redux';
+import SimpleDialogDemo from '../../Loader/backdrop';
 
 // Define TypeScript types for form values
 interface FormValues {
@@ -22,6 +25,7 @@ const validationSchema = Yup.object({
 });
 
 const MobileBankingLoginComponent: React.FC = () => {
+  const dispatch = useDispatch();
   const router = useRouter();
   const [open, setOpen] = useState(false);
   // const requestCode = getCookie('rc');
@@ -37,9 +41,8 @@ const MobileBankingLoginComponent: React.FC = () => {
       values: FormValues,
       { resetForm, setSubmitting }: FormikHelpers<FormValues>
     ) => {
+      dispatch(setIsBackDropOpen(true));
       try {
-        console.log('Submitting values:', values); // Debugging line
-
         const response = await fetch('/api/login', {
           method: 'POST',
           headers: {
@@ -57,18 +60,22 @@ const MobileBankingLoginComponent: React.FC = () => {
           });
           setTimeout(() => router.push('/'), 1);
           resetForm();
+          dispatch(setIsBackDropOpen(false));
         } else {
           toast.error(data.message || 'Login failed. Please try again.', {
             position: 'top-center',
           });
+          dispatch(setIsBackDropOpen(false));
         }
       } catch (error) {
         console.error('Error during form submission:', error); // Debugging line
         toast.error('An error occurred. Please try again.', {
           position: 'top-center',
         });
+        dispatch(setIsBackDropOpen(false));
       } finally {
         setSubmitting(false);
+        dispatch(setIsBackDropOpen(false));
       }
     },
   });
@@ -173,6 +180,7 @@ const MobileBankingLoginComponent: React.FC = () => {
       </Paper>
       <RequestCodeModal open={open} handleClose={(i: boolean) => setOpen(i)} />
       <ToastContainer />
+      <SimpleDialogDemo />
     </Container>
   );
 };
