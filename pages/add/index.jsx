@@ -100,6 +100,7 @@ const AddItemForm = () => {
     onSubmit: async (values, { resetForm, setSubmitting }) => {
       try {
         const response = await postItem(values);
+        console.log('response');
         if (response.status === 200) {
           Swal.fire({
             title: 'Success!',
