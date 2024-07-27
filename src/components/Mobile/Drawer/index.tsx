@@ -43,13 +43,13 @@ export default function MobileDrawer({ status, setStatus }: PropsDrawer) {
           sx={{
             display: 'flex',
             justifyContent: 'left',
-            background: '#0A736C',
+            background: '#ef783e',
             alignItems: 'center',
             padding: '10px',
           }}
         >
           <Image
-            src="/mposlogo.png" // Placeholder logo URL
+            src="/logov3.png" // Placeholder logo URL
             alt="Bank Logo"
             width={40}
             height={40}
@@ -102,7 +102,6 @@ export default function MobileDrawer({ status, setStatus }: PropsDrawer) {
         </List>
       </Box>
       <Box sx={{ padding: 2 }}>
-        <Divider />
         <List>
           <ListItem disablePadding>
             <ListItemButton onClick={handleSignout}>

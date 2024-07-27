@@ -23,8 +23,10 @@ export default function useViewModel() {
   const state = useSelector(getData);
   const [open, setOpen] = useState(false);
   const [itemToDelete2, setItemToDelete] = useState('');
-
+  const [deleteProduct, setDeleteProduct] = useState('');
+  const [autocompleteValue, setAutocompleteValue] = useState(null);
   const [allItems, setAllItems] = useState([]);
+  const [refetch, setRefetch] = useState(false);
   // const [lastScan, setLastScan] = useState(0);
   // const [isScanning, setIsScanning] = useState(false); // State to manage scanner visibility
 
@@ -58,11 +60,11 @@ export default function useViewModel() {
 
   useEffect(() => {
     fetItems();
-  }, []);
+  }, [refetch]);
 
   useEffect(() => {
     setAllItems(state);
-  }, [state]);
+  }, [state, refetch]);
 
   const handleAddItem = (event, value) => {
     if (value) {
@@ -75,6 +77,7 @@ export default function useViewModel() {
         });
       } else {
         setActiveOrders(value);
+        setAutocompleteValue(null);
         handleOpen(true);
         //dispatch(addItem({ id: value.id, name: value.name, price: value.price, _id: value._id }));
       }
@@ -90,7 +93,7 @@ export default function useViewModel() {
 
   const handleDeleteItem = (id, name) => {
     setOpen(true);
-    setItemToDelete(name);
+    setDeleteProduct(name);
     setItemToDelete(id);
     // if (confirmed) {
     //   dispatch(removeItem(id));
@@ -261,5 +264,8 @@ export default function useViewModel() {
     items,
     handleClose,
     itemToDelete2,
+    deleteProduct,
+    autocompleteValue,
+    setRefetch,
   };
 }

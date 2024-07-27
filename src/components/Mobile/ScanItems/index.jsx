@@ -23,6 +23,7 @@ import LinearIndeterminate from '../../Loader/linear';
 import DeleteConfirmationDialog from '../DeleteModal';
 import QuantityAdjuster from '../QtyConfrimatoin';
 import useViewModel from './useViewModel';
+import Checkout from '../CheckOut';
 
 const ComboBox = () => {
   const {
@@ -32,7 +33,7 @@ const ComboBox = () => {
     // handleOpen,
     handleCloseQty,
     handleClose,
-    itemToDelete2,
+    deleteProduct,
     handleConfirmQty,
     handleCancel,
     activeOrders,
@@ -48,6 +49,8 @@ const ComboBox = () => {
     handleDeleteItem,
     handleConfirm,
     items,
+    autocompleteValue,
+    setRefetch,
   } = useViewModel();
 
   return (
@@ -64,6 +67,9 @@ const ComboBox = () => {
               paddingTop: '20px',
             }}
           >
+            <Box sx={{ textAlign: 'center' }}>
+              <Checkout isRefresh={(i) => setRefetch(i)} />
+            </Box>
             {/* Conditionally render the Html5QrcodePlugin based on isScanning state */}
 
             {/* {isScanning && (
@@ -81,6 +87,7 @@ const ComboBox = () => {
                 disablePortal
                 id="combo-box-demo"
                 options={allItems}
+                value={autocompleteValue}
                 disabled={allItems.length === 0}
                 getOptionLabel={(option) => option.name}
                 sx={{
@@ -207,7 +214,7 @@ const ComboBox = () => {
               open={open}
               onClose={handleClose}
               onConfirm={handleConfirm}
-              item={itemToDelete2}
+              item={deleteProduct}
             />
           </Box>
           {/* <Button variant="contained" color="primary" onClick={handleOpen}>

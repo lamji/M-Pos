@@ -30,11 +30,6 @@ export const postTransaction = async (params?: TObjectAny) => {
   return instance.post('/api/transactions', params);
 };
 
-export const postItem = async (values: TObjectAny) => {
-  const response = await instance.post('/api/items2', values);
-  return response.data;
-};
-
 export const getSalesData = async () => {
   try {
     const response = await instance.get('/api/transactions', {
@@ -126,4 +121,28 @@ export const addPaymentToUtang = async (id: string, payment: { amount: number })
     console.error('Error adding payment to utang:', error);
     throw new Error('Failed to add payment to utang');
   }
+};
+
+export const getAllItem = async (page: number, limit: number) => {
+  const response = await instance.get(`/api/items2?page=${page}&limit=${limit}`);
+  return response.data;
+};
+
+export const postItemUpdate = async (itemData: any) => {
+  const response = instance.post('/api/items2', { ...itemData, type: 'none' });
+  return response;
+};
+
+export const postItem = async (values: TObjectAny) => {
+  const response = await instance.post('/api/items2', values);
+  return response.data;
+};
+
+export const getItemsByName = async (searchTerm: string) => {
+  const response = await instance.get('/api/items2', {
+    params: {
+      name: searchTerm,
+    },
+  });
+  return response;
 };

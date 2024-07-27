@@ -4,8 +4,8 @@ export const useStyles = () => {
   return {
     root: {
       borderRadius: '5px',
-
-      marginTop: '70px',
+      marginBottom: '10px',
+      marginTop: '50px',
     } as CSSProperties,
     button: {
       fontWeight: 700,

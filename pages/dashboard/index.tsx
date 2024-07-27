@@ -8,6 +8,31 @@ import { formatCurrency } from '@/src/common/helpers';
 import { setIsBackDropOpen } from '@/src/common/reducers/items';
 import { useDispatch } from 'react-redux';
 import moment from 'moment';
+import { GetServerSideProps } from 'next';
+import { parse } from 'cookie';
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const { req } = context;
+  const cookie = req.headers.cookie;
+
+  const cookies = cookie ? parse(cookie) : undefined;
+  const isAuthenticated = cookies?.t ? true : false;
+
+  if (!isAuthenticated) {
+    return {
+      redirect: {
+        destination: '/login',
+        permanent: false,
+      },
+    };
+  }
+
+  return {
+    props: {
+      fullMode: false,
+    },
+  };
+};
 
 export default function Dashboard() {
   const dispatch = useDispatch();
@@ -34,13 +59,7 @@ export default function Dashboard() {
 
   return (
     <div>
-      <Nav>
-        {/* <Box display="flex" alignItems="center">
-          <Typography variant="h6" fontWeight={700}>
-            Dashboard
-          </Typography>
-        </Box> */}
-      </Nav>
+      <Nav />
       <Box
         sx={{
           padding: '10px',
@@ -71,8 +90,8 @@ export default function Dashboard() {
           <Box
             sx={{
               padding: '10px',
-              border: '2px solid #8d8d8d',
-              background: '#c7c7c7',
+              border: '2px solid #ff6b23',
+              background: '#ef783e',
               borderRadius: 2,
               width: '48%',
               height: '120px',
@@ -88,10 +107,10 @@ export default function Dashboard() {
               <Typography
                 sx={{
                   fontSize: '9px',
-                  background: '#ff8e8e',
-                  padding: '2px 4px',
-                  borderRadius: '5px',
-                  border: '1px solid #bf2e2e',
+                  background: 'white',
+                  padding: '4px',
+                  borderRadius: '3px',
+                  color: 'red',
                 }}
               >
                 Utang: {formatCurrency(data?.yesterday?.Utang ?? 0)}
@@ -99,10 +118,9 @@ export default function Dashboard() {
               <Typography
                 sx={{
                   fontSize: '9px',
-                  background: '#9bc39b',
-                  padding: '2px 4px',
-                  borderRadius: '5px',
-                  border: '1px solid green',
+                  background: 'white',
+                  padding: '4px',
+                  borderRadius: '3px',
                   mt: '3px',
                 }}
               >
@@ -114,8 +132,8 @@ export default function Dashboard() {
             onClick={() => setFilterData('dataToday')}
             sx={{
               padding: '10px',
-              border: '2px solid #105942',
-              background: '#b8ded2',
+              border: '2px solid #ff6b23',
+              background: '#ef783e',
               borderRadius: 2,
               width: '48%',
               height: '120px',
@@ -130,10 +148,10 @@ export default function Dashboard() {
               <Typography
                 sx={{
                   fontSize: '9px',
-                  background: '#ff8e8e',
-                  padding: '2px 4px',
-                  borderRadius: '5px',
-                  border: '1px solid #bf2e2e',
+                  background: 'white',
+                  padding: '4px',
+                  borderRadius: '3px',
+                  color: 'red',
                 }}
               >
                 Utang: {formatCurrency(data?.today?.Utang ?? 0)}
@@ -141,10 +159,9 @@ export default function Dashboard() {
               <Typography
                 sx={{
                   fontSize: '9px',
-                  background: '#9bc39b',
-                  padding: '2px 4px',
-                  borderRadius: '5px',
-                  border: '1px solid green',
+                  background: 'white',
+                  padding: '4px',
+                  borderRadius: '3px',
                   mt: '3px',
                 }}
               >
@@ -155,11 +172,11 @@ export default function Dashboard() {
         </Box>
         <Box
           sx={{
-            background: '#76bba5',
+            background: '#ff6e31',
             p: 1,
             borderRadius: 2,
             mt: '5px',
-            border: '2px solid #007550',
+            border: '2px solid #ffe8de',
             boxShadow: '1px 1px 18px -5px rgba(0,0,0,0.75)',
           }}
         >
@@ -168,6 +185,7 @@ export default function Dashboard() {
               fontSize: '11px',
               fontWeight: 700,
               mb: '10px',
+              color: 'white',
             }}
           >
             Weekly fast moving
@@ -182,7 +200,7 @@ export default function Dashboard() {
                       sx={{
                         padding: '9px',
                         borderRadius: 2,
-                        border: '1px solid #007550',
+                        border: '1px solid #2d3349',
                         gap: 2,
                         width: '90px',
                         display: 'flex',
@@ -190,7 +208,7 @@ export default function Dashboard() {
                         alignItems: 'left',
                         justifyContent: 'center',
                         margin: '1px',
-                        background: '#abd7ab',
+                        background: '#fff9f6',
                         flexShrink: 0, // Prevent the items from shrinking
                       }}
                     >

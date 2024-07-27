@@ -1,6 +1,6 @@
 import cron from 'node-cron';
-import { connectToDatabase } from '../src/common/app/lib/mongodb';
-import User from '../src/common/app/model/Users';
+import { connectToDatabase } from '../../../src/common/app/lib/mongodb';
+import User from '../../../src/common/app/model/Users';
 
 async function deactivateExpiredSubscriptions() {
   await connectToDatabase();

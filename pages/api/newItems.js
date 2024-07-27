@@ -1,6 +1,6 @@
 import { connectToDatabase } from '../../src/common/app/lib/mongodb';
 import User from '../../src/common/app/model/Users';
-import { verifyToken } from '../../middleware/auth'; // Adjust the path as needed
+import { verifyToken } from '../../utils/authMiddleware'; // Adjust the path as needed
 
 export default async function handler(req, res) {
   const { method } = req;

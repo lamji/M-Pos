@@ -18,6 +18,31 @@ import SearchIcon from '@mui/icons-material/Search';
 import moment from 'moment';
 import Nav from '@/src/components/Nav';
 import useViewModel from './useViewModel';
+import { GetServerSideProps } from 'next';
+import { parse } from 'cookie';
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const { req } = context;
+  const cookie = req.headers.cookie;
+
+  const cookies = cookie ? parse(cookie) : undefined;
+  const isAuthenticated = cookies?.t ? true : false;
+
+  if (!isAuthenticated) {
+    return {
+      redirect: {
+        destination: '/login',
+        permanent: false,
+      },
+    };
+  }
+
+  return {
+    props: {
+      fullMode: false,
+    },
+  };
+};
 
 // types.ts
 export interface Item {

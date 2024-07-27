@@ -75,7 +75,7 @@ const QuantityAdjuster: React.FC<QuantityAdjusterProps> = ({
             aria-label="increase quantity"
             disabled={items.quantity <= quantity ? true : false}
           >
-            <AddIcon style={{ color: '#0A736C' }} />
+            <AddIcon style={{ color: '#ef783e' }} />
           </IconButton>
         </Box>
         <Box

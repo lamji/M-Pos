@@ -171,7 +171,7 @@ export default async function handler(req, res) {
           }
 
           await user.save();
-          res.status(201).json({ status: 'success' });
+          res.status(200).json({ status: 'success', data: user });
         });
       } catch (error) {
         res.status(500).json({ error: 'Failed to add or update item' });

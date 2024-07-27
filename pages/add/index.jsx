@@ -19,6 +19,30 @@ import Swal from 'sweetalert2';
 import Nav from '@/src/components/Nav';
 import { generateRandomBarcode } from '@/src/common/helpers';
 import { postItem } from '@/src/common/api/testApi';
+import { parse } from 'cookie';
+
+export const getServerSideProps = async (context) => {
+  const { req } = context;
+  const cookie = req.headers.cookie;
+
+  const cookies = cookie ? parse(cookie) : undefined;
+  const isAuthenticated = cookies?.t ? true : false;
+
+  if (!isAuthenticated) {
+    return {
+      redirect: {
+        destination: '/login',
+        permanent: false,
+      },
+    };
+  }
+
+  return {
+    props: {
+      fullMode: false,
+    },
+  };
+};
 
 // import Html5QrcodePlugin from '@/src/components/Scanner';
 
@@ -76,9 +100,7 @@ const AddItemForm = () => {
     onSubmit: async (values, { resetForm, setSubmitting }) => {
       try {
         const response = await postItem(values);
-        console.log('response data', response);
-
-        if (response) {
+        if (response.status === 200) {
           Swal.fire({
             title: 'Success!',
             text: checked ? 'Item updated successfully' : 'Item added successfully',
@@ -112,12 +134,6 @@ const AddItemForm = () => {
   const handleChange = (event) => {
     setChecked(event.target.checked);
   };
-
-  // const handleBarcodeScan = (decodedText) => {
-  //   setScannedBarcode(decodedText);
-  //   const randomId = `${decodedText}-${Math.floor(Math.random() * 1000)}`;
-  //   setGeneratedId(randomId);
-  // };
 
   const handleBarcodeScanUpdate = async (decodedText) => {
     setScannedBarcode(decodedText);
@@ -158,13 +174,6 @@ const AddItemForm = () => {
     }
   };
 
-  // const handleClick = (code) => {
-  //   if (checked) {
-  //     handleBarcodeScanUpdate(code);
-  //   } else {
-  //     handleBarcodeScan(code);
-  //   }
-  // };
   return (
     <>
       <Nav />

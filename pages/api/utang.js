@@ -1,133 +1,139 @@
-// pages/api/utang.js
 import moment from 'moment/moment';
 import { connectToDatabase } from '../../src/common/app/lib/mongodb';
-import Utang from '../../src/common/app/model/utang';
+import User from '../../src/common/app/model/Users';
+import { verifyToken } from '../../utils/authMiddleware';
 
 export default async function handler(req, res) {
-  const { method } = req;
-
   await connectToDatabase();
 
-  switch (method) {
-    case 'GET':
-      try {
-        const { _id } = req.query;
+  return verifyToken(req, res, async () => {
+    const { method } = req;
+    const { _id, email } = req.user; // Assume req.user has email from token
 
-        let utang;
-        if (_id) {
-          utang = await Utang.findById(_id);
-          if (!utang) {
-            return res.status(404).json({ error: 'Utang not found' });
-          }
-          utang = [utang]; // Ensure utang is an array for consistent response format
-        } else {
-          utang = await Utang.find({});
-          utang = utang.filter((entry) => entry.total > 0);
-        }
-
-        // Sort utang by date in ascending order (earliest items first)
-        utang.sort((a, b) => new Date(a.date) - new Date(b.date));
-
-        utang.forEach((entry, index) => {
-          entry.number = index + 1;
-        });
-
-        const totalUtang = utang.reduce((sum, entry) => {
-          return sum + entry.total;
-        }, 0);
-
-        const utangList = await await Utang.find({});
-        const listUtangName = utangList.map((item) => {
-          return {
-            _id: item._id,
-            personName: item.personName,
-          };
-        });
-
-        res.status(200).json({ utang, totalUtang, listUtangName });
-      } catch (error) {
-        res.status(500).json({ error: 'Failed to fetch utang' });
-      }
-
-      break;
-
-    case 'POST':
-      try {
-        const { items, name, _id, payment } = req.body;
-
-        // console.log(items, name, _id, payment);
-        // // Calculate the total amount based on items
-        // const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
-        if (_id) {
-          // If _id is provided, determine if it is a payment or an update
-          let utang = await Utang.findById(_id);
-          var change = 0;
-          if (!utang) {
-            return res.status(404).json({ error: 'Utang not found' });
+    switch (method) {
+      case 'GET':
+        try {
+          // Fetch the user by email (from token)
+          const user = await User.findOne({ email });
+          if (!user) {
+            return res.status(404).json({ error: 'User not found' });
           }
 
-          if (payment) {
-            // Check for payment transactions
-            // utang.remainingBalance -= payment.amount;
-            const totalDb = utang.total;
-            const type = payment.amount >= totalDb ? 'full' : 'partial';
+          const { utangs } = user;
 
-            utang.transactions.push({ date: new Date(), amount: payment.amount });
-            if (type === 'full') {
-              change = utang.total;
-              // If full payment, empty the items array
-              utang.items = [];
-              utang.total = 0;
-              utang.remainingBalance = 0;
-            } else {
-              // If partial payment, empty the items array and add a new item
-              const remainingBalance = totalDb - payment.amount;
-              utang.items = [
-                {
-                  name: 'Balance for date ' + moment().format('ll'),
-                  price: remainingBalance,
-                  quantity: 0,
-                  date: new Date(),
-                },
-              ];
-              utang.total = remainingBalance;
-              utang.remainingBalance = remainingBalance;
+          let filteredUtangs;
+          if (_id) {
+            filteredUtangs = utangs.filter((utang) => utang._id.toString() === _id);
+            if (filteredUtangs.length === 0) {
+              return res.status(404).json({ error: 'Utang not found' });
             }
           } else {
-            const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-            // Update the existing utang
-            utang.items = items; // Update the items list
-            utang.total = total; // Recalculate the total amount
-            // No need to set remainingBalance from body; it's recalculated based on total - previous payments
-            utang.remainingBalance =
-              total - utang.transactions.reduce((sum, transaction) => sum + transaction.amount, 0);
+            filteredUtangs = utangs.filter((utang) => utang.total > 0);
           }
 
-          await utang.save();
+          // Sort utang by date in ascending order (earliest items first)
+          filteredUtangs.sort((a, b) => new Date(a.date) - new Date(b.date));
 
-          res.status(200).json({ utang: 'success', change: change });
-        } else {
-          const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-          // Create a new utang
-          const remainingBalance = total;
-          const newUtang = new Utang({
-            items,
-            name,
-            total,
-            remainingBalance,
-            transactions: payment ? [{ date: new Date(), amount: payment.amount }] : [],
+          // Add a number property to each entry for display purposes
+          filteredUtangs.forEach((entry, index) => {
+            entry.number = index + 1;
           });
-          await newUtang.save();
-          res.status(201).json(newUtang);
-        }
-      } catch (error) {
-        console.log(error);
-        res.status(500).json({ error: 'Failed to add/update utang' });
-      }
-      break;
 
-    default:
-      res.setHeader('Allow', ['GET', 'POST']);
-      res.status(405).end(`Method ${method} Not Allowed`);
-  }
+          // Calculate the total outstanding amount
+          const totalUtang = filteredUtangs.reduce((sum, entry) => sum + entry.total, 0);
+
+          // Get a list of all Utang names
+          const listUtangName = user.utangs.map((item) => ({
+            _id: item._id,
+            personName: item.personName,
+          }));
+
+          res.status(200).json({ utang: filteredUtangs, totalUtang, listUtangName });
+        } catch (error) {
+          res.status(500).json({ error: 'Failed to fetch utang' });
+        }
+        break;
+
+      case 'POST':
+        try {
+          const { items, name, _id, payment } = req.body;
+
+          // Fetch the user by email (from token)
+          const user = await User.findOne({ email });
+          if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+          }
+
+          const utangs = user.utangs;
+          let utang;
+          let change = 0;
+
+          if (_id) {
+            utang = utangs.find((utang) => utang._id.toString() === _id);
+            if (!utang) {
+              return res.status(404).json({ error: 'Utang not found' });
+            }
+
+            if (payment) {
+              // Handle payment
+              const totalDb = utang.total;
+              const type = payment.amount >= totalDb ? 'full' : 'partial';
+
+              utang.transactions.push({ date: new Date(), amount: payment.amount });
+              if (type === 'full') {
+                change = utang.total;
+                utang.items = [];
+                utang.total = 0;
+                utang.remainingBalance = 0;
+              } else {
+                const remainingBalance = totalDb - payment.amount;
+                utang.items = [
+                  {
+                    name: 'Balance for date ' + moment().format('ll'),
+                    price: remainingBalance,
+                    quantity: 0,
+                    date: new Date(),
+                  },
+                ];
+                utang.total = remainingBalance;
+                utang.remainingBalance = remainingBalance;
+              }
+            } else {
+              // Update the existing utang
+              const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+              utang.items = items;
+              utang.total = total;
+              utang.remainingBalance =
+                total -
+                utang.transactions.reduce((sum, transaction) => sum + transaction.amount, 0);
+            }
+          } else {
+            // Create a new utang
+            const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+            const remainingBalance = total;
+            utang = {
+              items,
+              personName: name,
+              total,
+              remainingBalance,
+              transactions: payment ? [{ date: new Date(), amount: payment.amount }] : [],
+            };
+            user.utangs.push(utang);
+          }
+
+          // Save the user with the updated utangs
+          await user.save();
+
+          res.status(200).json({ utang: 'success', change });
+        } catch (error) {
+          console.error(error);
+          res.status(500).json({ error: 'Failed to add/update utang' });
+        }
+        break;
+
+      default:
+        res.setHeader('Allow', ['GET', 'POST']);
+        res.status(405).end(`Method ${method} Not Allowed`);
+    }
+  });
 }
