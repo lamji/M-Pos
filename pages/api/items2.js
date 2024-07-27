@@ -125,14 +125,13 @@ export default async function handler(req, res) {
           const existingItem = user.items.find((item) => item.barcode === barcode);
 
           if (existingItem && type === 'new') {
-            return res.status(400).json({ error: 'Barcode already exists' });
+            return res.status(409).json({ status: false, message: 'Barcode already exists' });
           }
 
           if (existingItem) {
             // Update existing item
             const prevQty = existingItem.quantity || 0;
             const newQty = type === 'Add' ? prevQty + quantity : prevQty - quantity;
-
             // Update item fields
             existingItem.name = name || existingItem.name;
             existingItem.price = price || existingItem.price;
@@ -141,7 +140,6 @@ export default async function handler(req, res) {
             } else {
               existingItem.quantity = quantity;
             }
-
             existingItem.regularPrice = regularPrice || existingItem.regularPrice;
             existingItem.quantityHistory.push({
               quantityChanged: quantity,
@@ -171,7 +169,7 @@ export default async function handler(req, res) {
           }
 
           await user.save();
-          res.status(200).json({ status: 200, data: user });
+          res.status(200).json({ status: 200, data: user.items });
         });
       } catch (error) {
         res.status(500).json({ error: 'Failed to add or update item' });

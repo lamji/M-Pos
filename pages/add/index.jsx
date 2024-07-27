@@ -18,8 +18,10 @@ import 'react-toastify/dist/ReactToastify.css';
 import Swal from 'sweetalert2';
 import Nav from '@/src/components/Nav';
 import { generateRandomBarcode } from '@/src/common/helpers';
-import { postItem } from '@/src/common/api/testApi';
 import { parse } from 'cookie';
+// import Html5QrcodePlugin from '@/src/components/Scanner';
+import { getCookie } from '@/src/common/app/cookie';
+import axios from 'axios';
 
 export const getServerSideProps = async (context) => {
   const { req } = context;
@@ -43,8 +45,6 @@ export const getServerSideProps = async (context) => {
     },
   };
 };
-
-// import Html5QrcodePlugin from '@/src/components/Scanner';
 
 // Validation Schema
 const validationSchemaChecked = Yup.object({
@@ -71,6 +71,7 @@ const validationSchemaUnchecked = Yup.object({
 });
 
 const AddItemForm = () => {
+  const token = getCookie('t');
   const [scannedBarcode, setScannedBarcode] = useState('');
   const [generatedId, setGeneratedId] = useState('');
   const [checked, setChecked] = useState(false);
@@ -98,9 +99,18 @@ const AddItemForm = () => {
     enableReinitialize: true,
     validationSchema: checked ? validationSchemaChecked : validationSchemaUnchecked,
     onSubmit: async (values, { resetForm, setSubmitting }) => {
+      const url = '/api/items2'; // Replace with your actual URL
+
       try {
-        const response = await postItem(values);
-        console.log('response');
+        const response = await axios.post(url, values, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+
+        alert(JSON.stringify(response, null, 2));
+
         if (response.status === 200) {
           Swal.fire({
             title: 'Success!',
@@ -122,7 +132,7 @@ const AddItemForm = () => {
       } catch (error) {
         Swal.fire({
           title: 'Error!',
-          text: `${JSON.stringify(error)}`,
+          text: `${error.response?.data?.message || error.error}`, // Handle error message from response
           icon: 'error',
           confirmButtonText: 'OK',
         });
@@ -143,7 +153,11 @@ const AddItemForm = () => {
       setGeneratedId(randomId);
     } else {
       try {
-        const response = await fetch(`/api/items2?barcode=${decodedText}`);
+        const response = await fetch(`/api/items2?barcode=${decodedText}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         const data = await response.json();
         if (data.length > 0) {
           const matchedItem = data[0];
@@ -159,7 +173,7 @@ const AddItemForm = () => {
         } else {
           Swal.fire({
             title: 'Error!',
-            text: 'No item found with the scanned barcode',
+            text: `No item found with the scanned barcode ${decodedText}`,
             icon: 'error',
             confirmButtonText: 'OK',
           });

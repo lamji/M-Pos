@@ -17,9 +17,7 @@ export const fetchItems = async (params: any) => {
 };
 export const getItemByBarcode = async (barcode: string) => {
   try {
-    const response = await instance.get('/api/items2', {
-      params: { barcode },
-    });
+    const response = await instance.get(`/api/items2?barcode=${barcode}`);
     return response.data;
   } catch (error) {
     console.error('Failed to fetch item', error);
@@ -145,4 +143,12 @@ export const getItemsByName = async (searchTerm: string) => {
     },
   });
   return response;
+};
+
+export const getByBarcode = async (decodedText: string) => {
+  const response = await instance.get(`/api/items2`, {
+    params: { barcode: decodedText },
+  });
+
+  return response?.data;
 };
