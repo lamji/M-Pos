@@ -24,6 +24,7 @@ import DeleteConfirmationDialog from '../DeleteModal';
 import QuantityAdjuster from '../QtyConfrimatoin';
 import useViewModel from './useViewModel';
 import Checkout from '../CheckOut';
+// import Html5QrcodePlugin from '../../Scanner';
 
 const ComboBox = () => {
   const {
@@ -72,15 +73,12 @@ const ComboBox = () => {
             </Box>
             {/* Conditionally render the Html5QrcodePlugin based on isScanning state */}
 
-            {/* {isScanning && (
-          <Html5QrcodePlugin
-            fps={10}
-            qrbox={250}
-            disableFlip={false}
-            qrCodeSuccessCallback={debouncedOnNewScanResult}
-            stopScanning={stopScanning} // Pass the stopScanning state as a prop
-          />
-        )} */}
+            {/* <Html5QrcodePlugin
+              fps={10}
+              qrbox={250}
+              disableFlip={false}
+              qrCodeSuccessCallback={onNewScanResult}
+            /> */}
 
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
               <Autocomplete

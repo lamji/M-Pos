@@ -72,6 +72,7 @@ const validationSchemaUnchecked = Yup.object({
 
 const AddItemForm = () => {
   const token = getCookie('t');
+  const url = '/api/items2'; // Replace with your actual URL
   const [scannedBarcode, setScannedBarcode] = useState('');
   const [generatedId, setGeneratedId] = useState('');
   const [checked, setChecked] = useState(false);
@@ -99,8 +100,6 @@ const AddItemForm = () => {
     enableReinitialize: true,
     validationSchema: checked ? validationSchemaChecked : validationSchemaUnchecked,
     onSubmit: async (values, { resetForm, setSubmitting }) => {
-      const url = '/api/items2'; // Replace with your actual URL
-
       try {
         const response = await axios.post(url, values, {
           headers: {
@@ -108,8 +107,6 @@ const AddItemForm = () => {
             'Content-Type': 'application/json',
           },
         });
-
-        alert(JSON.stringify(response, null, 2));
 
         if (response.status === 200) {
           Swal.fire({
@@ -153,12 +150,12 @@ const AddItemForm = () => {
       setGeneratedId(randomId);
     } else {
       try {
-        const response = await fetch(`/api/items2?barcode=${decodedText}`, {
+        const response = await axios.get(`/api/items2?barcode=${decodedText}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
-        const data = await response.json();
+        const data = response.data;
         if (data.length > 0) {
           const matchedItem = data[0];
           formik.setValues({

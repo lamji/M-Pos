@@ -1,4 +1,5 @@
-import { fetchItems, getAllUtang } from '@/src/common/api/testApi';
+import { fetchItems } from '@/src/common/api/testApi';
+import { getCookie } from '@/src/common/app/cookie';
 import { getData, setData } from '@/src/common/reducers/data';
 import {
   addItem,
@@ -8,12 +9,14 @@ import {
   updateItemQuantity,
 } from '@/src/common/reducers/items';
 import { setUtangData } from '@/src/common/reducers/utangData';
+import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 import Swal from 'sweetalert2';
 
 export default function useViewModel() {
+  const token = getCookie('t');
   const { items } = useSelector(getSelectedItems);
   const [quantity, setQuantity] = useState(1);
   const [modalOpen, setModalOpen] = useState(false);
@@ -113,9 +116,12 @@ export default function useViewModel() {
     }
 
     try {
-      const response = await fetch(`/api/items2?barcode=${decodedText}`);
-      const data = await response.json();
-      // setJsonResponse(data); // Set the JSON response to state
+      const response = await axios.get(`/api/items2?barcode=${decodedText}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = response.data;
 
       if (data.length > 0) {
         const matchedItem = data[0];
@@ -142,9 +148,14 @@ export default function useViewModel() {
 
   const updateUtang = async () => {
     try {
-      const data = await getAllUtang();
-      if (data) {
-        dispatch(setUtangData(data));
+      const response = await axios.get('/api/utang', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.data) {
+        dispatch(setUtangData(response.data));
       }
     } catch (error) {
       console.log(error);
