@@ -27,7 +27,7 @@ const transactionSchema = new mongoose.Schema({
   },
   transactionType: {
     type: String,
-    required: true,
+    required: false,
   },
   items: [
     {
@@ -59,6 +59,11 @@ const transactionSchema = new mongoose.Schema({
   },
 });
 
+const utangTransactionSchema = new mongoose.Schema({
+  date: { type: Date, default: Date.now },
+  amount: Number,
+});
+
 // Define the utang schema
 const utangSchema = new mongoose.Schema({
   items: [
@@ -81,7 +86,7 @@ const utangSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
-  transactions: [transactionSchema],
+  transactions: [utangTransactionSchema],
   date: {
     type: Date,
     default: Date.now,

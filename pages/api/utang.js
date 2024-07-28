@@ -81,11 +81,12 @@ export default async function handler(req, res) {
 
               utang.transactions.push({ date: new Date(), amount: payment.amount });
               if (type === 'full') {
-                change = utang.total;
+                change = payment.amount - utang.total;
                 utang.items = [];
                 utang.total = 0;
                 utang.remainingBalance = 0;
               } else {
+                change = payment.amount - utang.total;
                 const remainingBalance = totalDb - payment.amount;
                 utang.items = [
                   {

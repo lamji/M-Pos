@@ -1,4 +1,6 @@
+import moment from 'moment';
 import User from '../src/common/app/model/Users';
+import { formatCurrency } from '@/src/common/helpers';
 
 export const updatePartialTransactions = async (req: any) => {
   const { items, personName, cash, total, partialAmount, _id, payment } = req.body;
@@ -22,10 +24,11 @@ export const updatePartialTransactions = async (req: any) => {
       // Update utang record
       const utangItems = items.map((item: any) => ({
         ...item,
-        name: 'Resto',
+        name: `Resto as of ${moment(new Date()).format('LL')}`,
         price: total - partialAmount,
         quantity: 1,
       }));
+
       utangRecord.total += total - partialAmount;
       utangRecord.items = [...utangRecord.items, ...utangItems];
       utangRecord.transactions.push({ date: new Date(), amount: partialAmount });
@@ -33,8 +36,19 @@ export const updatePartialTransactions = async (req: any) => {
     } else {
       // Create a new utang record
       const utangToAdd = total - partialAmount;
+      const itemsPrice = utangToAdd / items.length;
+      const newUtangRecord = items.map((item: any) => {
+        return {
+          id: item.id,
+          name: `Resto for ${item.name}: Original Price ${formatCurrency(item.price)}}`,
+          price: itemsPrice,
+          quantity: 1,
+        };
+      });
+
+      console.log(newUtangRecord, items.length);
       utangRecord = {
-        items,
+        items: newUtangRecord,
         personName,
         total: utangToAdd,
         remainingBalance: utangToAdd,
@@ -45,14 +59,16 @@ export const updatePartialTransactions = async (req: any) => {
     }
 
     // Create a new transaction record inside the user schema
-    const utangItemsCash = [
-      {
-        id: '4800361413480-35-resto',
-        name: `Partial payment ${personName}`,
-        quantity: 1,
-        price: partialAmount,
-      },
-    ];
+
+    const utangItemsCash = items.map((item: any) => {
+      return {
+        id: item.id,
+        name: `Partial Payment ${personName}-${item.name}`,
+        quantity: item.quantity,
+        price: item.price,
+      };
+    });
+
     const transactionData = {
       items: utangItemsCash,
       personName,
@@ -64,14 +80,14 @@ export const updatePartialTransactions = async (req: any) => {
       transactionType: 'Cash',
     };
 
-    const utangItems = [
-      {
-        id: '4800361413480-35-resto',
-        name: `Resto ${personName}`,
-        quantity: 1,
-        price: total - partialAmount,
-      },
-    ];
+    const utangItems = items.map((item: any) => {
+      return {
+        id: item.id,
+        name: `Resto ${personName}-${item.name}`,
+        quantity: item.quantity,
+        price: item.price,
+      };
+    });
 
     const transactionDataUtang = {
       items: utangItems,

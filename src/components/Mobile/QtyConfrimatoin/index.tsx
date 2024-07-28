@@ -119,12 +119,11 @@ const QuantityAdjuster: React.FC<QuantityAdjusterProps> = ({
         </Typography>
         <Typography
           sx={{
-            color: items.quantity <= quantity ? 'error.main' : 'gray',
             textAlign: 'center',
             fontSize: '10px',
           }}
         >
-          {items.quantity <= quantity ? 'Out Of Stocks' : `Stocks: ${items.quantity - quantity}`}
+          {`Stocks: ${items.quantity - quantity}`}
         </Typography>
       </DialogContent>
 
@@ -141,7 +140,12 @@ const QuantityAdjuster: React.FC<QuantityAdjusterProps> = ({
         <Button onClick={onCancel} variant="outlined" color="error">
           Cancel
         </Button>
-        <Button onClick={onConfirm} variant="contained" color="primary">
+        <Button
+          disabled={items.quantity === 0}
+          onClick={onConfirm}
+          variant="contained"
+          color="primary"
+        >
           Confirm
         </Button>
       </Box>

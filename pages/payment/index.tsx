@@ -82,6 +82,7 @@ const AmountForm = () => {
       };
       try {
         const data = await addPaymentToUtang(args.id, args.payment);
+        console.log(data);
         if (data) {
           Swal.fire({
             title: 'Success!',

@@ -162,6 +162,11 @@ export default function useViewModel() {
     }
   };
 
+  const handleRefetch = (i) => {
+    console.log(i);
+    setRefetch(!refetch);
+  };
+
   useEffect(() => {
     updateUtang();
   }, [state]);
@@ -278,5 +283,6 @@ export default function useViewModel() {
     deleteProduct,
     autocompleteValue,
     setRefetch,
+    handleRefetch,
   };
 }

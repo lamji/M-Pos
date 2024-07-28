@@ -51,7 +51,7 @@ const ComboBox = () => {
     handleConfirm,
     items,
     autocompleteValue,
-    setRefetch,
+    handleRefetch,
   } = useViewModel();
 
   return (
@@ -69,7 +69,7 @@ const ComboBox = () => {
             }}
           >
             <Box sx={{ textAlign: 'center' }}>
-              <Checkout isRefresh={(i) => setRefetch(i)} />
+              <Checkout isRefresh={(i) => handleRefetch(i)} />
             </Box>
             {/* Conditionally render the Html5QrcodePlugin based on isScanning state */}
 
@@ -124,20 +124,32 @@ const ComboBox = () => {
                 )}
                 renderOption={(props, option) => (
                   <MenuItem {...props}>
-                    <div
-                      style={{
+                    <Box
+                      sx={{
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'space-between',
+                        width: '100%',
                       }}
                     >
-                      <Typography variant="body2" mr={1}>
-                        {option.name} -
-                      </Typography>
-                      <Typography variant="body2" color="textSecondary">
+                      <Box>
+                        <Typography fontSize={'12px'} variant="body2" mr={1} fontWeight={700}>
+                          {option.name}
+                        </Typography>
+                        <Typography
+                          fontSize={'12px'}
+                          sx={{ color: option.quantity > 0 ? 'green' : 'red' }}
+                          variant="body2"
+                          mr={1}
+                        >
+                          Stocks:{option.quantity}
+                        </Typography>
+                      </Box>
+
+                      <Typography fontSize={'12px'} variant="body2" color="textSecondary">
                         {formatCurrency(option.price)}
                       </Typography>
-                    </div>
+                    </Box>
                   </MenuItem>
                 )}
               />

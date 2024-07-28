@@ -11,6 +11,7 @@ export const updateItem = async (req: any, email: string) => {
       return { status: 'error', message: 'User not found' };
     }
 
+    // Loop through the items to update
     for (const item of items) {
       const { id, quantity } = item;
 
@@ -22,7 +23,6 @@ export const updateItem = async (req: any, email: string) => {
 
       // Find the existing item in the user's items
       const existingItem = user.items.find((userItem: any) => userItem.id === id);
-
       if (existingItem) {
         existingItem.quantity -= quantity;
         console.log(`Updated item ${id}: new quantity is ${existingItem.quantity}`);
@@ -31,16 +31,19 @@ export const updateItem = async (req: any, email: string) => {
       }
     }
 
-    user.markModified('items');
-    await user.save();
+    // Save the user document using the version key to handle concurrency
+    await User.findOneAndUpdate(
+      { _id: user._id, __v: user.__v },
+      { $set: { items: user.items }, $inc: { __v: 1 } },
+      { new: true, runValidators: true }
+    );
 
     return { status: 'success' };
   } catch (error) {
     console.error('Error updating items:', error);
-    return { status: 'error', message: error };
+    return { status: 'error', message: error || 'Error updating items' };
   }
 };
-
 export const getTopFastMovingItems = async (userTransactions: any) => {
   // Calculate the date one week ago from today
   const oneWeekAgo = new Date();

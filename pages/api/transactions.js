@@ -150,7 +150,7 @@ export default async function handler(req, res) {
           return res.status(404).json({ error: 'User not found' });
         }
 
-        updateItem(req, email);
+        updateItem(req, email, res);
         const change = cash ? cash - total : undefined;
         const remainingBalance = partialAmount ? total - partialAmount : undefined;
         const returnTotal = total;
