@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useState, useEffect } from 'react';
-import { toast, ToastContainer } from 'react-toastify';
+import React from 'react';
+import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
@@ -12,171 +12,47 @@ import {
   ListItem,
   ListItemText,
   Typography,
+  MenuItem,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import CloseIcon from '@mui/icons-material/Close';
 import EditIcon from '@mui/icons-material/Edit';
-import { useDispatch, useSelector } from 'react-redux';
-import { getSelectedItems, removeItem } from '@/src/common/reducers/items';
 import { formatCurrency } from '@/src/common/helpers';
-import { getData, setData } from '@/src/common/reducers/data';
-import { getAllUtang } from '@/src/common/api/testApi';
-import { setUtangData } from '@/src/common/reducers/utangData';
 import BarcodeScannerComponent from '../../wt2Scanner/index';
-import Swal from 'sweetalert2';
 import LinearIndeterminate from '../../Loader/linear';
 import DeleteConfirmationDialog from '../DeleteModal';
 import QuantityAdjuster from '../QtyConfrimatoin';
 import useViewModel from './useViewModel';
+import Checkout from '../CheckOut';
+// import Html5QrcodePlugin from '../../Scanner';
 
 const ComboBox = () => {
   const {
     handleIncrement,
     handleDecrement,
     handleChange,
-    handleOpen,
+    // handleOpen,
     handleCloseQty,
+    handleClose,
+    deleteProduct,
     handleConfirmQty,
     handleCancel,
+    activeOrders,
+    // setActiveOrders,
     quantity,
     modalOpen,
-    activeOrders,
-    setActiveOrders,
+    open,
     handleEditItem,
+    // setIsEdit,
+    onNewScanResult,
+    allItems,
+    handleAddItem,
+    handleDeleteItem,
+    handleConfirm,
+    items,
+    autocompleteValue,
+    handleRefetch,
   } = useViewModel();
-  const dispatch = useDispatch();
-  const { items } = useSelector(getSelectedItems);
-  const state = useSelector(getData);
-  const [open, setOpen] = useState(false);
-  const [itemToDelete, setItemToDelete] = useState('');
-  const [itemToDeleteId, setItemToDeleteId] = useState('');
-
-  const [allItems, setAllItems] = useState([]);
-  // const [lastScan, setLastScan] = useState(0);
-  // const [isScanning, setIsScanning] = useState(false); // State to manage scanner visibility
-
-  // const [jsonResponse, setJsonResponse] = useState(null); // State to hold the API response
-
-  const handleClose = () => {
-    setOpen(false);
-    setItemToDelete(null);
-  };
-
-  // Initialize Audio only on the client side
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      // Preload the sound effect
-      const scanSuccessSound = new Audio('/scan-success.mp3');
-      scanSuccessSound.preload = 'auto';
-      scanSuccessSound.load(); // Ensure the sound is loaded and ready to play
-      window.SCAN_SUCCESS_SOUND = scanSuccessSound;
-    }
-  }, []);
-
-  useEffect(() => {
-    fetch('/api/items2')
-      .then((response) => response.json())
-      .then((data) => {
-        // setAllItems(data);
-        dispatch(setData(data));
-      })
-      .catch((error) => console.error('Error fetching JSON data:', error));
-  }, []);
-
-  useEffect(() => {
-    setAllItems(state);
-  }, [state]);
-
-  // const handleScanClick = () => {
-  //   setIsScanning(!isScanning); // Toggle scanning state
-  //   console.log('Scan button clicked:', !isScanning ? 'Starting' : 'Stopping');
-  // };
-
-  const handleAddItem = (event, value) => {
-    if (value) {
-      if (value.quantity <= 0) {
-        Swal.fire({
-          title: 'Error!',
-          text: `Item ${value.name} is out of stock`,
-          icon: 'error',
-          confirmButtonText: 'OK',
-        });
-      } else {
-        setActiveOrders(value);
-        handleOpen(true);
-        //dispatch(addItem({ id: value.id, name: value.name, price: value.price, _id: value._id }));
-      }
-    }
-  };
-
-  const handleConfirm = () => {
-    dispatch(removeItem(itemToDeleteId));
-    handleClose();
-  };
-
-  const handleDeleteItem = (id, name) => {
-    setOpen(true);
-    setItemToDelete(name);
-    setItemToDeleteId(id);
-    // if (confirmed) {
-    //   dispatch(removeItem(id));
-    // }
-  };
-
-  const onNewScanResult = async (decodedText) => {
-    // Debounce logic to avoid handling the same scan multiple times
-
-    if (typeof window !== 'undefined' && window.SCAN_SUCCESS_SOUND) {
-      try {
-        window.SCAN_SUCCESS_SOUND.currentTime = 0; // Reset time to start from the beginning
-        window.SCAN_SUCCESS_SOUND.play();
-      } catch (error) {
-        console.error('Error playing sound', error);
-      }
-    }
-
-    try {
-      const response = await fetch(`/api/items2?barcode=${decodedText}`);
-      const data = await response.json();
-      // setJsonResponse(data); // Set the JSON response to state
-
-      if (data.length > 0) {
-        const matchedItem = data[0];
-        if (matchedItem?.quantity <= 0) {
-          Swal.fire({
-            title: 'Error!',
-            text: `Item ${matchedItem.name} is out of stock`,
-            icon: 'error',
-            confirmButtonText: 'OK',
-          });
-        } else {
-          setActiveOrders(matchedItem);
-          handleOpen(true);
-        }
-      } else {
-        toast.error('Barcode not found');
-      }
-    } catch (error) {
-      toast.error('Error fetching item data');
-    }
-  };
-
-  /**Utang updates */
-
-  const updateUtang = async () => {
-    try {
-      const data = await getAllUtang();
-      if (data) {
-        dispatch(setUtangData(data));
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  useEffect(() => {
-    updateUtang();
-  }, [state]);
 
   return (
     <>
@@ -192,23 +68,25 @@ const ComboBox = () => {
               paddingTop: '20px',
             }}
           >
+            <Box sx={{ textAlign: 'center' }}>
+              <Checkout isRefresh={(i) => handleRefetch(i)} />
+            </Box>
             {/* Conditionally render the Html5QrcodePlugin based on isScanning state */}
 
-            {/* {isScanning && (
-          <Html5QrcodePlugin
-            fps={10}
-            qrbox={250}
-            disableFlip={false}
-            qrCodeSuccessCallback={debouncedOnNewScanResult}
-            stopScanning={stopScanning} // Pass the stopScanning state as a prop
-          />
-        )} */}
+            {/* <Html5QrcodePlugin
+              fps={10}
+              qrbox={250}
+              disableFlip={false}
+              qrCodeSuccessCallback={onNewScanResult}
+            /> */}
 
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
               <Autocomplete
                 disablePortal
                 id="combo-box-demo"
                 options={allItems}
+                value={autocompleteValue}
+                disabled={allItems.length === 0}
                 getOptionLabel={(option) => option.name}
                 sx={{
                   width: '100%',
@@ -217,7 +95,6 @@ const ComboBox = () => {
                   },
                   '& .MuiAutocomplete-inputRoot': {
                     padding: '10px !important',
-
                     borderRadius: '4px', // Optional: Add border radius
                     '&:hover': {
                       borderColor: '#888', // Change border color on hover
@@ -244,6 +121,36 @@ const ComboBox = () => {
                       ),
                     }}
                   />
+                )}
+                renderOption={(props, option) => (
+                  <MenuItem {...props}>
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        width: '100%',
+                      }}
+                    >
+                      <Box>
+                        <Typography fontSize={'12px'} variant="body2" mr={1} fontWeight={700}>
+                          {option.name}
+                        </Typography>
+                        <Typography
+                          fontSize={'12px'}
+                          sx={{ color: option.quantity > 0 ? 'green' : 'red' }}
+                          variant="body2"
+                          mr={1}
+                        >
+                          Stocks:{option.quantity}
+                        </Typography>
+                      </Box>
+
+                      <Typography fontSize={'12px'} variant="body2" color="textSecondary">
+                        {formatCurrency(option.price)}
+                      </Typography>
+                    </Box>
+                  </MenuItem>
                 )}
               />
               <Box sx={{ marginTop: '50px', marginLeft: '20px' }}>
@@ -317,7 +224,7 @@ const ComboBox = () => {
               open={open}
               onClose={handleClose}
               onConfirm={handleConfirm}
-              item={itemToDelete}
+              item={deleteProduct}
             />
           </Box>
           {/* <Button variant="contained" color="primary" onClick={handleOpen}>

@@ -1,61 +1,74 @@
-// utils/helloworld.js
-import Transaction from '../src/common/app/model/transaction';
-import Utang from '../src/common/app/model/utang';
+import moment from 'moment';
+import User from '../src/common/app/model/Users';
+import { formatCurrency } from '@/src/common/helpers';
 
 export const updatePartialTransactions = async (req: any) => {
   const { items, personName, cash, total, partialAmount, _id, payment } = req.body;
-  let newTransaction, utangRecord, newTransactionUtang;
+  let utangRecord;
 
   try {
+    // Find the user based on email from the request
+    const { email } = req.user;
+    const user = await User.findOne({ email });
+    if (!user) {
+      return { success: false, status: 'error', message: 'User not found' };
+    }
+
     if (_id) {
-      console.log('test 2', _id);
-      utangRecord = await Utang.findById(_id);
+      // Update existing utang record
+      utangRecord = user.utangs.find((utang: any) => utang._id.toString() === _id);
       if (!utangRecord) {
-        return { status: 'error', message: 'Utang person name not found' };
+        return { success: false, status: 'error', message: 'Utang record not found' };
       }
 
-      // Update the existing utang record
+      // Update utang record
       const utangItems = items.map((item: any) => ({
         ...item,
-        name: 'Resto',
+        name: `Resto as of ${moment(new Date()).format('LL')}`,
         price: total - partialAmount,
         quantity: 1,
       }));
+
       utangRecord.total += total - partialAmount;
       utangRecord.items = [...utangRecord.items, ...utangItems];
       utangRecord.transactions.push({ date: new Date(), amount: partialAmount });
       utangRecord.transactionType = 'Utang';
-
-      const utangSaveResult = await utangRecord.save();
-      if (!utangSaveResult) {
-        return { success: false, status: 'error', message: 'Failed to save updated utang record' };
-      }
     } else {
       // Create a new utang record
       const utangToAdd = total - partialAmount;
-      utangRecord = new Utang({
-        items,
-        personName,
-        total,
-        remainingBalance: utangToAdd,
-        transactions: payment ? [{ date: new Date(), amount: payment.amount }] : [],
+      const itemsPrice = utangToAdd / items.length;
+      const newUtangRecord = items.map((item: any) => {
+        return {
+          id: item.id,
+          name: `Resto for ${item.name}: Original Price ${formatCurrency(item.price)}}`,
+          price: itemsPrice,
+          quantity: 1,
+        };
       });
 
-      const utangSaveResult = await utangRecord.save();
-      if (!utangSaveResult) {
-        return { success: false, status: 'error', message: 'Failed to save new utang record' };
-      }
+      console.log(newUtangRecord, items.length);
+      utangRecord = {
+        items: newUtangRecord,
+        personName,
+        total: utangToAdd,
+        remainingBalance: utangToAdd,
+        transactions: payment ? [{ date: new Date(), amount: payment.amount }] : [],
+        date: new Date(),
+      };
+      user.utangs.push(utangRecord);
     }
 
-    // Create the new transaction record for the partial payment
-    const utangItemsCash = [
-      {
-        id: '4800361413480-35-resto',
-        name: `Partial payment ${personName}`,
-        quantity: 1,
-        price: partialAmount,
-      },
-    ];
+    // Create a new transaction record inside the user schema
+
+    const utangItemsCash = items.map((item: any) => {
+      return {
+        id: item.id,
+        name: `Partial Payment ${personName}-${item.name}`,
+        quantity: item.quantity,
+        price: item.price,
+      };
+    });
+
     const transactionData = {
       items: utangItemsCash,
       personName,
@@ -67,14 +80,14 @@ export const updatePartialTransactions = async (req: any) => {
       transactionType: 'Cash',
     };
 
-    const utangItems = [
-      {
-        id: '4800361413480-35-resto',
-        name: `Resto ${personName}`,
-        quantity: 1,
-        price: total - partialAmount,
-      },
-    ];
+    const utangItems = items.map((item: any) => {
+      return {
+        id: item.id,
+        name: `Resto ${personName}-${item.name}`,
+        quantity: item.quantity,
+        price: item.price,
+      };
+    });
 
     const transactionDataUtang = {
       items: utangItems,
@@ -87,25 +100,15 @@ export const updatePartialTransactions = async (req: any) => {
       transactionType: 'Utang',
     };
 
-    newTransaction = new Transaction(transactionData);
-    newTransactionUtang = new Transaction(transactionDataUtang);
-    const transactionSaveResult = await newTransaction.save();
-    const newTransactionUtangResult = await newTransactionUtang.save();
-    if (!transactionSaveResult) {
-      return { success: false, status: 'error', message: 'Failed to save new transaction record' };
-    }
-    if (!newTransactionUtangResult) {
-      return {
-        success: false,
-        status: 'error',
-        message: 'Failed to save new transaction utang record',
-      };
-    }
+    user.transactions.push(transactionData);
+    user.transactions.push(transactionDataUtang);
+
+    await user.save();
 
     return {
       success: true,
       status: 'success',
-      data: newTransaction,
+      data: transactionData,
       remainingBalance: utangRecord.remainingBalance,
       partialAmount: partialAmount,
     };

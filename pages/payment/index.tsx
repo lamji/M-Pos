@@ -16,6 +16,31 @@ import { useDispatch, useSelector } from 'react-redux';
 import { clearPayment, getPayment } from '@/src/common/reducers/utangData';
 import { setIsBackDropOpen } from '@/src/common/reducers/items';
 import { useRouter } from 'next/router';
+import { GetServerSideProps } from 'next';
+import { parse } from 'cookie';
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const { req } = context;
+  const cookie = req.headers.cookie;
+
+  const cookies = cookie ? parse(cookie) : undefined;
+  const isAuthenticated = cookies?.t ? true : false;
+
+  if (!isAuthenticated) {
+    return {
+      redirect: {
+        destination: '/login',
+        permanent: false,
+      },
+    };
+  }
+
+  return {
+    props: {
+      fullMode: false,
+    },
+  };
+};
 
 const AmountForm = () => {
   const stateData = useSelector(getPayment);
@@ -57,6 +82,7 @@ const AmountForm = () => {
       };
       try {
         const data = await addPaymentToUtang(args.id, args.payment);
+        console.log(data);
         if (data) {
           Swal.fire({
             title: 'Success!',

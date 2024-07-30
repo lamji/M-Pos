@@ -1,12 +1,8 @@
 import { Box, IconButton, Typography } from '@mui/material';
 import SimpleDialogDemo from '../Loader/backdrop';
 import { useRouter } from 'next/router';
-import { useSelector } from 'react-redux';
-import { getUtangData } from '@/src/common/reducers/utangData';
 import { enablePullToRefresh, statusBar } from 'webtonative';
 import BottomNav from '../Mobile/bottomNav';
-import Checkout from '../Mobile/CheckOut';
-import { formatCurrency } from '@/src/common/helpers';
 import { getCookie } from '@/src/common/app/cookie';
 import MobileDrawer from '../Mobile/Drawer';
 import MenuIcon from '@mui/icons-material/Menu';
@@ -17,13 +13,13 @@ import { useState } from 'react';
 export default function Nav() {
   const router = useRouter();
   const currentPath = router.pathname;
-  const state = useSelector(getUtangData);
   const [open, setOpen] = useState(false);
   const token = getCookie('t');
+
   enablePullToRefresh(true);
   statusBar({
     style: 'dark',
-    color: '#0A736C',
+    color: '#ef783e',
     overlay: true, //Only for android
   });
 
@@ -32,7 +28,7 @@ export default function Nav() {
       <Box
         sx={{
           padding: '10px',
-          background: token ? '#0A736C' : 'white',
+          background: token ? '#ef783e' : 'white',
           color: 'white',
           position: 'fixed',
           top: 0,
@@ -61,7 +57,8 @@ export default function Nav() {
                 {currentPath === '/dashboard' && 'Dashboard'}
                 {currentPath === '/' && 'POS'}
 
-                {currentPath === '/utang' && 'Total Utang:  ' + formatCurrency(state.totalUtang)}
+                {/* {currentPath === '/utang' && 'Total Utang:  ' + formatCurrency(state.totalUtang)} */}
+                {currentPath === '/utang' && 'UTANG LIST'}
                 {currentPath === '/add' && 'ADD / UPDATE'}
                 {currentPath === '/payment' && 'PAYMENT'}
                 {currentPath === '/admin' && 'ADMIN'}
@@ -78,9 +75,7 @@ export default function Nav() {
           alignItems: 'center',
           justifyContent: 'center',
         }}
-      >
-        {currentPath === '/' && <Checkout />}
-      </Box>
+      ></Box>
       <Box
         sx={{
           marginTop: '200px',

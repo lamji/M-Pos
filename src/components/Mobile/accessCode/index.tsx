@@ -1,69 +1,81 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useFormik, FormikHelpers } from 'formik';
 import * as Yup from 'yup';
 import { TextField, Container, Typography, Box, Button, Paper } from '@mui/material';
 import Image from 'next/image';
-import { saveCookie } from '@/src/common/app/cookie';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import RequestCodeModal from '../DeleteModal/requestCodeModal';
+import { saveCookie } from '@/src/common/app/cookie';
+import { useRouter } from 'next/router';
+import { setIsBackDropOpen } from '@/src/common/reducers/items';
+import { useDispatch } from 'react-redux';
+import SimpleDialogDemo from '../../Loader/backdrop';
 
 // Define TypeScript types for form values
 interface FormValues {
-  access: string;
+  code: string;
+  email: string;
 }
 
 // Define the validation schema using Yup
 const validationSchema = Yup.object({
-  access: Yup.string().required('Access Code is required'),
+  code: Yup.string().required('Access Code is required'),
+  email: Yup.string().email('Invalid email address').required('Email is required'),
 });
 
-// Hardcoded username
-const HARD_CODED_USERNAME = 'admin';
-
-// Mock API function with username matching
-const mockApiCall = async (username: string) => {
-  return new Promise<{ code: number; token: string }>((resolve, reject) => {
-    setTimeout(() => {
-      if (username === HARD_CODED_USERNAME) {
-        const randomCode = Math.floor(Math.random() * 10000); // Generate a random 4-digit code
-        const mockToken = 'sampleToken123456'; // Mock token
-        resolve({ code: randomCode, token: mockToken });
-      } else {
-        reject(new Error('Invalid access code'));
-      }
-    }, 1000); // Simulate a network delay
-  });
-};
-
 const MobileBankingLoginComponent: React.FC = () => {
+  const dispatch = useDispatch();
+  const router = useRouter();
+  const [open, setOpen] = useState(false);
+  // const requestCode = getCookie('rc');
+
   // Initialize Formik with TypeScript types
   const formik = useFormik<FormValues>({
     initialValues: {
-      access: '',
+      code: '',
+      email: '',
     },
     validationSchema,
-    onSubmit: async (values: FormValues, { resetForm }: FormikHelpers<FormValues>) => {
+    onSubmit: async (
+      values: FormValues,
+      { resetForm, setSubmitting }: FormikHelpers<FormValues>
+    ) => {
+      dispatch(setIsBackDropOpen(true));
       try {
-        // Simulate API call
-        const response = await mockApiCall(values.access);
+        const response = await fetch('/api/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(values),
+        });
 
-        if (response.code) {
-          saveCookie('t', response.token); // Store the token if the code matches
+        const data = await response.json();
+
+        if (data.success) {
+          saveCookie('t', data.token); // Store the token if the code matches
           toast.success('Login successful!', {
             position: 'top-center',
           });
-          setTimeout(() => window.location.reload(), 2000); // Reload the page after a short delay to show the toast
+          setTimeout(() => router.push('/'), 1);
+          resetForm();
+          dispatch(setIsBackDropOpen(false));
         } else {
-          toast.error('Invalid code. Please try again.', {
+          toast.error(data.message || 'Login failed. Please try again.', {
             position: 'top-center',
           });
+          dispatch(setIsBackDropOpen(false));
         }
-        resetForm(); // Optionally reset the form after submission
       } catch (error) {
-        console.error('API call failed:', error);
-        toast.error(`${error}. Please try again.`, {
+        console.error('Error during form submission:', error); // Debugging line
+        toast.error('An error occurred. Please try again.', {
           position: 'top-center',
         });
+        dispatch(setIsBackDropOpen(false));
+      } finally {
+        setSubmitting(false);
+        dispatch(setIsBackDropOpen(false));
       }
     },
   });
@@ -96,43 +108,49 @@ const MobileBankingLoginComponent: React.FC = () => {
       >
         <Box sx={{ display: 'flex', justifyContent: 'center', marginBottom: 2 }}>
           <Image
-            src="/mposlogo.png" // Placeholder logo URL
+            src="/logov2.png" // Placeholder logo URL
             alt="Bank Logo"
             width={200}
             height={200}
           />
         </Box>
         <Typography
-          variant="h4"
-          component="div"
-          gutterBottom
-          align="center"
-          sx={{ color: '#0A736C' }}
-        >
-          M-Pos
-        </Typography>
-        <Typography
           variant="body1"
           component="div"
           align="center"
-          sx={{ marginBottom: 2, color: '#0A736C' }}
+          sx={{ marginBottom: 2, color: '#ef783e' }}
         >
-          Welcome back! Please enter your username to access your account.
+          Welcome! Please enter your email and access code to login.
         </Typography>
         <Box sx={{ width: '100%' }}>
           <form onSubmit={formik.handleSubmit}>
             <TextField
               fullWidth
               variant="outlined"
-              label="Access Code"
-              name="access"
+              name="email"
+              label="Email"
+              type="email"
               size="medium"
               autoComplete="off"
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
-              value={formik.values.access}
-              error={formik.touched.access && Boolean(formik.errors.access)}
-              helperText={formik.touched.access && formik.errors.access}
+              value={formik.values.email}
+              error={formik.touched.email && Boolean(formik.errors.email)}
+              helperText={formik.touched.email && formik.errors.email}
+              sx={{ marginBottom: 2 }}
+            />
+            <TextField
+              fullWidth
+              variant="outlined"
+              label="Access Code"
+              name="code"
+              size="medium"
+              autoComplete="off"
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              value={formik.values.code}
+              error={formik.touched.code && Boolean(formik.errors.code)}
+              helperText={formik.touched.code && formik.errors.code}
               sx={{ marginBottom: 2 }}
             />
             <Button
@@ -140,14 +158,29 @@ const MobileBankingLoginComponent: React.FC = () => {
               variant="contained"
               color="primary"
               fullWidth
-              sx={{ backgroundColor: '#0A736C', '&:hover': { backgroundColor: '#0A736C' } }}
+              sx={{ backgroundColor: '#ef783e', '&:hover': { backgroundColor: '#ef783e' } }}
             >
               Login
             </Button>
           </form>
         </Box>
+
+        <Box
+          sx={{
+            textAlign: 'center',
+            marginTop: '10px',
+            fontSize: '12px',
+            color: 'blue',
+            textDecoration: 'underline',
+          }}
+          onClick={() => setOpen(true)}
+        >
+          Request Access Code
+        </Box>
       </Paper>
+      <RequestCodeModal open={open} handleClose={(i: boolean) => setOpen(i)} />
       <ToastContainer />
+      <SimpleDialogDemo />
     </Container>
   );
 };

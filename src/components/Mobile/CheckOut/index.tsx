@@ -21,7 +21,12 @@ import { getSelectedItems, setIsBackDropOpen } from '@/src/common/reducers/items
 import { getAllUtang, postTransaction } from '@/src/common/api/testApi';
 import moment from 'moment';
 
-export default function Checkout() {
+interface Props {
+  isRefresh: (i: boolean) => void;
+}
+
+export default function Checkout({ isRefresh }: Props) {
+  const [refresh, setRefresh] = useState(false);
   const dispatch = useDispatch();
   const { total, items } = useSelector(getSelectedItems); // Get total from Redux
   const { classes, handleClickOpen, handleClose, open, fullScreen, handleClearItems, token } =
@@ -66,6 +71,8 @@ export default function Checkout() {
           setIsLoading(false);
           resetForm();
           dispatch(setIsBackDropOpen(false));
+          setRefresh(!refresh);
+          isRefresh(!refresh);
         }
       } catch (error) {
         console.error('Error:', error);
@@ -217,7 +224,7 @@ export default function Checkout() {
   return (
     <div>
       <Box sx={classes.root}>
-        <Box sx={{ width: '300px' }}>
+        <Box>
           {token && total > 0 && <Typography fontWeight={700}>{formatCurrency(total)}</Typography>}
           {/* Use total here */}
           {token && total > 0 && (
@@ -266,8 +273,8 @@ export default function Checkout() {
                 onClick={() => handleOptionClick('cash')}
                 sx={{
                   border: '2px solid',
-                  borderColor: selectedOption === 'cash' ? '#0A736C' : 'gray',
-                  background: selectedOption === 'cash' ? '#0A736C' : '#d1d1d1',
+                  borderColor: selectedOption === 'cash' ? '#ef783e' : 'gray',
+                  background: selectedOption === 'cash' ? '#ef783e' : '#d1d1d1',
                   color: selectedOption === 'cash' ? 'white' : 'unset',
                   padding: '10px',
                   borderRadius: '10px',
@@ -284,8 +291,8 @@ export default function Checkout() {
                 onClick={() => handleOptionClick('utang')}
                 sx={{
                   border: '2px solid',
-                  borderColor: selectedOption === 'utang' ? '#0A736C' : 'gray',
-                  background: selectedOption === 'utang' ? '#0A736C' : '#d1d1d1',
+                  borderColor: selectedOption === 'utang' ? '#ef783e' : 'gray',
+                  background: selectedOption === 'utang' ? '#ef783e' : '#d1d1d1',
                   color: selectedOption === 'utang' ? 'white' : 'unset',
                   padding: '10px',
                   borderRadius: '10px',
@@ -309,8 +316,8 @@ export default function Checkout() {
                   justifyContent: 'center',
                   alignItems: 'center',
                   border: '2px solid',
-                  borderColor: selectedOption === 'partial' ? '#0A736C' : 'gray',
-                  background: selectedOption === 'partial' ? '#0A736C' : '#d1d1d1',
+                  borderColor: selectedOption === 'partial' ? '#ef783e' : 'gray',
+                  background: selectedOption === 'partial' ? '#ef783e' : '#d1d1d1',
                   color: selectedOption === 'partial' ? 'white' : 'unset',
                 }}
               >

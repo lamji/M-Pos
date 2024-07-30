@@ -1,6 +1,10 @@
 {
-  "background_color": "#0A736C",
-  "categories": ["central", "eats", "markets"],
+  "background_color": "#ef783e",
+  "categories": [
+    "central",
+    "eats",
+    "markets"
+  ],
   "display": "standalone",
   "scope": "/",
   "start_url": "/",

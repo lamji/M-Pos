@@ -18,8 +18,33 @@ import 'react-toastify/dist/ReactToastify.css';
 import Swal from 'sweetalert2';
 import Nav from '@/src/components/Nav';
 import { generateRandomBarcode } from '@/src/common/helpers';
-
+import { parse } from 'cookie';
 // import Html5QrcodePlugin from '@/src/components/Scanner';
+import { getCookie } from '@/src/common/app/cookie';
+import axios from 'axios';
+
+export const getServerSideProps = async (context) => {
+  const { req } = context;
+  const cookie = req.headers.cookie;
+
+  const cookies = cookie ? parse(cookie) : undefined;
+  const isAuthenticated = cookies?.t ? true : false;
+
+  if (!isAuthenticated) {
+    return {
+      redirect: {
+        destination: '/login',
+        permanent: false,
+      },
+    };
+  }
+
+  return {
+    props: {
+      fullMode: false,
+    },
+  };
+};
 
 // Validation Schema
 const validationSchemaChecked = Yup.object({
@@ -46,6 +71,8 @@ const validationSchemaUnchecked = Yup.object({
 });
 
 const AddItemForm = () => {
+  const token = getCookie('t');
+  const url = '/api/items2'; // Replace with your actual URL
   const [scannedBarcode, setScannedBarcode] = useState('');
   const [generatedId, setGeneratedId] = useState('');
   const [checked, setChecked] = useState(false);
@@ -74,16 +101,14 @@ const AddItemForm = () => {
     validationSchema: checked ? validationSchemaChecked : validationSchemaUnchecked,
     onSubmit: async (values, { resetForm, setSubmitting }) => {
       try {
-        const endpoint = '/api/items2';
-        const response = await fetch(endpoint, {
-          method: 'POST',
+        const response = await axios.post(url, values, {
           headers: {
+            Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify(values),
         });
 
-        if (response.ok) {
+        if (response.status === 200) {
           Swal.fire({
             title: 'Success!',
             text: checked ? 'Item updated successfully' : 'Item added successfully',
@@ -104,7 +129,7 @@ const AddItemForm = () => {
       } catch (error) {
         Swal.fire({
           title: 'Error!',
-          text: `${JSON.stringify(error)}`,
+          text: `${error.response?.data?.message || error.error}`, // Handle error message from response
           icon: 'error',
           confirmButtonText: 'OK',
         });
@@ -118,12 +143,6 @@ const AddItemForm = () => {
     setChecked(event.target.checked);
   };
 
-  // const handleBarcodeScan = (decodedText) => {
-  //   setScannedBarcode(decodedText);
-  //   const randomId = `${decodedText}-${Math.floor(Math.random() * 1000)}`;
-  //   setGeneratedId(randomId);
-  // };
-
   const handleBarcodeScanUpdate = async (decodedText) => {
     setScannedBarcode(decodedText);
     if (!checked) {
@@ -131,8 +150,12 @@ const AddItemForm = () => {
       setGeneratedId(randomId);
     } else {
       try {
-        const response = await fetch(`/api/items2?barcode=${decodedText}`);
-        const data = await response.json();
+        const response = await axios.get(`/api/items2?barcode=${decodedText}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const data = response.data;
         if (data.length > 0) {
           const matchedItem = data[0];
           formik.setValues({
@@ -147,7 +170,7 @@ const AddItemForm = () => {
         } else {
           Swal.fire({
             title: 'Error!',
-            text: 'No item found with the scanned barcode',
+            text: `No item found with the scanned barcode ${decodedText}`,
             icon: 'error',
             confirmButtonText: 'OK',
           });
@@ -163,13 +186,6 @@ const AddItemForm = () => {
     }
   };
 
-  // const handleClick = (code) => {
-  //   if (checked) {
-  //     handleBarcodeScanUpdate(code);
-  //   } else {
-  //     handleBarcodeScan(code);
-  //   }
-  // };
   return (
     <>
       <Nav />
