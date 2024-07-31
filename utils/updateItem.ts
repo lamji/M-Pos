@@ -30,14 +30,7 @@ export const updateItem = async (req: any, email: string) => {
         console.log(`Item with id ${id} not found in user's items`);
       }
     }
-
-    // Save the user document using the version key to handle concurrency
-    await User.findOneAndUpdate(
-      { _id: user._id, __v: user.__v },
-      { $set: { items: user.items }, $inc: { __v: 1 } },
-      { new: true, runValidators: true }
-    );
-
+    await user.save();
     return { status: 'success' };
   } catch (error) {
     console.error('Error updating items:', error);
