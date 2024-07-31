@@ -116,6 +116,7 @@ export default function Checkout({ isRefresh }: Props) {
           setIsLoading(false);
           setIsOld(true);
           dispatch(setIsBackDropOpen(false));
+          isRefresh(!refresh);
         }
       } catch (error) {
         alert(JSON.stringify(error, null, 2));
@@ -174,6 +175,7 @@ export default function Checkout({ isRefresh }: Props) {
           resetForm();
           handleClose();
           dispatch(setIsBackDropOpen(false));
+          isRefresh(!refresh);
         }
       } catch (error) {
         alert(JSON.stringify(error, null, 2));

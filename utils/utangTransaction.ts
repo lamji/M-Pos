@@ -23,8 +23,6 @@ export const addTransactionUtang = async (req: any) => {
       utangRecord.items.push(...items);
       utangRecord.total += total;
       utangRecord.date = new Date();
-
-      user.markModified('utangs');
     } else {
       // Create new utang record
       utangRecord = {
@@ -37,7 +35,6 @@ export const addTransactionUtang = async (req: any) => {
       };
 
       user.utangs.push(utangRecord);
-      user.markModified('utangs');
     }
 
     // Create a new transaction record
@@ -50,7 +47,6 @@ export const addTransactionUtang = async (req: any) => {
       transactionType: type,
     };
     user.transactions.push(newTransaction);
-    user.markModified('transactions');
 
     await user.save();
 
