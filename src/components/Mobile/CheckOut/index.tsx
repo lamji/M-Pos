@@ -40,6 +40,8 @@ export default function Checkout({ isRefresh }: Props) {
   const [isLoading, setIsLoading] = useState(false);
   const [isOld, setIsOld] = useState(true);
 
+  console.log('allItems', allItems);
+
   const formikCash = useFormik({
     initialValues: {
       cashAmount: '',
@@ -622,7 +624,7 @@ export default function Checkout({ isRefresh }: Props) {
               Items
             </Typography>
 
-            {allItems?.data?.items?.map((data: any, idx: number) => {
+            {allItems?.data?.map((data: any, idx: number) => {
               return (
                 <>
                   <Box sx={classes.receiptsWrapper} key={idx}>
@@ -689,7 +691,7 @@ export default function Checkout({ isRefresh }: Props) {
                     align="left"
                     mb={1}
                   >
-                    {formatCurrency(allItems?.data?.partialAmount) ?? '-'}
+                    {formatCurrency(allItems?.partialAmount) ?? '-'}
                   </Typography>
                 </Box>
               </>
@@ -714,7 +716,7 @@ export default function Checkout({ isRefresh }: Props) {
                     align="left"
                     mb={1}
                   >
-                    {formatCurrency(allItems?.data?.cash)}
+                    {formatCurrency(allItems?.cash)}
                   </Typography>
                 </Box>
                 <Box sx={classes.receiptsWrapper}>
@@ -734,7 +736,7 @@ export default function Checkout({ isRefresh }: Props) {
                     align="left"
                     mb={1}
                   >
-                    {formatCurrency(allItems?.data?.change) ?? '-'}
+                    {formatCurrency(allItems?.change) ?? '-'}
                   </Typography>
                 </Box>
               </>

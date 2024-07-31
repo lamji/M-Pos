@@ -154,9 +154,6 @@ export default async function handler(req, res) {
         const change = cash ? cash - total : undefined;
         const remainingBalance = partialAmount ? total - partialAmount : undefined;
         const returnTotal = total;
-        const dataItems = {
-          items: items,
-        };
 
         if (type === 'Utang') {
           const utangResult = await addTransactionUtang(req);
@@ -165,8 +162,9 @@ export default async function handler(req, res) {
             return res.status(200).json({
               success: true,
               message: 'Utang transaction created successfully',
-              data: dataItems,
+              data: items,
               total: total,
+              cash: cash,
             });
           } else {
             return res.status(500).json({ error: 'Failed to create utang transaction' });
@@ -180,11 +178,12 @@ export default async function handler(req, res) {
             return res.status(200).json({
               success: true,
               message: 'Partial transaction created successfully',
-              data: dataItems,
+              data: items,
               total: total,
               change: total - partialAmount,
               partialAmount: partialAmount,
               remainingBalance,
+              cash: cash,
             });
           } else {
             return res.status(500).json({ error: 'Failed to create partial transaction' });
@@ -212,6 +211,7 @@ export default async function handler(req, res) {
             total: returnTotal,
             remainingBalance: 0,
             change: cash - total,
+            cash,
           });
         }
       });
