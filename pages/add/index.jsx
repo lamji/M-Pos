@@ -12,16 +12,19 @@ import {
 } from '@mui/material';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
-import BarcodeScannerComponent from '../../src/components/wt2Scanner';
+
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Swal from 'sweetalert2';
-import Nav from '@/src/components/Nav';
 import { generateRandomBarcode } from '@/src/common/helpers';
 import { parse } from 'cookie';
 // import Html5QrcodePlugin from '@/src/components/Scanner';
 import { getCookie } from '@/src/common/app/cookie';
 import axios from 'axios';
+import dynamic from 'next/dynamic';
+
+const Nav = dynamic(() => import('@/src/components/Nav'));
+const BarcodeScannerComponent = dynamic(() => import('../../src/components/wt2Scanner'));
 
 export const getServerSideProps = async (context) => {
   const { req } = context;

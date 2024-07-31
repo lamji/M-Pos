@@ -18,12 +18,15 @@ import SearchIcon from '@mui/icons-material/Search';
 import CloseIcon from '@mui/icons-material/Close';
 import EditIcon from '@mui/icons-material/Edit';
 import { formatCurrency } from '@/src/common/helpers';
-import BarcodeScannerComponent from '../../wt2Scanner/index';
 import LinearIndeterminate from '../../Loader/linear';
 import DeleteConfirmationDialog from '../DeleteModal';
-import QuantityAdjuster from '../QtyConfrimatoin';
 import useViewModel from './useViewModel';
-import Checkout from '../CheckOut';
+import dynamic from 'next/dynamic';
+
+const Checkout = dynamic(() => import('../CheckOut/index'));
+const BarcodeScannerComponent = dynamic(() => import('../../wt2Scanner/index'));
+const QuantityAdjuster = dynamic(() => import('../QtyConfrimatoin'));
+
 // import Html5QrcodePlugin from '../../Scanner';
 
 const ComboBox = () => {

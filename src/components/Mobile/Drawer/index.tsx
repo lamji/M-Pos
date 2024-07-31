@@ -53,6 +53,7 @@ export default function MobileDrawer({ status, setStatus }: PropsDrawer) {
             alt="Bank Logo"
             width={40}
             height={40}
+            priority
           />
           <Typography
             fontWeight={700}
