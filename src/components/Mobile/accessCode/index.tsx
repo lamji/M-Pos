@@ -91,7 +91,6 @@ const MobileBankingLoginComponent: React.FC = () => {
         height: '70vh',
         padding: 2,
         position: 'relative',
-        backgroundImage: 'url("https://images.unsplash.com/photo-1533149527490-1fd54d9b3da6")', // Background image
         backgroundSize: 'cover',
         backgroundPosition: 'center',
       }}
@@ -112,6 +111,7 @@ const MobileBankingLoginComponent: React.FC = () => {
             alt="Bank Logo"
             width={200}
             height={200}
+            priority={true}
           />
         </Box>
         <Typography

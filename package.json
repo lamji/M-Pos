@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "analyze": "cross-env ANALYZE=true next build",
+    "analyze:server": "cross-env BUNDLE_ANALYZE=server next build",
+    "analyze:browser": "cross-env BUNDLE_ANALYZE=browser next build"
   },
   "dependencies": {
     "@ducanh2912/next-pwa": "^10.2.8",
@@ -16,6 +19,7 @@
     "@mui/icons-material": "^5.15.11",
     "@mui/material": "^5.15.11",
     "@mui/x-data-grid": "^7.10.0",
+    "@next/bundle-analyzer": "^14.2.5",
     "@reduxjs/toolkit": "^2.2.1",
     "@types/node": "20.11.19",
     "@types/react": "18.2.56",
@@ -24,6 +28,7 @@
     "axios": "^1.6.7",
     "bcrypt": "^5.1.1",
     "cookie": "^0.6.0",
+    "cross-env": "^7.0.3",
     "crypto": "^1.0.1",
     "date-fns": "^3.6.0",
     "eslint": "8.56.0",

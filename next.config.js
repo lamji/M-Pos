@@ -1,4 +1,8 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
+const withBundleAnalyzer = require('@next/bundle-analyzer')({
+  enabled: process.env.ANALYZE === 'true',
+});
+
 const withPWA = require('@ducanh2912/next-pwa').default({
   dest: 'public',
   cacheOnFrontEndNav: true,
@@ -14,7 +18,11 @@ const withPWA = require('@ducanh2912/next-pwa').default({
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  env: {
+    NEXT_PUBLIC_ENV: 'PRODUCTION', // your next configs go here
+  },
   // ... other options you like
 };
 
-module.exports = withPWA(nextConfig);
+// Apply PWA configuration first, then apply Bundle Analyzer configuration
+module.exports = withBundleAnalyzer(withPWA(nextConfig));
