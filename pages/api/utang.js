@@ -92,7 +92,7 @@ export default async function handler(req, res) {
                   {
                     name: 'Balance for date ' + moment().format('ll'),
                     price: remainingBalance,
-                    quantity: 0,
+                    quantity: 1,
                     date: new Date(),
                   },
                 ];
