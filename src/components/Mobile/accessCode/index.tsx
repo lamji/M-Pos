@@ -111,7 +111,8 @@ const MobileBankingLoginComponent: React.FC = () => {
             alt="Bank Logo"
             width={200}
             height={200}
-            priority={true}
+            priority
+            fetchPriority="high"
           />
         </Box>
         <Typography

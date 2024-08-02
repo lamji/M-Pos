@@ -1,5 +1,4 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import TextField from '@mui/material/TextField';
@@ -27,26 +26,21 @@ const Checkout = dynamic(() => import('../CheckOut/index'));
 const BarcodeScannerComponent = dynamic(() => import('../../wt2Scanner/index'));
 const QuantityAdjuster = dynamic(() => import('../QtyConfrimatoin'));
 
-// import Html5QrcodePlugin from '../../Scanner';
-
 const ComboBox = () => {
   const {
     handleIncrement,
     handleDecrement,
     handleChange,
-    // handleOpen,
     handleCloseQty,
     handleClose,
     deleteProduct,
     handleConfirmQty,
     handleCancel,
     activeOrders,
-    // setActiveOrders,
     quantity,
     modalOpen,
     open,
     handleEditItem,
-    // setIsEdit,
     onNewScanResult,
     allItems,
     handleAddItem,
@@ -56,6 +50,22 @@ const ComboBox = () => {
     autocompleteValue,
     handleRefetch,
   } = useViewModel();
+
+  const [displayedItems, setDisplayedItems] = useState([]);
+  const [isFullDataLoaded, setIsFullDataLoaded] = useState(false);
+
+  useEffect(() => {
+    if (allItems) {
+      setDisplayedItems(allItems.slice(0, 10));
+    }
+  }, [allItems]);
+
+  const handleInputChange = async (event, value) => {
+    if (!isFullDataLoaded && value) {
+      setIsFullDataLoaded(true);
+      setDisplayedItems(allItems);
+    }
+  };
 
   return (
     <>
@@ -74,20 +84,12 @@ const ComboBox = () => {
             <Box sx={{ textAlign: 'center' }}>
               <Checkout isRefresh={(i) => handleRefetch(i)} />
             </Box>
-            {/* Conditionally render the Html5QrcodePlugin based on isScanning state */}
-
-            {/* <Html5QrcodePlugin
-              fps={10}
-              qrbox={250}
-              disableFlip={false}
-              qrCodeSuccessCallback={onNewScanResult}
-            /> */}
 
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
               <Autocomplete
                 disablePortal
                 id="combo-box-demo"
-                options={allItems}
+                options={displayedItems}
                 value={autocompleteValue}
                 disabled={allItems.length === 0}
                 getOptionLabel={(option) => option.name}
@@ -98,12 +100,13 @@ const ComboBox = () => {
                   },
                   '& .MuiAutocomplete-inputRoot': {
                     padding: '10px !important',
-                    borderRadius: '4px', // Optional: Add border radius
+                    borderRadius: '4px',
                     '&:hover': {
-                      borderColor: '#888', // Change border color on hover
+                      borderColor: '#888',
                     },
                   },
                 }}
+                onInputChange={handleInputChange}
                 onChange={handleAddItem}
                 renderInput={(params) => (
                   <TextField
@@ -148,7 +151,6 @@ const ComboBox = () => {
                           Stocks:{option.quantity}
                         </Typography>
                       </Box>
-
                       <Typography fontSize={'12px'} variant="body2" color="textSecondary">
                         {formatCurrency(option.price)}
                       </Typography>
@@ -230,9 +232,6 @@ const ComboBox = () => {
               item={deleteProduct}
             />
           </Box>
-          {/* <Button variant="contained" color="primary" onClick={handleOpen}>
-            Adjust Quantity
-          </Button> */}
 
           <QuantityAdjuster
             open={modalOpen}
@@ -247,9 +246,7 @@ const ComboBox = () => {
           />
         </>
       ) : (
-        <>
-          <LinearIndeterminate />
-        </>
+        <LinearIndeterminate />
       )}
     </>
   );

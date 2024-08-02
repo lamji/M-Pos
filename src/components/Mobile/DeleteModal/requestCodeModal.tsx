@@ -37,6 +37,7 @@ export default function RequestCodeModal({ open, handleClose }: Props) {
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
+  const [isSuccess, setIsSuccess] = useState(false);
 
   const handleCancel = () => {
     handleClose(false);
@@ -55,6 +56,7 @@ export default function RequestCodeModal({ open, handleClose }: Props) {
       const result = await response.json();
 
       if (response.ok) {
+        setIsSuccess(true);
         setAlertMessage('Code activated successfully. You have 7 days of trial access.');
       } else {
         setAlertMessage(result.message || 'An error occurred.');
@@ -68,11 +70,15 @@ export default function RequestCodeModal({ open, handleClose }: Props) {
     <React.Fragment>
       <Dialog fullScreen={fullScreen} open={open} aria-labelledby="responsive-dialog-title">
         <DialogTitle id="responsive-dialog-title">
-          <Alert severity="info">
-            After requesting a code, the code will be activated and grant 7 days of trial access to
-            the service. This feature ensures that users can experience the full functionality of
-            the service before committing to a subscription.
-          </Alert>
+          {isSuccess ? (
+            <></>
+          ) : (
+            <Alert severity="info">
+              After requesting a code, the code will be activated and grant 7 days of trial access
+              to the service. This feature ensures that users can experience the full functionality
+              of the service before committing to a subscription.
+            </Alert>
+          )}
         </DialogTitle>
         <DialogContent
           sx={{
@@ -82,55 +88,70 @@ export default function RequestCodeModal({ open, handleClose }: Props) {
             flexDirection: 'column',
           }}
         >
-          <DialogContentText>Enter your desired code and email</DialogContentText>
-          <Formik
-            initialValues={{ code: '', email: '' }}
-            validationSchema={validationSchema}
-            onSubmit={handleSubmitForm}
-          >
-            {({ handleSubmit, handleChange, values, touched, errors }) => (
-              <form onSubmit={handleSubmit}>
-                <Field
-                  as={StyledTextField}
-                  name="email"
-                  type="email"
-                  label="Email"
-                  fullWidth
-                  variant="outlined"
-                  onChange={handleChange}
-                  value={values.email}
-                  error={touched.email && Boolean(errors.email)}
-                  helperText={<ErrorMessage name="email" />}
-                />
-                <Field
-                  as={StyledTextField}
-                  name="code"
-                  type="text"
-                  label="Code"
-                  fullWidth
-                  variant="outlined"
-                  onChange={handleChange}
-                  value={values.code}
-                  error={touched.code && Boolean(errors.code)}
-                  helperText={<ErrorMessage name="code" />}
-                />
-                <Button type="submit" variant="contained" color="primary" fullWidth>
-                  Submit
-                </Button>
-                {alertMessage && (
-                  <Alert severity={alertMessage.includes('error') ? 'error' : 'success'}>
-                    {alertMessage}
-                  </Alert>
+          {isSuccess ? (
+            <>
+              <Alert severity="success">Success</Alert>
+              <Button
+                sx={{ my: '10px', color: 'white' }}
+                variant="contained"
+                onClick={handleCancel}
+              >
+                Return to Login
+              </Button>
+            </>
+          ) : (
+            <>
+              <DialogContentText>Enter your desired code and email</DialogContentText>
+              <Formik
+                initialValues={{ code: '', email: '' }}
+                validationSchema={validationSchema}
+                onSubmit={handleSubmitForm}
+              >
+                {({ handleSubmit, handleChange, values, touched, errors }) => (
+                  <form onSubmit={handleSubmit}>
+                    <Field
+                      as={StyledTextField}
+                      name="email"
+                      type="email"
+                      label="Email"
+                      fullWidth
+                      variant="outlined"
+                      onChange={handleChange}
+                      value={values.email}
+                      error={touched.email && Boolean(errors.email)}
+                      helperText={<ErrorMessage name="email" />}
+                    />
+                    <Field
+                      as={StyledTextField}
+                      name="code"
+                      type="text"
+                      label="Code"
+                      fullWidth
+                      variant="outlined"
+                      onChange={handleChange}
+                      value={values.code}
+                      error={touched.code && Boolean(errors.code)}
+                      helperText={<ErrorMessage name="code" />}
+                    />
+                    <Button type="submit" variant="contained" color="primary" fullWidth>
+                      Submit
+                    </Button>
+                    {alertMessage && (
+                      <Alert severity={alertMessage.includes('error') ? 'error' : 'success'}>
+                        {alertMessage}
+                      </Alert>
+                    )}
+                  </form>
                 )}
-              </form>
-            )}
-          </Formik>
+              </Formik>
+            </>
+          )}
         </DialogContent>
-        <DialogActions>
-          <Button autoFocus onClick={handleCancel}>
-            Cancel
-          </Button>
-        </DialogActions>
+        {!isSuccess && (
+          <DialogActions>
+            <Button onClick={handleCancel}>Cancel</Button>
+          </DialogActions>
+        )}
       </Dialog>
     </React.Fragment>
   );
