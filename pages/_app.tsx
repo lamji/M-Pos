@@ -7,6 +7,8 @@ import Layout from '@/src/components/Layout';
 import { persistor, store } from '@/src/common/app/store';
 import { PersistGate } from 'redux-persist/integration/react';
 import '@/styles/globals.css';
+import 'react-date-range/dist/styles.css'; // main style file
+import 'react-date-range/dist/theme/default.css'; // theme css file
 import { QueryClient, QueryClientProvider } from 'react-query';
 
 const queryClient = new QueryClient({

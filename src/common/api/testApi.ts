@@ -5,7 +5,7 @@ export const getClearBatchReports = async (params?: TObjectAny) => {
   return instance.get('/api/reports/clear-batch', { params });
 };
 
-export const fetchItems = async (params: any) => {
+export const fetchItems = async (params?: any) => {
   try {
     const response = await instance.get('/api/items2', { params });
     const data = response.data;

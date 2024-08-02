@@ -40,8 +40,6 @@ export default function Checkout({ isRefresh }: Props) {
   const [isLoading, setIsLoading] = useState(false);
   const [isOld, setIsOld] = useState(true);
 
-  console.log('allItems', allItems);
-
   const formikCash = useFormik({
     initialValues: {
       cashAmount: '',

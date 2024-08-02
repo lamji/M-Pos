@@ -1,4 +1,21 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+
+import { useMediaQuery } from '@mui/material';
+
+import { createTheme } from '@mui/material/styles';
+
+const theme = createTheme({
+  breakpoints: {
+    values: {
+      xs: 0, // mobile
+      sm: 600, // tablet
+      md: 900, // laptop
+      lg: 1200, // desktop
+      xl: 1536, // large desktop
+    },
+  },
+});
+
 /**
  * Add delay to your app.
  * @param ms - Milliseconds
@@ -32,4 +49,18 @@ export const generateRandomBarcode = (length: number): string => {
     barcode += digits[randomIndex];
   }
   return barcode;
+};
+
+export const useDeviceType = () => {
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
+  const isLaptop = useMediaQuery(theme.breakpoints.between('md', 'lg'));
+  const isPC = useMediaQuery(theme.breakpoints.up('lg'));
+
+  return {
+    isMobile,
+    isTablet,
+    isLaptop,
+    isPC,
+  };
 };
