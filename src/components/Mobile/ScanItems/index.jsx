@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import TextField from '@mui/material/TextField';
@@ -49,23 +49,12 @@ const ComboBox = () => {
     items,
     autocompleteValue,
     handleRefetch,
+    handleInputChange,
+    displayedItems,
+    stocks,
   } = useViewModel();
 
-  const [displayedItems, setDisplayedItems] = useState([]);
-  const [isFullDataLoaded, setIsFullDataLoaded] = useState(false);
-
-  useEffect(() => {
-    if (allItems) {
-      setDisplayedItems(allItems.slice(0, 10));
-    }
-  }, [allItems]);
-
-  const handleInputChange = async (event, value) => {
-    if (!isFullDataLoaded && value) {
-      setIsFullDataLoaded(true);
-      setDisplayedItems(allItems);
-    }
-  };
+  console.log(stocks);
 
   return (
     <>
@@ -243,6 +232,7 @@ const ComboBox = () => {
             onConfirm={handleConfirmQty}
             onCancel={handleCancel}
             items={activeOrders}
+            stocks={stocks}
           />
         </>
       ) : (
