@@ -202,13 +202,6 @@ export default function Checkout({ isRefresh }: Props) {
     }
   };
 
-  // const handleAutocompleteChange = (event: any, value: any) => {
-  //   // Set the selected value to Formik
-  //   console.log('handleAutocompleteChange', value);
-  //   formikPartial.setFieldValue('personName', value ? value.personName : '');
-  //   formikUtang.setFieldValue('_id', value?._id ?? ''); // Set _id
-  // };
-
   const getAllUtandData = async () => {
     try {
       const data = await getAllUtang();
@@ -223,6 +216,7 @@ export default function Checkout({ isRefresh }: Props) {
   useEffect(() => {
     getAllUtandData();
   }, [allItems]);
+
   return (
     <div>
       <Box sx={classes.root}>

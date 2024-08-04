@@ -46,7 +46,7 @@ export default async function handler(req, res) {
       const totalItems = filteredItems.length;
       const totalPages = Math.ceil(totalItems / limitNumber);
 
-      res.status(200).json({
+      return res.status(200).json({
         items: paginatedItems,
         pagination: {
           totalItems,
@@ -56,7 +56,7 @@ export default async function handler(req, res) {
         },
       });
     } catch (error) {
-      res.status(500).json({ error: 'Failed to fetch items with pagination' });
+      return res.status(500).json({ error: 'Failed to fetch items with pagination' });
     }
   }
 
@@ -64,6 +64,11 @@ export default async function handler(req, res) {
     try {
       const { barcode, name } = req.query;
       const { email } = req.user;
+
+      // Ensure email is present in req.user
+      if (!email) {
+        return res.status(400).json({ error: 'User email is required' });
+      }
 
       // Find the user by email
       const user = await User.findOne({ email });
@@ -74,20 +79,23 @@ export default async function handler(req, res) {
 
       // Filter items based on query parameters
       let filteredItems = user.items;
+
       if (barcode) {
         filteredItems = filteredItems.filter(
           (item) => item.barcode.toLowerCase() === barcode.toLowerCase()
         );
       }
+
       if (name) {
         filteredItems = filteredItems.filter((item) =>
           item.name.toLowerCase().includes(name.toLowerCase())
         );
       }
 
-      res.status(200).json(filteredItems);
+      // If no items match the criteria, return an empty array
+      return res.status(200).json(filteredItems);
     } catch (error) {
-      res.status(500).json({ error: 'Failed to fetch all items' });
+      return res.status(500).json({ error: 'Failed to fetch all items' });
     }
   }
 

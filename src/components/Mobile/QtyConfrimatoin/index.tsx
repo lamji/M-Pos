@@ -22,6 +22,7 @@ interface QuantityAdjusterProps {
   onConfirm: () => void;
   onCancel: () => void;
   items: any;
+  stocks?: number;
 }
 
 const QuantityAdjuster: React.FC<QuantityAdjusterProps> = ({
@@ -33,6 +34,7 @@ const QuantityAdjuster: React.FC<QuantityAdjusterProps> = ({
   onConfirm,
   onCancel,
   items,
+  stocks,
 }) => {
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseInt(event.target.value, 10);
@@ -123,7 +125,7 @@ const QuantityAdjuster: React.FC<QuantityAdjusterProps> = ({
             fontSize: '10px',
           }}
         >
-          {`Stocks: ${items.quantity - quantity}`}
+          {stocks ? `Stocks: ${stocks - quantity}` : `Stocks: ${items.quantity - quantity}`}
         </Typography>
       </DialogContent>
 

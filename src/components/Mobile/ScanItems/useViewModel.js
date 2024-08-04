@@ -1,6 +1,5 @@
 import { fetchItems } from '@/src/common/api/testApi';
 import { getCookie } from '@/src/common/app/cookie';
-import { getData, setData } from '@/src/common/reducers/data';
 import {
   addItem,
   deleteItem,
@@ -8,7 +7,6 @@ import {
   removeItem,
   updateItemQuantity,
 } from '@/src/common/reducers/items';
-import { setUtangData } from '@/src/common/reducers/utangData';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -17,19 +15,21 @@ import Swal from 'sweetalert2';
 
 export default function useViewModel() {
   const token = getCookie('t');
+  const dispatch = useDispatch();
   const { items } = useSelector(getSelectedItems);
   const [quantity, setQuantity] = useState(1);
   const [modalOpen, setModalOpen] = useState(false);
   const [activeOrders, setActiveOrders] = useState({});
   const [isEdit, setIsEdit] = useState(false);
-  const dispatch = useDispatch();
-  const state = useSelector(getData);
   const [open, setOpen] = useState(false);
   const [itemToDelete2, setItemToDelete] = useState('');
   const [deleteProduct, setDeleteProduct] = useState('');
   const [autocompleteValue, setAutocompleteValue] = useState(null);
   const [allItems, setAllItems] = useState([]);
   const [refetch, setRefetch] = useState(false);
+  const [displayedItems, setDisplayedItems] = useState([]);
+  const [isFullDataLoaded, setIsFullDataLoaded] = useState(false);
+  const [stocks, setStocks] = useState(0);
   // const [lastScan, setLastScan] = useState(0);
   // const [isScanning, setIsScanning] = useState(false); // State to manage scanner visibility
 
@@ -55,8 +55,9 @@ export default function useViewModel() {
     try {
       const itemsData = await fetchItems();
       setAllItems(itemsData);
-      dispatch(setData(itemsData));
+      // dispatch(setData(itemsData));
     } catch (error) {
+      alert(JSON.stringify(error));
       console.log(error);
     }
   };
@@ -64,10 +65,6 @@ export default function useViewModel() {
   useEffect(() => {
     fetItems();
   }, [refetch]);
-
-  useEffect(() => {
-    setAllItems(state);
-  }, [state, refetch]);
 
   const handleAddItem = (event, value) => {
     if (value) {
@@ -144,33 +141,6 @@ export default function useViewModel() {
     }
   };
 
-  /**Utang updates */
-
-  const updateUtang = async () => {
-    try {
-      const response = await axios.get('/api/utang', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (response.data) {
-        dispatch(setUtangData(response.data));
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  const handleRefetch = (i) => {
-    console.log(i);
-    setRefetch(!refetch);
-  };
-
-  useEffect(() => {
-    updateUtang();
-  }, [state]);
-
   const handleIncreaseQuantity = (id) => {
     console.log('quantity', quantity);
     setQuantity((prevQuantity) => prevQuantity + 1);
@@ -221,6 +191,7 @@ export default function useViewModel() {
   };
 
   const handleConfirmQty = () => {
+    setStocks(activeOrders.quantity);
     const newData = {
       id: activeOrders.id,
       name: activeOrders.name,
@@ -247,6 +218,7 @@ export default function useViewModel() {
   };
 
   const handleEditItem = (data) => {
+    console.log(data);
     setIsEdit(true);
     setActiveOrders(data);
     setQuantity(data.quantity);
@@ -254,8 +226,23 @@ export default function useViewModel() {
   };
 
   useEffect(() => {
-    console.log(quantity);
-  }, [quantity]);
+    if (allItems) {
+      setDisplayedItems(allItems.slice(0, 10));
+    }
+  }, [allItems, refetch]);
+
+  const handleInputChange = async (event, value) => {
+    if (!isFullDataLoaded && value) {
+      setIsFullDataLoaded(true);
+      setDisplayedItems(allItems);
+    }
+  };
+
+  const handleRefetch = (i) => {
+    console.log(i);
+    setIsFullDataLoaded(false);
+    setRefetch(!refetch);
+  };
 
   return {
     handleIncrement,
@@ -284,5 +271,8 @@ export default function useViewModel() {
     autocompleteValue,
     setRefetch,
     handleRefetch,
+    handleInputChange,
+    displayedItems,
+    stocks,
   };
 }
