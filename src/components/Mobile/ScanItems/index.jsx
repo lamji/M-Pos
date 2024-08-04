@@ -54,8 +54,6 @@ const ComboBox = () => {
     stocks,
   } = useViewModel();
 
-  console.log(stocks);
-
   return (
     <>
       {allItems ? (
