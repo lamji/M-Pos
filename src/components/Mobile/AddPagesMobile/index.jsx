@@ -21,6 +21,7 @@ const BarcodeScannerComponent = dynamic(() => import('../../wt2Scanner'));
 
 const AddItemFormMobile = () => {
   const model = useViewModel();
+
   return (
     <>
       <Nav />
@@ -92,7 +93,7 @@ const AddItemFormMobile = () => {
               label="Barcode"
               variant="outlined"
               fullWidth
-              value={model.formik.values.scannedBarcode}
+              value={model.scannedBarcode}
               error={model.formik.touched.barcode && Boolean(model.formik.errors.barcode)}
               helperText={model.formik.touched.barcode && model.formik.errors.barcode}
               onChange={model.formik.handleChange}
@@ -176,7 +177,12 @@ const AddItemFormMobile = () => {
                   <Typography fontSize={'12px'}>No Barcode?</Typography>
                   <Box
                     onClick={() => model.handleGenerateBarcode()}
-                    sx={{ fontSize: '12px', color: 'blue', textDecoration: 'underline', mx: '2px' }}
+                    sx={{
+                      fontSize: '12px',
+                      color: 'blue',
+                      textDecoration: 'underline',
+                      mx: '2px',
+                    }}
                   >
                     Generate here
                   </Box>
