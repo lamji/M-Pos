@@ -43,6 +43,7 @@ export default function useViewModel() {
   const [scannedBarcode, setScannedBarcode] = useState('');
   const [generatedId, setGeneratedId] = useState('');
   const [checked, setChecked] = useState(false);
+  const [searchedVal, setSearchVal] = useState<any>();
 
   // Initial Values
   const initialValues = {
@@ -116,6 +117,15 @@ export default function useViewModel() {
       setScannedBarcode(decodedText);
       const randomId = `${decodedText}-${Math.floor(Math.random() * 1000)}`;
       setGeneratedId(randomId);
+      setSearchVal({
+        id: randomId,
+        name: '',
+        price: '',
+        barcode: decodedText,
+        quantity: '',
+        regularPrice: '',
+        type: '', // Set type if available
+      });
     } else {
       try {
         dispatch(setIsBackDropOpen(true));
@@ -130,6 +140,15 @@ export default function useViewModel() {
           const matchedItem = data[0];
           setScannedBarcode(matchedItem.barcode);
           formik.setValues({
+            id: matchedItem.id,
+            name: matchedItem.name,
+            price: matchedItem.price,
+            barcode: matchedItem.barcode,
+            quantity: matchedItem.quantity,
+            regularPrice: matchedItem.regularPrice,
+            type: matchedItem.type || '', // Set type if available
+          });
+          setSearchVal({
             id: matchedItem.id,
             name: matchedItem.name,
             price: matchedItem.price,
@@ -171,5 +190,6 @@ export default function useViewModel() {
     formik,
     styles,
     scannedBarcode,
+    searchedVal,
   };
 }
