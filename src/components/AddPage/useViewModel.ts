@@ -124,6 +124,7 @@ export default function useViewModel() {
 
         if (data.length > 0) {
           const matchedItem = data[0];
+          setScannedBarcode(decodedText);
           formik.setValues({
             id: matchedItem.id,
             name: matchedItem.name,
