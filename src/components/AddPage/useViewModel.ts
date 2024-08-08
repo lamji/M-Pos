@@ -105,11 +105,12 @@ export default function useViewModel() {
 
   const handleChange = (event: any) => {
     setChecked(event.target.checked);
+    setScannedBarcode('');
   };
 
   const handleBarcodeScanUpdate = async (decodedText: string) => {
-    setScannedBarcode(decodedText);
     if (!checked) {
+      setScannedBarcode(decodedText);
       const randomId = `${decodedText}-${Math.floor(Math.random() * 1000)}`;
       setGeneratedId(randomId);
     } else {
@@ -120,6 +121,7 @@ export default function useViewModel() {
           },
         });
         const data = response.data;
+
         if (data.length > 0) {
           const matchedItem = data[0];
           formik.setValues({
@@ -132,6 +134,7 @@ export default function useViewModel() {
             type: matchedItem.type || '', // Set type if available
           });
         } else {
+          setScannedBarcode('');
           Swal.fire({
             title: 'Error!',
             text: `No item found with the scanned barcode ${decodedText}`,
@@ -140,6 +143,7 @@ export default function useViewModel() {
           });
         }
       } catch (error) {
+        setScannedBarcode('');
         Swal.fire({
           title: 'Error!',
           text: 'Failed to fetch item details',
@@ -159,5 +163,6 @@ export default function useViewModel() {
     checked,
     formik,
     styles,
+    scannedBarcode,
   };
 }
