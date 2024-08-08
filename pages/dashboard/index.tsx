@@ -223,10 +223,10 @@ export default function Dashboard() {
                           sx={{
                             fontSize: '9px',
                             fontWeight: 700,
-                            color: items.quantity <= 5 ? 'red' : 'unset',
+                            color: items.stock <= 5 ? 'red' : 'green',
                           }}
                         >
-                          Stocks: {items.quantity}
+                          Stocks: {items.stock}
                         </Typography>
                       </Box>
                     </Box>
@@ -291,8 +291,7 @@ export default function Dashboard() {
                             <Typography
                               fontSize="10px"
                               sx={{
-                                color:
-                                  transaction.transactionType === 'Cash' ? '#9bc39b' : '#ff8e8e',
+                                color: transaction.transactionType === 'Cash' ? 'green' : 'red',
                               }}
                             >
                               {formatCurrency(item.quantity * item.price)}

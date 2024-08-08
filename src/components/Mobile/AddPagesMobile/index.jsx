@@ -14,6 +14,7 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import dynamic from 'next/dynamic';
 import useViewModel from '../../AddPage/useViewModel';
+// import Html5QrcodePlugin from '../../Scanner/index';
 
 const Nav = dynamic(() => import('@/src/components/Nav'));
 const BarcodeScannerComponent = dynamic(() => import('../../wt2Scanner'));
@@ -91,7 +92,7 @@ const AddItemFormMobile = () => {
               label="Barcode"
               variant="outlined"
               fullWidth
-              value={model.scannedBarcode}
+              value={model.formik.values.scannedBarcode}
               error={model.formik.touched.barcode && Boolean(model.formik.errors.barcode)}
               helperText={model.formik.touched.barcode && model.formik.errors.barcode}
               onChange={model.formik.handleChange}
@@ -152,7 +153,7 @@ const AddItemFormMobile = () => {
                 fps={10}
                 qrbox={250}
                 disableFlip={false}
-                qrCodeSuccessCallback={(decodedText) => handleBarcodeScanUpdate(decodedText)}
+                qrCodeSuccessCallback={(decodedText) => model.handleBarcodeScanUpdate(decodedText)}
               /> */}
               <Button
                 type="submit"
