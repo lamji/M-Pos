@@ -37,37 +37,61 @@ export const updateItem = async (req: any, email: string) => {
     return { status: 'error', message: error || 'Error updating items' };
   }
 };
-export const getTopFastMovingItems = async (userTransactions: any) => {
-  // Calculate the date one week ago from today
-  const oneWeekAgo = new Date();
-  oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 
-  // Filter transactions within the last week
-  const transactionsLastWeek = userTransactions.filter((transaction: any) => {
+export const getTopFastMovingItems = async (userTransactions: any, items: any[]) => {
+  // Get the current date
+  const now = new Date();
+
+  // Calculate the start of the current week (Monday)
+  const startOfWeek = new Date(now);
+  const dayOfWeek = startOfWeek.getDay(); // 0 is Sunday, 1 is Monday, etc.
+  const diffToMonday = (dayOfWeek + 6) % 7; // Number of days from Monday
+  startOfWeek.setDate(startOfWeek.getDate() - diffToMonday);
+  startOfWeek.setHours(0, 0, 0, 0); // Set time to midnight
+
+  // Calculate the end of the current week (Sunday)
+  const endOfWeek = new Date(startOfWeek);
+  endOfWeek.setDate(startOfWeek.getDate() + 6);
+  endOfWeek.setHours(23, 59, 59, 999); // Set time to end of day
+
+  // Filter transactions within the current week (Monday to Sunday)
+  const transactionsThisWeek = userTransactions.filter((transaction: any) => {
     const transactionDate = new Date(transaction.date);
-    return transactionDate >= oneWeekAgo;
+    return transactionDate >= startOfWeek && transactionDate <= endOfWeek;
   });
 
   // Aggregate items and calculate their total quantities
   const itemMap = new Map();
 
-  transactionsLastWeek.forEach((transaction: any) => {
-    transaction.items.forEach((item: any) => {
-      if (itemMap.has(item.name)) {
-        itemMap.set(item.name, itemMap.get(item.name) + item.quantity);
-      } else {
-        itemMap.set(item.name, item.quantity);
+  transactionsThisWeek.forEach((transaction: any) => {
+    transaction.items.forEach((itemIn: any) => {
+      const itemFound = items.find((item: any) => item.id === itemIn.id);
+      if (itemFound) {
+        if (itemMap.has(itemIn.id)) {
+          const currentData = itemMap.get(itemIn.id);
+          itemMap.set(itemIn.id, {
+            name: itemIn.name,
+            quantity: currentData.quantity + itemIn.quantity,
+            stock: itemFound.quantity,
+          });
+        } else {
+          itemMap.set(itemIn.id, {
+            name: itemIn.name,
+            quantity: itemIn.quantity,
+            stock: itemFound.quantity,
+          });
+        }
       }
     });
   });
 
   // Convert map to array and sort by quantity in descending order
-  const sortedItems = Array.from(itemMap.entries()).sort((a, b) => b[1] - a[1]);
+  const sortedItems = Array.from(itemMap.values()).sort((a, b) => b.quantity - a.quantity);
 
-  // Get top 5 fast-moving items with their names and quantities
-  const top5Items = sortedItems.slice(0, 20).map(([name, quantity]) => ({ name, quantity }));
+  // Get top 20 fast-moving items with their names, quantities, and stock
+  const top20Items = sortedItems.slice(0, 20);
 
-  return top5Items;
+  return top20Items;
 };
 
 export const getItemQuantities = async (top5Items: any, userTransactions: any) => {

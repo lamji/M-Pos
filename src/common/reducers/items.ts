@@ -5,6 +5,7 @@ interface SelectedItem {
   name: string;
   price: number;
   quantity: number;
+  stocks: number;
 }
 
 interface SelectedItemsState {
@@ -37,14 +38,15 @@ const selectedItemsSlice = createSlice({
         name: string;
         price: number;
         quantity: number;
+        stocks: number;
       }>
     ) => {
-      const { id, name, price, quantity } = action.payload;
+      const { id, name, price, quantity, stocks } = action.payload;
       const existingItem = state.items.find((item) => item.id === id);
       if (existingItem) {
         existingItem.quantity += quantity;
       } else {
-        state.items.push({ id, name, price, quantity });
+        state.items.push({ id, name, price, quantity, stocks });
       }
       state.total = calculateTotal(state.items);
     },

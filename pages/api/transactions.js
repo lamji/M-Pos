@@ -78,7 +78,7 @@ export default async function handler(req, res) {
               });
             });
 
-            const top5Items = await getTopFastMovingItems(user.transactions);
+            const top5Items = await getTopFastMovingItems(user.transactions, user.items);
             const top5ItemsWithQuantities = await getItemQuantities(top5Items, user.transactions);
 
             return res.status(200).json({

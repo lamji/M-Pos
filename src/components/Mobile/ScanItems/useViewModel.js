@@ -67,6 +67,7 @@ export default function useViewModel() {
   }, [refetch]);
 
   const handleAddItem = (event, value) => {
+    console.log('value', value);
     if (value) {
       if (value.quantity <= 0) {
         Swal.fire({
@@ -79,6 +80,7 @@ export default function useViewModel() {
         setActiveOrders(value);
         setAutocompleteValue(null);
         handleOpen(true);
+        setStocks(value.quantity);
         //dispatch(addItem({ id: value.id, name: value.name, price: value.price, _id: value._id }));
       }
     }
@@ -191,13 +193,13 @@ export default function useViewModel() {
   };
 
   const handleConfirmQty = () => {
-    setStocks(activeOrders.quantity);
     const newData = {
       id: activeOrders.id,
       name: activeOrders.name,
       price: activeOrders.price,
       quantity: quantity,
       total: activeOrders.price * quantity,
+      stocks: activeOrders.quantity,
       _id: activeOrders._id,
     };
     if (isEdit) {
@@ -219,6 +221,7 @@ export default function useViewModel() {
 
   const handleEditItem = (data) => {
     console.log(data);
+    setStocks(data.stocks);
     setIsEdit(true);
     setActiveOrders(data);
     setQuantity(data.quantity);
