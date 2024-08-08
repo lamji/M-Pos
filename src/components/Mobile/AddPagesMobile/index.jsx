@@ -22,6 +22,8 @@ const BarcodeScannerComponent = dynamic(() => import('../../wt2Scanner'));
 const AddItemFormMobile = () => {
   const model = useViewModel();
 
+  alert(JSON.stringify(model.formik.values));
+
   return (
     <>
       <Nav />
