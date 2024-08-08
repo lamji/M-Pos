@@ -6,10 +6,13 @@ import Swal from 'sweetalert2';
 import { generateRandomBarcode } from '@/src/common/helpers';
 import { getCookie } from '@/src/common/app/cookie';
 import useStyles from './useStyles';
+import { useDispatch } from 'react-redux';
+import { setIsBackDropOpen } from '@/src/common/reducers/items';
 
 // import Html5QrcodePlugin from '@/src/components/Scanner';
 
 export default function useViewModel() {
+  const dispatch = useDispatch();
   const styles = useStyles();
   // Validation Schema
   const validationSchemaChecked = Yup.object({
@@ -115,6 +118,7 @@ export default function useViewModel() {
       setGeneratedId(randomId);
     } else {
       try {
+        dispatch(setIsBackDropOpen(true));
         const response = await axios.get(`/api/items2?barcode=${decodedText}`, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -124,7 +128,7 @@ export default function useViewModel() {
 
         if (data.length > 0) {
           const matchedItem = data[0];
-          setScannedBarcode(decodedText);
+          setScannedBarcode(matchedItem.barcode);
           formik.setValues({
             id: matchedItem.id,
             name: matchedItem.name,
@@ -134,8 +138,10 @@ export default function useViewModel() {
             regularPrice: matchedItem.regularPrice,
             type: matchedItem.type || '', // Set type if available
           });
+          dispatch(setIsBackDropOpen(false));
         } else {
           setScannedBarcode('');
+          dispatch(setIsBackDropOpen(false));
           Swal.fire({
             title: 'Error!',
             text: `No item found with the scanned barcode ${decodedText}`,
