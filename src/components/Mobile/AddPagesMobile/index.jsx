@@ -22,6 +22,8 @@ const BarcodeScannerComponent = dynamic(() => import('../../wt2Scanner'));
 const AddItemFormMobile = () => {
   const model = useViewModel();
 
+  alert(JSON.stringify(model.formik.values));
+
   return (
     <>
       <Nav />
@@ -93,7 +95,7 @@ const AddItemFormMobile = () => {
               label="Barcode"
               variant="outlined"
               fullWidth
-              value={model.scannedBarcode}
+              value={model.checked ? model.formik.values.scannedBarcode : model.scannedBarcode}
               error={model.formik.touched.barcode && Boolean(model.formik.errors.barcode)}
               helperText={model.formik.touched.barcode && model.formik.errors.barcode}
               onChange={model.formik.handleChange}
