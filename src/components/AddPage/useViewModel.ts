@@ -113,8 +113,8 @@ export default function useViewModel() {
   };
 
   const handleBarcodeScanUpdate = async (decodedText: string) => {
+    setScannedBarcode(decodedText);
     if (!checked) {
-      setScannedBarcode(decodedText);
       const randomId = `${decodedText}-${Math.floor(Math.random() * 1000)}`;
       setGeneratedId(randomId);
       setSearchVal({
