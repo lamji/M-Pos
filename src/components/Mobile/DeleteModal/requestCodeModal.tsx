@@ -41,6 +41,7 @@ export default function RequestCodeModal({ open, handleClose }: Props) {
 
   const handleCancel = () => {
     handleClose(false);
+    setIsSuccess(false);
   };
 
   const handleSubmitForm = async (values: { code: string; email: string }) => {

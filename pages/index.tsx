@@ -4,6 +4,8 @@ import { GetServerSideProps } from 'next';
 import { parse } from 'cookie';
 import dynamic from 'next/dynamic';
 
+import ScanItems from '@/src/components/Mobile/ScanItems';
+
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { req } = context;
   const cookie = req.headers.cookie;
@@ -27,10 +29,28 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   };
 };
 
-const ScanItems = dynamic(() => import('@/src/components/Mobile/ScanItems'));
 const Nav = dynamic(() => import('@/src/components/Nav'));
 
 export default function Home() {
+  // useEffect(() => {
+  //   const fetchDocuments = async () => {
+  //     try {
+  //       const docs = await readAllDocuments();
+  //       const history = await readAllDocumentsHistory();
+  //       const utang = await readAllDocumentsUtang();
+  //       const transactions = await readAllDocumentTransaction();
+  //       console.log('docs', docs);
+  //       console.log('history', history);
+  //       console.log('utang', utang);
+  //       console.log('transactions', transactions);
+  //     } catch (err) {
+  //       console.error('Error fetching documents', err);
+  //     }
+  //   };
+
+  //   fetchDocuments();
+  // }, []);
+
   return (
     <>
       <Head>
@@ -38,12 +58,8 @@ export default function Home() {
       </Head>
       <main>
         <Nav />
-        <Box sx={{}}>
-          <>
-            <Box>
-              <ScanItems />
-            </Box>
-          </>
+        <Box>
+          <ScanItems />
         </Box>
       </main>
     </>

@@ -16,6 +16,7 @@ import { clearCookie } from '@/src/common/app/cookie';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
 import { Typography } from '@mui/material';
+import CloudSyncIcon from '@mui/icons-material/CloudSync';
 
 interface PropsDrawer {
   status: boolean;
@@ -90,6 +91,14 @@ export default function MobileDrawer({ status, setStatus }: PropsDrawer) {
                 <InventoryIcon />
               </ListItemIcon>
               <ListItemText primary={'Create Inventory'} />
+            </ListItemButton>
+          </ListItem>
+          <ListItem disablePadding>
+            <ListItemButton onClick={() => router.push('/backup')}>
+              <ListItemIcon>
+                <CloudSyncIcon />
+              </ListItemIcon>
+              <ListItemText primary={'Backup/Restore'} />
             </ListItemButton>
           </ListItem>
           <ListItem disablePadding>

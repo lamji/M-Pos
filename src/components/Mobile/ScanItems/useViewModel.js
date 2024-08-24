@@ -1,5 +1,7 @@
-import { fetchItems } from '@/src/common/api/testApi';
-import { getCookie } from '@/src/common/app/cookie';
+import {
+  queryDocumentsByBarcode,
+  readAllDocuments,
+} from '@/src/common/app/lib/pouchdbServiceItems';
 import {
   addItem,
   deleteItem,
@@ -7,14 +9,12 @@ import {
   removeItem,
   updateItemQuantity,
 } from '@/src/common/reducers/items';
-import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 import Swal from 'sweetalert2';
 
 export default function useViewModel() {
-  const token = getCookie('t');
   const dispatch = useDispatch();
   const { items } = useSelector(getSelectedItems);
   const [quantity, setQuantity] = useState(1);
@@ -51,20 +51,19 @@ export default function useViewModel() {
     }
   }, []);
 
-  const fetItems = async () => {
-    try {
-      const itemsData = await fetchItems();
-      setAllItems(itemsData);
-      // dispatch(setData(itemsData));
-    } catch (error) {
-      alert(JSON.stringify(error));
-      console.log(error);
-    }
-  };
-
   useEffect(() => {
-    fetItems();
-  }, [refetch]);
+    const fetchDocuments = async () => {
+      try {
+        const docs = await readAllDocuments();
+        setAllItems(docs);
+        console.log('docs', docs);
+      } catch (err) {
+        console.error('Error fetching documents', err);
+      }
+    };
+
+    fetchDocuments();
+  }, []);
 
   const handleAddItem = (event, value) => {
     console.log('value', value);
@@ -115,12 +114,7 @@ export default function useViewModel() {
     }
 
     try {
-      const response = await axios.get(`/api/items2?barcode=${decodedText}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      const data = response.data;
+      const data = await queryDocumentsByBarcode(decodedText);
 
       if (data.length > 0) {
         const matchedItem = data[0];

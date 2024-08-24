@@ -15,6 +15,17 @@ export const fetchItems = async (params?: any) => {
     console.error('Error fetching JSON data:', error);
   }
 };
+
+export const fetchItemsRestore = async (params?: any) => {
+  try {
+    const response = await instance.get('/api/restore', { params });
+    const data = response.data;
+    // Dispatch your Redux action here
+    return data;
+  } catch (error) {
+    console.error('Error fetching JSON data:', error);
+  }
+};
 export const getItemByBarcode = async (barcode: string) => {
   try {
     const response = await instance.get(`/api/items2?barcode=${barcode}`);

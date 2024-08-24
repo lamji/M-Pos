@@ -21,6 +21,7 @@ import LinearIndeterminate from '../../Loader/linear';
 import DeleteConfirmationDialog from '../DeleteModal';
 import useViewModel from './useViewModel';
 import dynamic from 'next/dynamic';
+// import Html5QrcodePlugin from '../../Scanner/index';
 
 const Checkout = dynamic(() => import('../CheckOut/index'));
 const BarcodeScannerComponent = dynamic(() => import('../../wt2Scanner/index'));
@@ -53,8 +54,6 @@ const ComboBox = () => {
     displayedItems,
     stocks,
   } = useViewModel();
-
-  console.log(stocks);
 
   return (
     <>
@@ -147,8 +146,14 @@ const ComboBox = () => {
                   </MenuItem>
                 )}
               />
-              <Box sx={{ marginTop: '50px', marginLeft: '20px' }}>
+              <Box sx={{ marginLeft: '20px' }}>
                 <BarcodeScannerComponent dataOut={(data) => onNewScanResult(data)} size={50} />
+                {/* <Html5QrcodePlugin
+                  fps={10}
+                  qrbox={250}
+                  disableFlip={false}
+                  qrCodeSuccessCallback={(decodedText) => onNewScanResult(decodedText)}
+                /> */}
               </Box>
             </Box>
 
