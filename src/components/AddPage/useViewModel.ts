@@ -51,8 +51,8 @@ export default function useViewModel() {
     name: '',
     price: '',
     barcode: '',
-    quantity: checked ? '' : 0,
-    regularPrice: checked ? '' : 0,
+    quantity: '',
+    regularPrice: '',
     type: checked ? '' : 'new',
   };
 

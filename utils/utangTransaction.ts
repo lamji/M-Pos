@@ -4,6 +4,13 @@ export const addTransactionUtang = async (req: any) => {
   const { items, personName, total, type, _id, cash } = req.body;
   const { email } = req.user;
 
+  const newItems = items.map((item: any) => {
+    return {
+      ...item,
+      date: new Date(),
+    };
+  });
+
   try {
     const user = await User.findOne({ email });
     if (!user) {
@@ -20,13 +27,13 @@ export const addTransactionUtang = async (req: any) => {
       }
 
       // Update existing utang record
-      utangRecord.items.push(...items);
+      utangRecord.items.push(...newItems);
       utangRecord.total += total;
       utangRecord.date = new Date();
     } else {
       // Create new utang record
       utangRecord = {
-        items,
+        items: newItems,
         personName,
         total,
         remainingBalance: total,
@@ -39,7 +46,7 @@ export const addTransactionUtang = async (req: any) => {
 
     // Create a new transaction record
     const newTransaction = {
-      items,
+      items: newItems,
       personName,
       cash,
       total,
