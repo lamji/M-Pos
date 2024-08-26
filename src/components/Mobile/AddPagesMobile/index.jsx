@@ -93,7 +93,7 @@ const AddItemFormMobile = () => {
               label="Barcode"
               variant="outlined"
               fullWidth
-              value={model.formik.values.scannedBarcode}
+              value={model.formik.values.barcode}
               error={model.formik.touched.barcode && Boolean(model.formik.errors.barcode)}
               helperText={model.formik.touched.barcode && model.formik.errors.barcode}
               onChange={model.formik.handleChange}
@@ -106,7 +106,7 @@ const AddItemFormMobile = () => {
               type="number"
               variant="outlined"
               fullWidth
-              value={model.formik.values.quantity || ''}
+              value={model.formik.values.quantity}
               error={model.formik.touched.quantity && Boolean(model.formik.errors.quantity)}
               helperText={model.formik.touched.quantity && model.formik.errors.quantity}
               onChange={model.formik.handleChange}
@@ -118,7 +118,7 @@ const AddItemFormMobile = () => {
               type="number"
               variant="outlined"
               fullWidth
-              value={model.formik.values.regularPrice || ''}
+              value={model.formik.values.regularPrice}
               error={model.formik.touched.regularPrice && Boolean(model.formik.errors.regularPrice)}
               helperText={model.formik.touched.regularPrice && model.formik.errors.regularPrice}
               onChange={model.formik.handleChange}

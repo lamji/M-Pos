@@ -82,6 +82,7 @@ const utangSchema = new mongoose.Schema(
         name: String,
         price: Number,
         quantity: Number,
+        date: String,
       },
     ],
     personName: {
