@@ -5,6 +5,7 @@ import {
   deleteItem,
   getSelectedItems,
   removeItem,
+  setIsBackDropOpen,
   updateItemQuantity,
 } from '@/src/common/reducers/items';
 import axios from 'axios';
@@ -67,7 +68,6 @@ export default function useViewModel() {
   }, [refetch]);
 
   const handleAddItem = (event, value) => {
-    console.log('value', value);
     if (value) {
       if (value.quantity <= 0) {
         Swal.fire({
@@ -115,6 +115,7 @@ export default function useViewModel() {
     }
 
     try {
+      dispatch(setIsBackDropOpen(true));
       const response = await axios.get(`/api/items2?barcode=${decodedText}`, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -123,6 +124,7 @@ export default function useViewModel() {
       const data = response.data;
 
       if (data.length > 0) {
+        dispatch(setIsBackDropOpen(false));
         const matchedItem = data[0];
         if (matchedItem?.quantity <= 0) {
           Swal.fire({
@@ -140,6 +142,9 @@ export default function useViewModel() {
       }
     } catch (error) {
       toast.error('Error fetching item data');
+      dispatch(setIsBackDropOpen(false));
+    } finally {
+      dispatch(setIsBackDropOpen(false));
     }
   };
 
