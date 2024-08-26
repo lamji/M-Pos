@@ -180,7 +180,7 @@ const UtangTransactions: React.FC = () => {
               </Box>
             </>
           ) : (
-            transactions?.utang?.map((data: any, idx: number) => {
+            transactions?.utang?.slice().reverse()((data: any, idx: number) => {
               return (
                 <Box
                   key={idx}
