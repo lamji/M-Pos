@@ -180,28 +180,31 @@ const UtangTransactions: React.FC = () => {
               </Box>
             </>
           ) : (
-            transactions?.utang?.slice().reverse()((data: any, idx: number) => {
-              return (
-                <Box
-                  key={idx}
-                  display="flex"
-                  alignItems="center"
-                  justifyContent="space-between"
-                  p={1}
-                  sx={{
-                    border: '1px solid #ccd2d7',
-                  }}
-                >
-                  <Box sx={{ width: 70 }}>
-                    <Typography fontSize={'12px'}>{data.personName}</Typography>
+            transactions?.utang
+              ?.slice()
+              ?.reverse()
+              ?.map((data: any, idx: number) => {
+                return (
+                  <Box
+                    key={idx}
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="space-between"
+                    p={1}
+                    sx={{
+                      border: '1px solid #ccd2d7',
+                    }}
+                  >
+                    <Box sx={{ width: 70 }}>
+                      <Typography fontSize={'12px'}>{data.personName}</Typography>
+                    </Box>
+                    <Typography fontSize={'12px'}>{formatCurrency(data.total)}</Typography>
+                    <Button onClick={() => handleOpen(data)} sx={{ textTransform: 'capitalize' }}>
+                      View
+                    </Button>
                   </Box>
-                  <Typography fontSize={'12px'}>{formatCurrency(data.total)}</Typography>
-                  <Button onClick={() => handleOpen(data)} sx={{ textTransform: 'capitalize' }}>
-                    View
-                  </Button>
-                </Box>
-              );
-            })
+                );
+              })
           )}
         </Box>
         {/* <Box display="flex" alignItems="center" justifyContent="end">
