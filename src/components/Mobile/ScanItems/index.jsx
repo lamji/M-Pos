@@ -52,9 +52,9 @@ const ComboBox = () => {
     handleInputChange,
     displayedItems,
     stocks,
+    isMobile,
+    isLarge,
   } = useViewModel();
-
-  console.log(stocks);
 
   return (
     <>
@@ -70,9 +70,13 @@ const ComboBox = () => {
               paddingTop: '20px',
             }}
           >
-            <Box sx={{ textAlign: 'center' }}>
-              <Checkout isRefresh={(i) => handleRefetch(i)} />
-            </Box>
+            {isMobile && (
+              <>
+                <Box sx={{ textAlign: 'center' }}>
+                  <Checkout isRefresh={(i) => handleRefetch(i)} />
+                </Box>
+              </>
+            )}
 
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
               <Autocomplete
@@ -147,12 +151,14 @@ const ComboBox = () => {
                   </MenuItem>
                 )}
               />
-              <Box sx={{ marginTop: '50px', marginLeft: '20px' }}>
-                <BarcodeScannerComponent dataOut={(data) => onNewScanResult(data)} size={50} />
-              </Box>
+              {isMobile && (
+                <Box sx={{ marginTop: '50px', marginLeft: '20px' }}>
+                  <BarcodeScannerComponent dataOut={(data) => onNewScanResult(data)} size={50} />
+                </Box>
+              )}
             </Box>
 
-            <List sx={{ marginTop: '0px', height: '50vh', overflow: 'scroll' }}>
+            <List sx={{ marginTop: '10px', height: '50vh', overflowY: 'scroll' }}>
               {items.length > 0 ? (
                 items
                   .slice()
@@ -213,6 +219,7 @@ const ComboBox = () => {
                 </ListItem>
               )}
             </List>
+
             <ToastContainer />
             <DeleteConfirmationDialog
               open={open}
@@ -221,7 +228,13 @@ const ComboBox = () => {
               item={deleteProduct}
             />
           </Box>
-
+          {isLarge && (
+            <>
+              <Box sx={{ textAlign: 'center' }}>
+                <Checkout isRefresh={(i) => handleRefetch(i)} />
+              </Box>
+            </>
+          )}
           <QuantityAdjuster
             open={modalOpen}
             handleClose={handleCloseQty}

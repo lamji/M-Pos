@@ -1,5 +1,6 @@
 import { fetchItems } from '@/src/common/api/testApi';
 import { getCookie } from '@/src/common/app/cookie';
+import { useDeviceType } from '@/src/common/helpers';
 import {
   addItem,
   deleteItem,
@@ -31,6 +32,8 @@ export default function useViewModel() {
   const [displayedItems, setDisplayedItems] = useState([]);
   const [isFullDataLoaded, setIsFullDataLoaded] = useState(false);
   const [stocks, setStocks] = useState(0);
+  const { isMobile, isLaptop, isPC } = useDeviceType();
+  const isLarge = isLaptop || isPC;
   // const [lastScan, setLastScan] = useState(0);
   // const [isScanning, setIsScanning] = useState(false); // State to manage scanner visibility
 
@@ -282,5 +285,7 @@ export default function useViewModel() {
     handleInputChange,
     displayedItems,
     stocks,
+    isLarge,
+    isMobile,
   };
 }

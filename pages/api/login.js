@@ -26,6 +26,8 @@ export default async function handler(req, res) {
       // Decrypt the stored subscription code
       const decryptedCode = decrypt(user.subscription.code);
 
+      console.log('decryptedCode', decryptedCode);
+
       // Check if the provided code matches the decrypted code
       if (decryptedCode !== code) {
         return res.status(401).json({ success: false, message: 'Invalid email or code' });
