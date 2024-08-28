@@ -41,6 +41,22 @@ export default function LaptopScanItems() {
               cardHight={60}
               onClick={() => console.log('test')}
             />
+            <CardButton
+              height={40}
+              description="Logout"
+              width={80}
+              header="CTRL + L"
+              cardHight={60}
+              onClick={() => console.log('test')}
+            />
+            <CardButton
+              height={40}
+              description="Clear"
+              width={80}
+              header="CTRL + C"
+              cardHight={60}
+              onClick={() => console.log('test')}
+            />
           </Box>
         </Box>
       </Box>
