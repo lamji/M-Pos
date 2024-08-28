@@ -22,7 +22,7 @@ interface QuantityAdjusterProps {
   onConfirm: () => void;
   onCancel: () => void;
   items: any;
-  stocks?: number;
+  stocks: number;
 }
 
 const QuantityAdjuster: React.FC<QuantityAdjusterProps> = ({
@@ -44,7 +44,7 @@ const QuantityAdjuster: React.FC<QuantityAdjusterProps> = ({
   };
 
   return (
-    <Dialog open={open} aria-labelledby="quantity-adjuster-dialog" fullWidth>
+    <Dialog open={open} aria-labelledby="quantity-adjuster-dialog" fullWidth maxWidth="xs">
       <Box sx={{ textAlign: 'center', p: 2 }}>
         <Typography fontWeight={700}>Adjust Quantity</Typography>
         <Typography sx={{ color: 'gray', fontSize: '12px' }}>{items?.name}</Typography>
@@ -75,7 +75,7 @@ const QuantityAdjuster: React.FC<QuantityAdjusterProps> = ({
             sx={{ background: '#c2e6e4' }}
             onClick={onIncrement}
             aria-label="increase quantity"
-            disabled={items.quantity <= quantity ? true : false}
+            disabled={stocks <= quantity ? true : false}
           >
             <AddIcon style={{ color: '#ef783e' }} />
           </IconButton>

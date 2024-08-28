@@ -159,7 +159,11 @@ const MobileBankingLoginComponent: React.FC = () => {
               variant="contained"
               color="primary"
               fullWidth
-              sx={{ backgroundColor: '#ef783e', '&:hover': { backgroundColor: '#ef783e' } }}
+              sx={{
+                color: 'white',
+                backgroundColor: '#ef783e',
+                '&:hover': { backgroundColor: '#ef783e' },
+              }}
             >
               Login
             </Button>
