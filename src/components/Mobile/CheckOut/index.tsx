@@ -21,6 +21,8 @@ import { getSelectedItems, setIsBackDropOpen } from '@/src/common/reducers/items
 import { getAllUtang, postTransaction } from '@/src/common/api/testApi';
 import moment from 'moment';
 import hotkeys from 'hotkeys-js';
+import { useRouter } from 'next/router';
+import { clearCookie } from '@/src/common/app/cookie';
 
 interface Props {
   isRefresh: (i: boolean) => void;
@@ -29,6 +31,7 @@ interface Props {
 export default function Checkout({ isRefresh }: Props) {
   const [refresh, setRefresh] = useState(false);
   const dispatch = useDispatch();
+  const router = useRouter();
   const { total, items } = useSelector(getSelectedItems); // Get total from Redux
   const {
     classes,
@@ -226,6 +229,11 @@ export default function Checkout({ isRefresh }: Props) {
     getAllUtandData();
   }, [allItems]);
 
+  const handleSignout = async () => {
+    clearCookie();
+    router.push('/');
+  };
+
   useEffect(() => {
     // Attach the hotkey event
     hotkeys('ctrl+p', (event, handler) => {
@@ -235,9 +243,22 @@ export default function Checkout({ isRefresh }: Props) {
       handleClickOpen();
     });
 
+    // Clear
+    hotkeys('ctrl+c', (event) => {
+      event.preventDefault();
+      handleClearItems();
+    });
+
+    hotkeys('ctrl+l', (event) => {
+      event.preventDefault();
+      handleSignout();
+    });
+
     // Cleanup the hotkey event on component unmount
     return () => {
       hotkeys.unbind('ctrl+p');
+      hotkeys.unbind('ctrl+c');
+      hotkeys.unbind('ctrl+l');
     };
   }, []);
 
