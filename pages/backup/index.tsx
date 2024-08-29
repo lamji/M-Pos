@@ -3,12 +3,12 @@ import { parse } from 'cookie';
 import dynamic from 'next/dynamic';
 import { Box } from '@mui/material';
 import CardButton from '@/src/components/Mobile/CardButton';
-import { fetchItemsRestore } from '@/src/common/api/testApi';
 import { setIsBackDropOpen } from '@/src/common/reducers/items';
 import { useDispatch } from 'react-redux';
 import { restoreDocument } from '@/src/common/app/lib/pouchdbServiceItems';
 import { restoreUtangDocument } from '@/src/common/app/lib/pouchDbUtang';
 import { restoreTransactionDocs } from '@/src/common/app/lib/pouchDbTransaction';
+import apiClient from '@/src/common/app/axios';
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { req } = context;
@@ -41,19 +41,22 @@ export default function Backup() {
   const fetItems = async () => {
     dispatch(setIsBackDropOpen(true));
     try {
-      const itemsData = await fetchItemsRestore();
-      if (itemsData) {
+      const response = await apiClient.get('/restore');
+      const data = response.data;
+      const userData = data.users[0];
+      console.log('data=============>', userData);
+      if (data.success) {
         // Create an array of promises for restoring 'items' documents
-        const restoreItemPromises = itemsData.items.map(async (data: any) => {
+        const restoreItemPromises = userData.items.map(async (data: any) => {
           await restoreDocument(data);
         });
 
         // Create an array of promises for restoring 'utang' documents
-        const restoreUtangPromises = itemsData.utangs.map(async (data: any) => {
+        const restoreUtangPromises = userData.utangs.map(async (data: any) => {
           await restoreUtangDocument(data);
         });
 
-        const restoreTransactionsPromises = itemsData.transactions.map(async (data: any) => {
+        const restoreTransactionsPromises = userData.transactions.map(async (data: any) => {
           await restoreTransactionDocs(data);
         });
 

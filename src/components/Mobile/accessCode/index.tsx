@@ -11,6 +11,7 @@ import { useRouter } from 'next/router';
 import { setIsBackDropOpen } from '@/src/common/reducers/items';
 import { useDispatch } from 'react-redux';
 import SimpleDialogDemo from '../../Loader/backdrop';
+import apiClient from '@/src/common/app/axios';
 
 // Define TypeScript types for form values
 interface FormValues {
@@ -43,15 +44,8 @@ const MobileBankingLoginComponent: React.FC = () => {
     ) => {
       dispatch(setIsBackDropOpen(true));
       try {
-        const response = await fetch('/api/login', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(values),
-        });
-
-        const data = await response.json();
+        const response = await apiClient.post('/login', values); // Use Axios instance
+        const data = response.data;
 
         if (data.success) {
           saveCookie('t', data.token); // Store the token if the code matches
@@ -159,7 +153,11 @@ const MobileBankingLoginComponent: React.FC = () => {
               variant="contained"
               color="primary"
               fullWidth
-              sx={{ backgroundColor: '#ef783e', '&:hover': { backgroundColor: '#ef783e' } }}
+              sx={{
+                color: 'white',
+                backgroundColor: '#ef783e',
+                '&:hover': { backgroundColor: '#ef783e' },
+              }}
             >
               Login
             </Button>

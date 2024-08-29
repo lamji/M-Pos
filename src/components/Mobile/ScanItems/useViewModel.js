@@ -2,11 +2,13 @@ import {
   queryDocumentsByBarcode,
   readAllDocuments,
 } from '@/src/common/app/lib/pouchdbServiceItems';
+import { useDeviceType } from '@/src/common/helpers';
 import {
   addItem,
   deleteItem,
   getSelectedItems,
   removeItem,
+  setIsBackDropOpen,
   updateItemQuantity,
 } from '@/src/common/reducers/items';
 import { useEffect, useState } from 'react';
@@ -30,6 +32,8 @@ export default function useViewModel() {
   const [displayedItems, setDisplayedItems] = useState([]);
   const [isFullDataLoaded, setIsFullDataLoaded] = useState(false);
   const [stocks, setStocks] = useState(0);
+  const { isMobile, isLaptop, isPC } = useDeviceType();
+  const isLarge = isLaptop || isPC;
   // const [lastScan, setLastScan] = useState(0);
   // const [isScanning, setIsScanning] = useState(false); // State to manage scanner visibility
 
@@ -56,7 +60,6 @@ export default function useViewModel() {
       try {
         const docs = await readAllDocuments();
         setAllItems(docs);
-        console.log('docs', docs);
       } catch (err) {
         console.error('Error fetching documents', err);
       }
@@ -66,7 +69,6 @@ export default function useViewModel() {
   }, []);
 
   const handleAddItem = (event, value) => {
-    console.log('value', value);
     if (value) {
       if (value.quantity <= 0) {
         Swal.fire({
@@ -117,6 +119,7 @@ export default function useViewModel() {
       const data = await queryDocumentsByBarcode(decodedText);
 
       if (data.length > 0) {
+        dispatch(setIsBackDropOpen(false));
         const matchedItem = data[0];
         if (matchedItem?.quantity <= 0) {
           Swal.fire({
@@ -134,6 +137,9 @@ export default function useViewModel() {
       }
     } catch (error) {
       toast.error('Error fetching item data');
+      dispatch(setIsBackDropOpen(false));
+    } finally {
+      dispatch(setIsBackDropOpen(false));
     }
   };
 
@@ -271,5 +277,7 @@ export default function useViewModel() {
     handleInputChange,
     displayedItems,
     stocks,
+    isLarge,
+    isMobile,
   };
 }

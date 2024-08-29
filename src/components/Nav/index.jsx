@@ -63,6 +63,7 @@ export default function Nav() {
                 {currentPath === '/payment' && 'PAYMENT'}
                 {currentPath === '/admin' && 'ADMIN'}
                 {currentPath === '/report' && 'REPORT'}
+                {currentPath === '/backup' && 'BACKUP / RESTORE'}
               </Typography>
             </>
           )}

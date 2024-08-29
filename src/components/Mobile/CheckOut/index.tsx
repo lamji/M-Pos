@@ -20,6 +20,9 @@ import { formatCurrency } from '@/src/common/helpers';
 import { getSelectedItems, setIsBackDropOpen } from '@/src/common/reducers/items';
 import { getAllUtang, postTransaction } from '@/src/common/api/testApi';
 import moment from 'moment';
+import hotkeys from 'hotkeys-js';
+import { useRouter } from 'next/router';
+import { clearCookie } from '@/src/common/app/cookie';
 
 interface Props {
   isRefresh: (i: boolean) => void;
@@ -28,9 +31,18 @@ interface Props {
 export default function Checkout({ isRefresh }: Props) {
   const [refresh, setRefresh] = useState(false);
   const dispatch = useDispatch();
+  const router = useRouter();
   const { total, items } = useSelector(getSelectedItems); // Get total from Redux
-  const { classes, handleClickOpen, handleClose, open, fullScreen, handleClearItems, token } =
-    useViewModel();
+  const {
+    classes,
+    handleClickOpen,
+    handleClose,
+    open,
+    fullScreen,
+    handleClearItems,
+    token,
+    isMobile,
+  } = useViewModel();
   const [selectedOption, setSelectedOption] = React.useState<'cash' | 'utang' | 'partial' | null>(
     null
   );
@@ -217,24 +229,81 @@ export default function Checkout({ isRefresh }: Props) {
     getAllUtandData();
   }, [allItems]);
 
+  const handleSignout = async () => {
+    clearCookie();
+    router.push('/');
+  };
+
+  useEffect(() => {
+    // Attach the hotkey event
+    hotkeys('ctrl+p', (event, handler) => {
+      // Prevent the default refresh event under WINDOWS system
+      event.preventDefault();
+      console.log(handler);
+      handleClickOpen();
+    });
+
+    // Clear
+    hotkeys('ctrl+c', (event) => {
+      event.preventDefault();
+      handleClearItems();
+    });
+
+    hotkeys('ctrl+l', (event) => {
+      event.preventDefault();
+      handleSignout();
+    });
+
+    // Cleanup the hotkey event on component unmount
+    return () => {
+      hotkeys.unbind('ctrl+p');
+      hotkeys.unbind('ctrl+c');
+      hotkeys.unbind('ctrl+l');
+    };
+  }, []);
+
   return (
     <div>
-      <Box sx={classes.root}>
-        <Box>
-          {token && total > 0 && <Typography fontWeight={700}>{formatCurrency(total)}</Typography>}
-          {/* Use total here */}
-          {token && total > 0 && (
-            <>
+      <Box
+        sx={{ borderRadius: '5px', marginBottom: '10px', marginTop: isMobile ? '50px' : '10px' }}
+      >
+        {isMobile ? (
+          <>
+            <Box>
+              {token && total > 0 && (
+                <Typography fontWeight={700}>{formatCurrency(total)}</Typography>
+              )}
+              {/* Use total here */}
+              {token && total > 0 && (
+                <>
+                  <Button
+                    onClick={handleClickOpen}
+                    sx={{ ...classes.button, py: 1, width: '100%', color: 'white' }}
+                    variant="contained"
+                  >
+                    PAY
+                  </Button>
+                </>
+              )}
+            </Box>
+          </>
+        ) : (
+          <>
+            <Box sx={{ textAlign: 'left' }}>
+              <Typography mb={2} fontSize="20px" fontWeight={700}>
+                TOTAL: {formatCurrency(total)}
+              </Typography>
+
               <Button
                 onClick={handleClickOpen}
-                sx={{ ...classes.button, py: 1, width: '100%' }}
+                sx={{ width: '100%', height: '100px', color: 'white', fontSize: '30px' }}
                 variant="contained"
               >
-                PAY
+                CHECKOUT
               </Button>
-            </>
-          )}
-        </Box>
+            </Box>
+          </>
+        )}
       </Box>
       <div>
         <Dialog
@@ -242,6 +311,7 @@ export default function Checkout({ isRefresh }: Props) {
           open={open}
           onClose={handleClose}
           aria-labelledby="responsive-dialog-title"
+          maxWidth={'xs'}
         >
           <DialogTitle>
             <Typography variant="h5" fontWeight={700}>
@@ -261,10 +331,7 @@ export default function Checkout({ isRefresh }: Props) {
                 Select Option
               </Typography>
             </Box>
-            <Box
-              px={2}
-              sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
-            >
+            <Box px={2} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <Box
                 onClick={() => handleOptionClick('cash')}
                 sx={{
@@ -279,6 +346,7 @@ export default function Checkout({ isRefresh }: Props) {
                   display: 'flex',
                   justifyContent: 'center',
                   alignItems: 'center',
+                  mx: '10px',
                 }}
               >
                 Cash
@@ -297,6 +365,7 @@ export default function Checkout({ isRefresh }: Props) {
                   display: 'flex',
                   justifyContent: 'center',
                   alignItems: 'center',
+                  mx: '10px',
                 }}
               >
                 Utang
@@ -315,6 +384,7 @@ export default function Checkout({ isRefresh }: Props) {
                   borderColor: selectedOption === 'partial' ? '#ef783e' : 'gray',
                   background: selectedOption === 'partial' ? '#ef783e' : '#d1d1d1',
                   color: selectedOption === 'partial' ? 'white' : 'unset',
+                  mx: '10px',
                 }}
               >
                 Partial
@@ -344,12 +414,7 @@ export default function Checkout({ isRefresh }: Props) {
               {selectedOption === 'utang' && (
                 <>
                   <form onSubmit={formikUtang.handleSubmit}>
-                    <Box
-                      sx={{
-                        width: '100%',
-                        textAlign: 'center',
-                      }}
-                    >
+                    <Box>
                       {isOld ? (
                         <>
                           <Autocomplete
@@ -435,119 +500,121 @@ export default function Checkout({ isRefresh }: Props) {
               )}
               {selectedOption === 'partial' && (
                 <form onSubmit={formikPartial.handleSubmit}>
-                  <TextField
-                    type="number"
-                    fullWidth
-                    id="partialAmount"
-                    name="partialAmount"
-                    label="Input Cash"
-                    value={formikPartial.values.partialAmount}
-                    onChange={formikPartial.handleChange}
-                    error={
-                      formikPartial.touched.partialAmount &&
-                      Boolean(formikPartial.errors.partialAmount)
-                    }
-                    helperText={
-                      formikPartial.touched.partialAmount && formikPartial.errors.partialAmount
-                    }
-                    sx={{ marginBottom: '10px' }}
-                  />
-
-                  <TextField
-                    fullWidth
-                    type="number"
-                    id="desiredAmount"
-                    name="desiredAmount"
-                    label="Input Desired Amount"
-                    value={formikPartial.values.desiredAmount}
-                    onChange={formikPartial.handleChange}
-                    error={
-                      formikPartial.touched.desiredAmount &&
-                      Boolean(formikPartial.errors.desiredAmount)
-                    }
-                    helperText={
-                      formikPartial.touched.desiredAmount && formikPartial.errors.desiredAmount
-                    }
-                    sx={{ marginBottom: '10px' }}
-                  />
-                  {isOld ? (
-                    <>
-                      <Autocomplete
-                        onChange={(event, value) => {
-                          formikPartial.setFieldValue('_id', value?._id ?? ''); // Set _id
-                          formikPartial.setFieldValue('personName', value?.personName ?? ''); // Set personName
-                        }}
-                        disablePortal
-                        id="combo-box-demo"
-                        options={allItemsUtang.listUtangName}
-                        getOptionLabel={(option: any) => option?.personName}
-                        sx={{ width: '100%', marginBottom: 2 }}
-                        renderInput={(params) => (
-                          <TextField
-                            {...params}
-                            label="Select Name"
-                            id="personName"
-                            name="personName"
-                            error={
-                              formikPartial.touched.personName &&
-                              Boolean(formikPartial.errors.personName)
-                            }
-                            helperText={
-                              formikPartial.touched.personName && formikPartial.errors.personName
-                            }
-                          />
-                        )}
-                      />
-                      <Box
-                        component="a"
-                        sx={{
-                          width: '100%',
-                          textAlign: 'center',
-                          cursor: 'pointer',
-                          textDecoration: 'underline',
-                          color: 'blue',
-                          mt: 2,
-                          fontSize: '12px',
-                        }}
-                        onClick={() => setIsOld(false)}
-                      >
-                        Person not found?
-                      </Box>
-                    </>
-                  ) : (
-                    <>
-                      <TextField
-                        fullWidth
-                        id="personName"
-                        name="personName"
-                        label="Input Person Name"
-                        value={formikPartial.values.personName}
-                        onChange={formikPartial.handleChange}
-                        error={
-                          formikPartial.touched.personName &&
-                          Boolean(formikPartial.errors.personName)
-                        }
-                        helperText={
-                          formikPartial.touched.personName && formikPartial.errors.personName
-                        }
-                      />
-                      <Box
-                        component="a"
-                        sx={{
-                          width: '100%',
-                          textAlign: 'center',
-                          cursor: 'pointer',
-                          textDecoration: 'underline',
-                          color: 'blue',
-                          mt: 2,
-                          fontSize: '12px',
-                        }}
-                        onClick={() => setIsOld(true)}
-                      >
-                        Back
-                      </Box>
-                    </>
-                  )}
+                  <Box>
+                    <TextField
+                      type="number"
+                      fullWidth
+                      id="partialAmount"
+                      name="partialAmount"
+                      label="Input Cash"
+                      margin="normal"
+                      value={formikPartial.values.partialAmount}
+                      onChange={formikPartial.handleChange}
+                      error={
+                        formikPartial.touched.partialAmount &&
+                        Boolean(formikPartial.errors.partialAmount)
+                      }
+                      helperText={
+                        formikPartial.touched.partialAmount && formikPartial.errors.partialAmount
+                      }
+                      sx={{ marginBottom: '10px' }}
+                    />
+                    <TextField
+                      fullWidth
+                      type="number"
+                      id="desiredAmount"
+                      name="desiredAmount"
+                      label="Input Desired Amount"
+                      value={formikPartial.values.desiredAmount}
+                      onChange={formikPartial.handleChange}
+                      error={
+                        formikPartial.touched.desiredAmount &&
+                        Boolean(formikPartial.errors.desiredAmount)
+                      }
+                      helperText={
+                        formikPartial.touched.desiredAmount && formikPartial.errors.desiredAmount
+                      }
+                      sx={{ marginBottom: '10px' }}
+                    />
+                    {isOld ? (
+                      <>
+                        <Autocomplete
+                          onChange={(event, value) => {
+                            formikPartial.setFieldValue('_id', value?._id ?? ''); // Set _id
+                            formikPartial.setFieldValue('personName', value?.personName ?? ''); // Set personName
+                          }}
+                          disablePortal
+                          id="combo-box-demo"
+                          options={allItemsUtang.listUtangName}
+                          getOptionLabel={(option: any) => option?.personName}
+                          sx={{ width: '100%', marginBottom: 2 }}
+                          renderInput={(params) => (
+                            <TextField
+                              {...params}
+                              label="Select Name"
+                              id="personName"
+                              name="personName"
+                              error={
+                                formikPartial.touched.personName &&
+                                Boolean(formikPartial.errors.personName)
+                              }
+                              helperText={
+                                formikPartial.touched.personName && formikPartial.errors.personName
+                              }
+                            />
+                          )}
+                        />
+                        <Box
+                          component="a"
+                          sx={{
+                            width: '100%',
+                            textAlign: 'center',
+                            cursor: 'pointer',
+                            textDecoration: 'underline',
+                            color: 'blue',
+                            mt: 2,
+                            fontSize: '12px',
+                          }}
+                          onClick={() => setIsOld(false)}
+                        >
+                          Person not found?
+                        </Box>
+                      </>
+                    ) : (
+                      <>
+                        <TextField
+                          fullWidth
+                          id="personName"
+                          name="personName"
+                          label="Input Person Name"
+                          value={formikPartial.values.personName}
+                          onChange={formikPartial.handleChange}
+                          error={
+                            formikPartial.touched.personName &&
+                            Boolean(formikPartial.errors.personName)
+                          }
+                          helperText={
+                            formikPartial.touched.personName && formikPartial.errors.personName
+                          }
+                        />
+                        <Box
+                          component="a"
+                          sx={{
+                            width: '100%',
+                            textAlign: 'center',
+                            cursor: 'pointer',
+                            textDecoration: 'underline',
+                            color: 'blue',
+                            mt: 2,
+                            fontSize: '12px',
+                          }}
+                          onClick={() => setIsOld(true)}
+                        >
+                          Back
+                        </Box>
+                      </>
+                    )}
+                  </Box>
                 </form>
               )}
             </Box>

@@ -7,6 +7,8 @@ const dbTransactions = new PouchDB<any>('my_database_transaction');
 // Create a document
 export const createDocumentTransaction = async (doc: any): Promise<void> => {
   try {
+    // Save each document in the array to the database
+
     await dbTransactions.put(doc);
   } catch (err) {
     console.error('Error creating document', err);

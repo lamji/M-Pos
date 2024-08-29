@@ -7,18 +7,19 @@ import {
   DialogTitle,
   IconButton,
   Typography,
-  Autocomplete,
   TextField,
-  InputAdornment,
-  CircularProgress,
+  Paper,
+  InputBase,
+  Divider,
 } from '@mui/material';
 import React from 'react';
 import { formatCurrency } from '@/src/common/helpers';
-import SearchIcon from '@mui/icons-material/Search';
+import { TbReportSearch } from 'react-icons/tb';
 import moment from 'moment';
 import Nav from '@/src/components/Nav';
 import useViewModel from './useViewModel';
 import { GetServerSideProps } from 'next';
+import { RiExpandDiagonalFill } from 'react-icons/ri';
 import { parse } from 'cookie';
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
@@ -67,152 +68,109 @@ export interface Transaction {
 
 const UtangTransactions: React.FC = () => {
   const {
-    state,
+    grandTotal,
     hanndlePayment,
     handleAdjustMent,
     formikUtang,
-    handleChange,
     open,
     handleOpen,
-    transactions,
     type,
-    isLoading,
     handleClose,
     selectedData,
+    utangList,
+    handleSearchChange,
+    searchTerm,
   } = useViewModel();
   return (
     <>
-      <Nav></Nav>
-      <div style={{ padding: '20px', background: 'white', borderRadius: 25, marginTop: '-150px' }}>
+      <Nav />
+      <div
+        style={{
+          background: 'white',
+
+          marginTop: '-150px',
+        }}
+      >
         <Box
           sx={{
-            background: '#ffb7b7',
-            border: '2px solid #c54a4a',
-            borderRadius: '10px',
-            mb: '10px',
-            textAlign: 'center',
-            p: '10px',
-            fontWeight: 700,
+            display: 'flex',
+            alignItems: 'center',
+            height: '180px',
+            backgroundColor: 'primary.main',
           }}
         >
-          Total: {formatCurrency(state.totalUtang)}
-        </Box>
-        <Autocomplete
-          disablePortal
-          id="combo-box-demo"
-          options={transactions?.listUtangName || []}
-          getOptionLabel={(option: any) => option?.personName}
-          sx={{
-            width: '100%',
-            mb: '10px',
-            '& .MuiAutocomplete-endAdornment': {
-              display: 'none',
-            },
-            '& .MuiAutocomplete-inputRoot': {
-              padding: '10px !important',
-
-              borderRadius: '4px', // Optional: Add border radius
-              '&:hover': {
-                borderColor: '#888', // Change border color on hover
-              },
-            },
-          }}
-          onChange={handleChange}
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              label="Search Item"
-              InputProps={{
-                ...params.InputProps,
-                endAdornment: (
-                  <>
-                    {params.InputProps.endAdornment}
-                    <InputAdornment position="end">
-                      <IconButton>
-                        <SearchIcon />
-                      </IconButton>
-                    </InputAdornment>
-                  </>
-                ),
-              }}
-            />
-          )}
-        />
-        <Box
-          display="flex"
-          alignItems="center"
-          justifyContent="space-between"
-          p={1}
-          sx={{
-            border: '1px solid #ccd2d7',
-          }}
-        >
-          <Typography fontWeight={700}>Name</Typography>
-
-          <Typography fontWeight={700}>Total</Typography>
-          <Typography fontWeight={700} sx={{ textTransform: 'capitalize' }}>
-            Action
-          </Typography>
+          <Box sx={{ marginTop: '-60px', px: '20px', width: '100%' }}>
+            <Paper
+              component="form"
+              sx={{ p: '2px 4px', display: 'flex', alignItems: 'center', width: '100%' }}
+            >
+              <InputBase
+                sx={{ ml: 1, flex: 1 }}
+                placeholder="Search Name"
+                inputProps={{ 'aria-label': 'search google maps' }}
+                value={searchTerm}
+                onChange={handleSearchChange}
+              />
+              <Divider sx={{ height: 28, m: 0.5 }} orientation="vertical" />
+              <IconButton color="primary" sx={{ p: '10px' }} aria-label="directions">
+                <TbReportSearch />
+              </IconButton>
+            </Paper>
+            <Typography my={1} sx={{ fontWeight: 700, color: 'white', fontSize: '20px' }}>
+              {formatCurrency(grandTotal)}
+            </Typography>
+          </Box>
         </Box>
         <Box
           sx={{
-            width: '100%',
-            borderRadius: '0px 0px 10px 10px',
-            border: '1px solid #ccd2d7',
-            overflow: 'scroll',
-            marginBottom: '100px',
+            padding: '20px 40px',
+            overflowY: 'scroll',
+            marginBottom: '50px',
+            height: '70vh',
+            backgroundColor: 'white',
+            zIndex: 999,
+            marginTop: '-70px',
+            borderRadius: '80px 0 0 0',
           }}
         >
-          {isLoading ? (
-            <>
-              <Box
-                sx={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-
-                  padding: '0 20px', // Optional: Add some horizontal padding
-                  gap: '10px',
-                }}
-              >
-                <CircularProgress />
-              </Box>
-            </>
-          ) : (
-            transactions?.utang?.map((data: any, idx: number) => {
+          {utangList
+            ?.slice()
+            ?.reverse()
+            ?.map((data: any, idx: number) => {
               return (
                 <Box
                   key={idx}
-                  display="flex"
-                  alignItems="center"
-                  justifyContent="space-between"
-                  p={1}
                   sx={{
-                    border: '1px solid #ccd2d7',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    background: '#c8c8c8',
+                    padding: '15px 10px',
+                    my: 1,
+                    borderRadius: '10px',
                   }}
                 >
-                  <Box sx={{ width: 70 }}>
-                    <Typography fontSize={'12px'}>{data.personName}</Typography>
+                  <Box>
+                    <Typography
+                      sx={{ fontSize: '13px', fontWeight: 700, textTransform: 'capitalize' }}
+                    >
+                      {data.personName}
+                    </Typography>
+                    <Typography sx={{ fontSize: '11px', color: 'gray' }}>
+                      {formatCurrency(data.total)}
+                    </Typography>
                   </Box>
-                  <Typography fontSize={'12px'}>{formatCurrency(data.total)}</Typography>
-                  <Button onClick={() => handleOpen(data)} sx={{ textTransform: 'capitalize' }}>
-                    View
-                  </Button>
+                  <IconButton onClick={() => handleOpen(data as any)}>
+                    <RiExpandDiagonalFill />
+                  </IconButton>
                 </Box>
               );
-            })
-          )}
+            })}
         </Box>
-        {/* <Box display="flex" alignItems="center" justifyContent="end">
-          <Typography fontWeight={700} py={2}>
-            Total: {formatCurrency(transactions?.totalUtang ?? 0)}
-          </Typography>
-        </Box> */}
 
-        <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
+        <Dialog open={open} onClose={handleClose} fullWidth fullScreen>
           {type === 'adjustment' ? (
-            <DialogTitle>Adjustment</DialogTitle>
+            <DialogTitle>Details</DialogTitle>
           ) : (
             <DialogTitle>
               <Box>
@@ -226,7 +184,7 @@ const UtangTransactions: React.FC = () => {
                   {selectedData?.personName}
                 </Typography>
                 {type != 'adjustment' && (
-                  <Typography align="right" sx={{ fontSize: '10px' }}>
+                  <Typography align="right" sx={{ fontSize: '13px' }}>
                     <strong>Total: {formatCurrency(selectedData?.total as number)}</strong>
                   </Typography>
                 )}
@@ -281,36 +239,38 @@ const UtangTransactions: React.FC = () => {
                   {selectedData?.items
                     ?.slice()
                     .reverse()
-                    .map((item: any) => (
-                      <Box
-                        key={item._id}
-                        sx={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                          marginBottom: '5px',
-                          borderBottom: '1px solid gray',
-                        }}
-                      >
-                        <Box>
-                          <Typography fontSize={'10px'} fontWeight={700}>
-                            {item.name}
-                          </Typography>
-                          <Typography fontSize={'9px'}>
-                            {`Quantity: ${item.quantity} x ${formatCurrency(item.price)}`}
-                          </Typography>
-                          <Typography fontSize={'9px'}>
-                            Date: {moment(item.date).format('llll')}
-                          </Typography>
-                        </Box>
+                    .map((item: any, id: any) => {
+                      return (
+                        <Box
+                          key={id}
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            marginBottom: '5px',
+                            borderBottom: '1px solid gray',
+                          }}
+                        >
+                          <Box>
+                            <Typography fontSize={'10px'} fontWeight={700}>
+                              {item.name}
+                            </Typography>
+                            <Typography fontSize={'9px'}>
+                              {`Quantity: ${item.quantity} x ${formatCurrency(item.price)}`}
+                            </Typography>
+                            <Typography fontSize={'9px'}>
+                              Date: {moment(item.date).format('llll')}
+                            </Typography>
+                          </Box>
 
-                        <Box>
-                          <Typography fontSize={'10px'}>
-                            {formatCurrency(item.quantity * item.price)}
-                          </Typography>
+                          <Box>
+                            <Typography fontSize={'10px'}>
+                              {formatCurrency(item.quantity * item.price)}
+                            </Typography>
+                          </Box>
                         </Box>
-                      </Box>
-                    ))}
+                      );
+                    })}
                 </>
               )}
             </Box>

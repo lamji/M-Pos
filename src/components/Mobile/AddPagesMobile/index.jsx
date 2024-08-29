@@ -113,7 +113,7 @@ const AddItemFormMobile = () => {
               type="number"
               variant="outlined"
               fullWidth
-              value={model.formik.values.regularPrice || ''}
+              value={model.formik.values.regularPrice}
               error={model.formik.touched.regularPrice && Boolean(model.formik.errors.regularPrice)}
               helperText={model.formik.touched.regularPrice && model.formik.errors.regularPrice}
               onChange={model.formik.handleChange}
