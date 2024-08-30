@@ -1,7 +1,7 @@
 import React from 'react';
 import { Format, BarcodeScan } from 'webtonative/barcode';
 import { Box } from '@mui/material';
-import Image from 'next/image';
+import { IoMdQrScanner } from 'react-icons/io';
 // import DocumentScannerIcon from '@mui/icons-material/DocumentScanner';
 
 const BarcodeScannerComponent = ({ dataOut, size }) => {
@@ -16,8 +16,8 @@ const BarcodeScannerComponent = ({ dataOut, size }) => {
 
   return (
     <Box sx={{ width: '100%', textAlign: 'center', height: size, mx: 1 }} onClick={handleScan}>
-      {/* <DocumentScannerIcon style={{ fontSize: size }} /> */}
-      <Image src="/scan.png" width={size} height={size} alt="Picture of the author" />
+      <IoMdQrScanner style={{ fontSize: size, color: 'white' }} />
+      {/* <Image src="/scan.png" width={size} height={size} alt="Picture of the author" /> */}
     </Box>
   );
 };

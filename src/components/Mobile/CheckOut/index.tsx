@@ -307,24 +307,18 @@ export default function Checkout({ isRefresh }: Props) {
 
   return (
     <div>
-      <Box
-        sx={{ borderRadius: '5px', marginBottom: '10px', marginTop: isMobile ? '50px' : '10px' }}
-      >
+      <Box sx={{ borderRadius: '5px', marginBottom: '10px', marginTop: '5px' }}>
         {isMobile ? (
           <>
             <Box>
               {token && total > 0 && (
-                <Typography fontWeight={700}>{formatCurrency(total)}</Typography>
-              )}
-              {/* Use total here */}
-              {token && total > 0 && (
                 <>
                   <Button
                     onClick={handleClickOpen}
-                    sx={{ ...classes.button, py: 1, width: '100%', color: 'white' }}
+                    sx={{ ...classes.button, py: 1, width: '100%', background: 'white' }}
                     variant="contained"
                   >
-                    PAY
+                    {formatCurrency(total)} PAY
                   </Button>
                 </>
               )}
