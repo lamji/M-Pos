@@ -135,7 +135,7 @@ const UtangTransactions: React.FC = () => {
         >
           {utangList
             ?.slice()
-            ?.reverse()
+            ?.sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())
             ?.map((data: any, idx: number) => {
               return (
                 <Box
@@ -149,6 +149,7 @@ const UtangTransactions: React.FC = () => {
                     my: 1,
                     borderRadius: '10px',
                   }}
+                  onClick={() => handleOpen(data as any)}
                 >
                   <Box>
                     <Typography

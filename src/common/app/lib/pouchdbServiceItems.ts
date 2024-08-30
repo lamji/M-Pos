@@ -63,7 +63,13 @@ export const restoreDocument = async (doc: any): Promise<void> => {
 export const readAllDocuments = async (): Promise<any[]> => {
   try {
     const result = await db.allDocs({ include_docs: true });
-    return result.rows.map((row) => row.doc as any);
+
+    // Extract documents and sort them by date (assuming the date is stored in a 'date' field)
+    const sortedDocs = result.rows
+      .map((row) => row.doc as any)
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+    return sortedDocs;
   } catch (err) {
     console.error('Error reading documents', err);
     throw err;

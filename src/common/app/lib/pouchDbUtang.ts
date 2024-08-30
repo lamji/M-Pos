@@ -14,7 +14,7 @@ export const createDocumentUtang = async (doc: any): Promise<void> => {
   }
 };
 
-export const updateUtang = async (doc: any): Promise<void> => {
+export const updateUtang = async (doc: any): Promise<any> => {
   try {
     const newItems = doc.items.map((item: any) => {
       return {
@@ -22,15 +22,31 @@ export const updateUtang = async (doc: any): Promise<void> => {
         date: new Date(),
       };
     });
+
+    let updatedDoc;
+
     // Find the document by _id
     const existingDoc = await dbUtang.get(doc._id);
+    if (existingDoc) {
+      // Update the document with the new total and prepend new items
+      existingDoc.items.push(...newItems);
+      existingDoc.total += doc.total;
+      existingDoc.date = new Date();
+      console.log('existingDoc===============', existingDoc);
+      // Save the updated document
+      await dbUtang.put(existingDoc);
+      updatedDoc = existingDoc;
+    } else {
+      // If the document does not exist, create a new one
+      await dbUtang.put(doc);
+      updatedDoc = doc;
+    }
 
-    // Update the document with the new total and prepend new items
-    existingDoc.items.push(...newItems);
-    existingDoc.total += doc.total;
-    existingDoc.date = new Date();
-    // Save the updated document
-    await dbUtang.put(existingDoc);
+    return {
+      ...updatedDoc,
+      data: newItems,
+      type: doc.type,
+    }; // Return the updated document
   } catch (err) {
     console.error('Error updating document', err);
     throw err;

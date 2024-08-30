@@ -41,5 +41,6 @@ const dataSlice = createSlice({
 export const { setData, addItem, clearData, setRefetch } = dataSlice.actions;
 
 export const getData = (state: any) => state.data.data;
+export const getDataRefetch = (state: any) => state.data;
 
 export default dataSlice.reducer;

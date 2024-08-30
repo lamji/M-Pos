@@ -18,11 +18,14 @@ import useViewModel from './useViewModel';
 import { useDispatch, useSelector } from 'react-redux';
 import { formatCurrency } from '@/src/common/helpers';
 import { getSelectedItems, setIsBackDropOpen } from '@/src/common/reducers/items';
-import { getAllUtang, postTransaction } from '@/src/common/api/testApi';
+// import { getAllUtang, postTransaction } from '@/src/common/api/testApi';
 import moment from 'moment';
 import hotkeys from 'hotkeys-js';
 import { useRouter } from 'next/router';
 import { clearCookie } from '@/src/common/app/cookie';
+import { readAllDocumentsUtang, updateUtang } from '@/src/common/app/lib/pouchDbUtang';
+import { createDocumentTransaction } from '@/src/common/app/lib/pouchDbTransaction';
+import { getDataRefetch, setRefetch } from '@/src/common/reducers/data';
 
 interface Props {
   isRefresh: (i: boolean) => void;
@@ -33,6 +36,8 @@ export default function Checkout({ isRefresh }: Props) {
   const dispatch = useDispatch();
   const router = useRouter();
   const { total, items } = useSelector(getSelectedItems); // Get total from Redux
+  const app = useSelector(getDataRefetch);
+  console.log('transactionData', app);
   const {
     classes,
     handleClickOpen,
@@ -50,6 +55,7 @@ export default function Checkout({ isRefresh }: Props) {
   const [allItems, setAllItems] = useState<any>([]);
   const [allItemsUtang, setAllItemsUtang] = useState<any>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [allUtamgList, setAllUtangList] = useState<any>();
   const [isOld, setIsOld] = useState(true);
 
   const formikCash = useFormik({
@@ -71,12 +77,15 @@ export default function Checkout({ isRefresh }: Props) {
         items: items,
         cash: cashAmount,
         total,
+        _id: new Date(),
       };
       setIsLoading(true);
       try {
-        const data = await postTransaction(transactionData);
+        const data = await createDocumentTransaction(transactionData);
+
+        console.log('transactionData', data);
         if (data) {
-          setAllItems(data.data);
+          setAllItems(data);
           handleClearItems();
           setReceiptOpen(true);
           handleClose();
@@ -85,6 +94,7 @@ export default function Checkout({ isRefresh }: Props) {
           dispatch(setIsBackDropOpen(false));
           setRefresh(!refresh);
           isRefresh(!refresh);
+          // dispatch(setRefresh(!app));
         }
       } catch (error) {
         console.error('Error:', error);
@@ -110,26 +120,33 @@ export default function Checkout({ isRefresh }: Props) {
     onSubmit: async (values, { resetForm }) => {
       dispatch(setIsBackDropOpen(true));
       setIsLoading(true);
-      const transactionData = {
+      const transactionUtang = {
         type: 'Utang',
         items: items,
         personName: values.personName,
         total,
         _id: values._id || undefined,
       };
+      const transactionData = {
+        type: 'Utang',
+        items: items,
+        personName: values.personName,
+        total,
+        _id: new Date(),
+      };
       try {
-        const data = await postTransaction(transactionData);
-        if (data) {
-          setAllItems(data.data);
-          setReceiptOpen(true);
-          handleClose();
-          handleClearItems();
-          resetForm();
-          setIsLoading(false);
-          setIsOld(true);
-          dispatch(setIsBackDropOpen(false));
-          isRefresh(!refresh);
-        }
+        await createDocumentTransaction(transactionData);
+        const data = await updateUtang(transactionUtang);
+        setAllItems(data);
+        setReceiptOpen(true);
+        handleClose();
+        handleClearItems();
+        resetForm();
+        setIsLoading(false);
+        setIsOld(true);
+        dispatch(setIsBackDropOpen(false));
+        dispatch(setRefetch());
+        isRefresh(!refresh);
       } catch (error) {
         alert(JSON.stringify(error, null, 2));
         setIsLoading(false);
@@ -174,12 +191,31 @@ export default function Checkout({ isRefresh }: Props) {
         cash: partialAmount,
         total,
         partialAmount: desiredAmount,
-        _id: values._id || undefined,
+        _id: new Date() || undefined,
       };
+
+      const transactionUtang = {
+        type: 'partial',
+        items: [
+          {
+            name: `Partial Balance of ${moment(new Date()).format('lll')}`,
+            price: total - desiredAmount,
+            quantity: 1,
+            id: new Date(),
+          },
+        ],
+        personName: values.personName,
+        cash: partialAmount,
+        total: total - desiredAmount,
+        partialAmount: desiredAmount,
+        _id: new Date() || undefined,
+      };
+
       setIsLoading(true);
       try {
-        const data = await postTransaction(transactionData);
-        setAllItems(data.data);
+        const data = await createDocumentTransaction(transactionData);
+        await updateUtang(transactionUtang);
+        setAllItems(data);
         if (data) {
           setIsLoading(false);
           handleClearItems();
@@ -216,9 +252,16 @@ export default function Checkout({ isRefresh }: Props) {
 
   const getAllUtandData = async () => {
     try {
-      const data = await getAllUtang();
-      if (data) {
-        setAllItemsUtang(data);
+      const docs = await readAllDocumentsUtang();
+      console.log(docs);
+      if (docs) {
+        setAllItemsUtang(docs);
+        // Get a list of all Utang names
+        const listUtangName = docs.map((item) => ({
+          _id: item._id,
+          personName: item.personName,
+        }));
+        setAllUtangList(listUtangName);
       }
     } catch (error) {
       console.log(error);
@@ -227,7 +270,7 @@ export default function Checkout({ isRefresh }: Props) {
 
   useEffect(() => {
     getAllUtandData();
-  }, [allItems]);
+  }, [refresh]);
 
   const handleSignout = async () => {
     clearCookie();
@@ -313,7 +356,7 @@ export default function Checkout({ isRefresh }: Props) {
           aria-labelledby="responsive-dialog-title"
           maxWidth={'xs'}
         >
-          <DialogTitle>
+          <Box>
             <Typography variant="h5" fontWeight={700}>
               Check Out
             </Typography>
@@ -324,7 +367,7 @@ export default function Checkout({ isRefresh }: Props) {
             >
               <CloseIcon />
             </IconButton>
-          </DialogTitle>
+          </Box>
           <DialogContent>
             <Box px={2}>
               <Typography fontWeight={700} variant="h6">
@@ -425,7 +468,7 @@ export default function Checkout({ isRefresh }: Props) {
                             }}
                             disablePortal
                             id="combo-box-demo"
-                            options={allItemsUtang.listUtangName}
+                            options={allUtamgList}
                             getOptionLabel={(option: any) => option?.personName}
                             sx={{ width: 300, marginBottom: 2 }}
                             renderInput={(params) => (
@@ -545,7 +588,7 @@ export default function Checkout({ isRefresh }: Props) {
                           }}
                           disablePortal
                           id="combo-box-demo"
-                          options={allItemsUtang.listUtangName}
+                          options={allItemsUtang}
                           getOptionLabel={(option: any) => option?.personName}
                           sx={{ width: '100%', marginBottom: 2 }}
                           renderInput={(params) => (
@@ -674,10 +717,10 @@ export default function Checkout({ isRefresh }: Props) {
               align="left"
               mb={1}
             >
-              Date: {moment(allItems.date).format('llll')}
+              Date: {moment(allItems?.date).format('llll')}
             </Typography>
             <Typography fontSize={'11px'} variant="body2" align="left" mb={1}>
-              Type: {allItems?.data?.transactionType}
+              Type: {allItems?.type}
             </Typography>
             <Typography fontSize={'11px'} variant="body2" align="left" mb={1} fontWeight={700}>
               Items
@@ -828,7 +871,7 @@ export default function Checkout({ isRefresh }: Props) {
 
             {selectedOption === 'utang' && (
               <Typography fontSize={'11px'} variant="body2" align="left" mb={1}>
-                Person Name: {allItems?.data?.personName ?? '-'}
+                Person Name: {allItems?.personName ?? '-'}
               </Typography>
             )}
             <Box mt={2}>

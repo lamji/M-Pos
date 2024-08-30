@@ -144,7 +144,6 @@ export default function useViewModel() {
   };
 
   const handleIncreaseQuantity = (id) => {
-    console.log('quantity', quantity);
     setQuantity((prevQuantity) => prevQuantity + 1);
     dispatch(
       updateItemQuantity({

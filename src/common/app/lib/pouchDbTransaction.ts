@@ -5,11 +5,23 @@ const dbTransactions = new PouchDB<any>('my_database_transaction');
 // const dbUtang = new PouchDB<any>('my_database_utang');
 
 // Create a document
-export const createDocumentTransaction = async (doc: any): Promise<void> => {
+export const createDocumentTransaction = async (doc: any): Promise<{ data: any }> => {
   try {
-    // Save each document in the array to the database
+    const newItems = doc.items.map((item: any) => {
+      return {
+        ...item,
+        date: new Date(),
+      };
+    });
 
-    await dbTransactions.put(doc);
+    // Save the document to the database
+    await dbTransactions.put(newItems);
+
+    // Return the saved document
+    return {
+      ...doc,
+      data: doc.items,
+    };
   } catch (err) {
     console.error('Error creating document', err);
     throw err;
