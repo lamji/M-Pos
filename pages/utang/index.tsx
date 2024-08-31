@@ -21,6 +21,7 @@ import useViewModel from './useViewModel';
 import { GetServerSideProps } from 'next';
 import { RiExpandDiagonalFill } from 'react-icons/ri';
 import { parse } from 'cookie';
+import { IoIosArrowRoundBack } from 'react-icons/io';
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { req } = context;
@@ -80,6 +81,7 @@ const UtangTransactions: React.FC = () => {
     utangList,
     handleSearchChange,
     searchTerm,
+    setType,
   } = useViewModel();
   return (
     <>
@@ -171,10 +173,24 @@ const UtangTransactions: React.FC = () => {
 
         <Dialog open={open} onClose={handleClose} fullWidth fullScreen>
           {type === 'adjustment' ? (
-            <DialogTitle>Details</DialogTitle>
+            <Box sx={{ p: 2 }}>
+              <IconButton
+                onClick={() => {
+                  setType('');
+                }}
+              >
+                <IoIosArrowRoundBack />
+              </IconButton>
+              <Typography mx={1} fontWeight={700}>
+                New Custom Utang
+              </Typography>
+            </Box>
           ) : (
             <DialogTitle>
               <Box>
+                <IconButton onClick={handleClose}>
+                  <IoIosArrowRoundBack />
+                </IconButton>
                 <Typography
                   sx={{ marginBottom: '0px' }}
                   variant="body1"
@@ -203,7 +219,7 @@ const UtangTransactions: React.FC = () => {
                         fullWidth
                         id="description"
                         name="description"
-                        label="Input Description"
+                        label="Input Item"
                         value={formikUtang.values.description}
                         onChange={formikUtang.handleChange}
                         error={
@@ -222,7 +238,7 @@ const UtangTransactions: React.FC = () => {
                         id="amount"
                         name="amount"
                         type="number"
-                        label="Input Amount"
+                        label="Amount"
                         value={formikUtang.values.amount}
                         onChange={formikUtang.handleChange}
                         error={formikUtang.touched.amount && Boolean(formikUtang.errors.amount)}
@@ -289,32 +305,24 @@ const UtangTransactions: React.FC = () => {
               </Button>
             ) : (
               <Button
-                variant="text"
+                variant="outlined"
                 sx={{ textTransform: 'capitalize' }}
                 color="primary"
                 onClick={handleAdjustMent}
               >
-                Adjust
+                New
               </Button>
             )}
 
             {type != 'adjustment' && (
               <>
                 <Button
-                  variant="text"
+                  variant="outlined"
                   sx={{ textTransform: 'capitalize' }}
-                  color="primary"
+                  color="success"
                   onClick={() => hanndlePayment()}
                 >
                   Pay
-                </Button>
-                <Button
-                  variant="text"
-                  sx={{ textTransform: 'capitalize' }}
-                  color="error"
-                  onClick={handleClose}
-                >
-                  Close
                 </Button>
               </>
             )}

@@ -43,7 +43,7 @@ export default function Home() {
         const history = await readAllDocumentsHistory();
         const utang = await readAllDocumentsUtang();
         const transactions = await readAllDocumentTransaction();
-        console.log('docs', docs);
+        console.log('items', docs);
         console.log('history', history);
         console.log('utang', utang);
         console.log('transactions', transactions);

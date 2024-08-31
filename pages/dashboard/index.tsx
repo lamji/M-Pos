@@ -3,13 +3,13 @@ import Nav from '@/src/components/Nav';
 import { Box, Typography } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 
-import { getSalesData } from '@/src/common/api/testApi';
 import { formatCurrency } from '@/src/common/helpers';
 import { setIsBackDropOpen } from '@/src/common/reducers/items';
 import { useDispatch } from 'react-redux';
 import moment from 'moment';
 import { GetServerSideProps } from 'next';
 import { parse } from 'cookie';
+import { findTop10FastMovingItemsThisWeek } from '@/src/common/app/lib/pouchDbTransaction';
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { req } = context;
@@ -37,16 +37,21 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 export default function Dashboard() {
   const dispatch = useDispatch();
   const [data, setData] = useState<any>({});
+  const [fastMoving, setFastMoving] = useState<any>();
   const [filterData, setFilterData] = useState('dataToday');
 
   const getSales = async () => {
     dispatch(setIsBackDropOpen(true));
     try {
-      const data = await getSalesData();
-      if (data) {
-        dispatch(setIsBackDropOpen(false));
-        setData(data);
-      }
+      const [data] = await Promise.all([findTop10FastMovingItemsThisWeek()]);
+      console.log('top10', data);
+      setFastMoving(data);
+      // const data = await getSalesData();
+      // if (data) {
+      //   dispatch(setIsBackDropOpen(false));
+      //   setData(data);
+      // }
+      dispatch(setIsBackDropOpen(false));
     } catch (error) {
       console.log(error);
       dispatch(setIsBackDropOpen(false));
@@ -192,8 +197,8 @@ export default function Dashboard() {
           </Typography>
           <Box sx={{ overflowX: 'auto', display: 'flex', whiteSpace: 'wrap' }}>
             <Box sx={{ display: 'flex' }}>
-              {data.top5ItemsWithQuantities &&
-                data.top5ItemsWithQuantities.map((items: any, idx: number) => {
+              {fastMoving &&
+                fastMoving.map((items: any, idx: number) => {
                   return (
                     <Box
                       key={idx}
@@ -217,7 +222,7 @@ export default function Dashboard() {
                           {items?.name}
                         </Typography>
                         <Typography sx={{ fontSize: '9px', fontWeight: 700 }}>
-                          Sold: {items.sold}
+                          Sold: {items.quantity}
                         </Typography>
                         <Typography
                           sx={{

@@ -2,8 +2,23 @@ import PouchDB from 'pouchdb';
 
 // Initialize the PouchDB database
 const dbHistory = new PouchDB<any>('my_database_history');
+const db = new PouchDB<any>('my_database_my_items');
+const dbTransactions = new PouchDB<any>('my_database_transaction');
+const dbUtang = new PouchDB<any>('my_database_utang');
 // const dbUtang = new PouchDB<any>('my_database_utang');
 
+export const deleteDatabase = async (): Promise<void> => {
+  try {
+    await dbHistory.destroy();
+    await db.destroy();
+    await dbTransactions.destroy();
+    await dbUtang.destroy();
+    console.log('Database deleted successfully');
+  } catch (err) {
+    console.error('Error deleting database', err);
+    throw err;
+  }
+};
 // Create a document
 export const createDocumentHistory = async (doc: Document): Promise<void> => {
   try {

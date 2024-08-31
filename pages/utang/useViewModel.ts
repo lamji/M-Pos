@@ -147,17 +147,11 @@ export default function useViewModel() {
     const fetchDocuments = async () => {
       try {
         const docs = await readAllDocumentsUtang();
-        setUtangList(docs);
+        setUtangList(docs.filteredDocs);
 
         // Calculate the grand total once
-        const total = docs.reduce((acc, transaction) => {
-          const totalForTransaction = transaction.items.reduce((itemAcc: any, item: any) => {
-            return itemAcc + item.price * item.quantity;
-          }, 0);
-          return acc + totalForTransaction;
-        }, 0);
 
-        setGrandTotal(total);
+        setGrandTotal(docs.total);
       } catch (err) {
         console.error('Error fetching documents', err);
       }
@@ -182,5 +176,6 @@ export default function useViewModel() {
     handleSearchChange,
     searchTerm,
     grandTotal,
+    setType,
   };
 }

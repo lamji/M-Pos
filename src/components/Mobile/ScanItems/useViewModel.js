@@ -3,6 +3,7 @@ import {
   readAllDocuments,
 } from '@/src/common/app/lib/pouchdbServiceItems';
 import { useDeviceType } from '@/src/common/helpers';
+import { getDataRefetch } from '@/src/common/reducers/data';
 import {
   addItem,
   deleteItem,
@@ -19,6 +20,7 @@ import Swal from 'sweetalert2';
 export default function useViewModel() {
   const dispatch = useDispatch();
   const { items } = useSelector(getSelectedItems);
+  const { isRefetch } = useSelector(getDataRefetch);
   const [quantity, setQuantity] = useState(1);
   const [modalOpen, setModalOpen] = useState(false);
   const [activeOrders, setActiveOrders] = useState({});
@@ -34,6 +36,9 @@ export default function useViewModel() {
   const [stocks, setStocks] = useState(0);
   const { isMobile, isLaptop, isPC } = useDeviceType();
   const isLarge = isLaptop || isPC;
+
+  console.log('isRefetch', isRefetch);
+
   // const [lastScan, setLastScan] = useState(0);
   // const [isScanning, setIsScanning] = useState(false); // State to manage scanner visibility
 
@@ -66,7 +71,7 @@ export default function useViewModel() {
     };
 
     fetchDocuments();
-  }, []);
+  }, [isRefetch]);
 
   const handleAddItem = (event, value) => {
     if (value) {
@@ -98,9 +103,6 @@ export default function useViewModel() {
     setOpen(true);
     setDeleteProduct(name);
     setItemToDelete(id);
-    // if (confirmed) {
-    //   dispatch(removeItem(id));
-    // }
   };
 
   const onNewScanResult = async (decodedText) => {

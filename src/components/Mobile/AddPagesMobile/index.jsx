@@ -25,6 +25,8 @@ const BarcodeScannerComponent = dynamic(() => import('../../wt2Scanner'));
 const AddItemFormMobile = () => {
   const model = useViewModel();
 
+  console.log('model', model);
+
   return (
     <>
       <Nav />
@@ -151,6 +153,7 @@ const AddItemFormMobile = () => {
                 <BarcodeScannerComponent
                   dataOut={(data) => model.handleBarcodeScanUpdate(data)}
                   size={40}
+                  color="primary"
                 />
               </Box>
               <Box>

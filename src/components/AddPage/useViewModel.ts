@@ -13,6 +13,7 @@ import {
   updateDocument,
 } from '@/src/common/app/lib/pouchdbServiceItems';
 import { createDocumentHistory } from '@/src/common/app/lib/PouchDbHistory';
+import { v4 as uuidv4 } from 'uuid';
 
 // import Html5QrcodePlugin from '@/src/components/Scanner';
 
@@ -63,6 +64,7 @@ export default function useViewModel() {
     quantity: '',
     regularPrice: '',
     type: 'New',
+    // _id: uuidv4(),
   };
 
   const handleGenerateBarcode = () => {
@@ -86,7 +88,7 @@ export default function useViewModel() {
         };
 
         const documentHistory = {
-          _id: values.id + new Date().toISOString(),
+          _id: uuidv4(),
           createdAt: new Date(), // Use provided ID or generate a new one
           ...values,
         };
@@ -193,6 +195,7 @@ export default function useViewModel() {
   };
 
   const handleDataOutSearch = (search: any) => {
+    console.log(search);
     setOpenDiog(false);
     formik.setValues({
       id: search.id,

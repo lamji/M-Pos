@@ -71,7 +71,7 @@ const ComboBox = () => {
               sx={{
                 backgroundColor: 'primary.main',
                 height: '250px',
-                padding: '60px 20px 200px 20px',
+                padding: '70px 20px 200px 20px',
               }}
             >
               <Box sx={{ display: 'flex', alignItems: 'center' }}>

@@ -1,9 +1,10 @@
 import PouchDB from 'pouchdb';
+import PouchDBFind from 'pouchdb-find';
 
 // Initialize the PouchDB database
 const dbUtang = new PouchDB<any>('my_database_utang');
 // const dbUtang = new PouchDB<any>('my_database_utang');
-
+PouchDB.plugin(PouchDBFind);
 // Create a document
 export const createDocumentUtang = async (doc: any): Promise<void> => {
   try {
@@ -16,23 +17,27 @@ export const createDocumentUtang = async (doc: any): Promise<void> => {
 
 export const updateUtang = async (doc: any): Promise<any> => {
   try {
-    const newItems = doc.items.map((item: any) => {
-      return {
-        ...item,
-        date: new Date(),
-      };
+    // Create a new date for new items
+    const newItems = doc.items.map((item: any) => ({
+      ...item,
+      date: new Date(),
+    }));
+
+    // Query the document by _id using PouchDB Find
+    const resultFindByID = await dbUtang.find({
+      selector: { _id: doc._id },
     });
 
     let updatedDoc;
 
-    // Find the document by _id
-    const existingDoc = await dbUtang.get(doc._id);
-    if (existingDoc) {
+    if (resultFindByID.docs.length > 0) {
+      const existingDoc = resultFindByID.docs[0];
+
       // Update the document with the new total and prepend new items
       existingDoc.items.push(...newItems);
       existingDoc.total += doc.total;
       existingDoc.date = new Date();
-      console.log('existingDoc===============', existingDoc);
+
       // Save the updated document
       await dbUtang.put(existingDoc);
       updatedDoc = existingDoc;
@@ -54,23 +59,26 @@ export const updateUtang = async (doc: any): Promise<any> => {
 };
 
 // Read all documents
-export const readAllDocumentsUtang = async (): Promise<any[]> => {
+export const readAllDocumentsUtang = async (): Promise<any> => {
   try {
     const result = await dbUtang.allDocs({ include_docs: true });
 
-    const filteredDocs = result.rows
-      .map((row) => row.doc as any)
-      .filter((doc) => {
-        // Calculate the total for each document
-        const total = doc.items.reduce((acc: number, item: any) => {
-          return acc + item.price * item.quantity;
-        }, 0);
+    // Filter documents from result
+    const filteredDocs = result.rows.map((row) => row.doc);
 
-        // Return only documents where the total is greater than 0
-        return total > 0;
-      });
+    // Calculate the overall total
+    const overallTotal = filteredDocs.reduce((total, doc) => {
+      return total + (doc.total || 0); // Use 0 if `doc.total` is undefined
+    }, 0);
 
-    return filteredDocs;
+    console.log('Filtered Docs:', filteredDocs);
+    console.log('Overall Total:', overallTotal);
+
+    // Return both filteredDocs and overallTotal
+    return {
+      filteredDocs,
+      total: overallTotal,
+    };
   } catch (err) {
     console.error('Error reading documents', err);
     throw err;

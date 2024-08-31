@@ -9,6 +9,7 @@ import { restoreDocument } from '@/src/common/app/lib/pouchdbServiceItems';
 import { restoreUtangDocument } from '@/src/common/app/lib/pouchDbUtang';
 import { restoreTransactionDocs } from '@/src/common/app/lib/pouchDbTransaction';
 import apiClient from '@/src/common/app/axios';
+import { deleteDatabase } from '@/src/common/app/lib/PouchDbHistory';
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { req } = context;
@@ -38,25 +39,41 @@ const Nav = dynamic(() => import('@/src/components/Nav'));
 export default function Backup() {
   const dispatch = useDispatch();
 
+  const clearDB = async () => {
+    try {
+      dispatch(setIsBackDropOpen(true));
+      await deleteDatabase();
+    } catch (error) {
+      dispatch(setIsBackDropOpen(false));
+      console.log(error);
+    } finally {
+      dispatch(setIsBackDropOpen(false));
+    }
+  };
+
   const fetItems = async () => {
     dispatch(setIsBackDropOpen(true));
     try {
       const response = await apiClient.get('/restore');
       const data = response.data;
-      const userData = data.users[0];
-      console.log('data=============>', userData);
+      const userData = data.users[0] || {};
+
+      const itemsData = userData.items || [];
+      const utangsData = userData.utangs || [];
+      const transactionsData = userData.transactions || [];
+
       if (data.success) {
         // Create an array of promises for restoring 'items' documents
-        const restoreItemPromises = userData.items.map(async (data: any) => {
+        const restoreItemPromises = itemsData.map(async (data: any) => {
           await restoreDocument(data);
         });
 
         // Create an array of promises for restoring 'utang' documents
-        const restoreUtangPromises = userData.utangs.map(async (data: any) => {
+        const restoreUtangPromises = utangsData.map(async (data: any) => {
           await restoreUtangDocument(data);
         });
 
-        const restoreTransactionsPromises = userData.transactions.map(async (data: any) => {
+        const restoreTransactionsPromises = transactionsData.map(async (data: any) => {
           await restoreTransactionDocs(data);
         });
 
@@ -104,8 +121,14 @@ export default function Backup() {
             header="Restore"
             onClick={() => fetItems()}
           />
+          <CardButton
+            images="/restore.png"
+            height={80}
+            width={80}
+            header="Clear DB"
+            onClick={() => clearDB()}
+          />
         </Box>
-        ;
       </main>
     </>
   );
