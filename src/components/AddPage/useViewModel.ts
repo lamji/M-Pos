@@ -7,6 +7,7 @@ import useStyles from './useStyles';
 import { useDispatch } from 'react-redux';
 import { setIsBackDropOpen } from '@/src/common/reducers/items';
 import {
+  checkIfIdExists,
   createDocument,
   queryDocumentsByBarcode,
   readAllDocuments,
@@ -41,7 +42,7 @@ export default function useViewModel() {
     barcode: Yup.string().required('Barcode is required'),
     quantity: Yup.number().required(),
     regularPrice: Yup.number().required(),
-    type: Yup.string().notRequired(),
+    type: Yup.string().required('Type is required'),
   });
 
   // const url = '/api/items2'; // Replace with your actual URL
@@ -63,7 +64,7 @@ export default function useViewModel() {
     barcode: '',
     quantity: '',
     regularPrice: '',
-    type: 'New',
+    type: '',
     // _id: uuidv4(),
   };
 
@@ -80,27 +81,85 @@ export default function useViewModel() {
     validationSchema: checked ? validationSchemaChecked : validationSchemaUnchecked,
     onSubmit: async (values, { resetForm, setSubmitting }) => {
       try {
-        // Construct the document based on form values
+        /**
+         * Shape the json payload
+         */
         const document = {
-          _id: values.id || new Date().toISOString(),
-          createdAt: new Date(), // Use provided ID or generate a new one
-          ...values,
-        };
-
-        const documentHistory = {
           _id: uuidv4(),
-          createdAt: new Date(), // Use provided ID or generate a new one
+          createdAt: new Date(),
           ...values,
         };
 
-        // Add or update the document in PouchDB
-        if (type != 'New') {
-          await updateDocument(document as any);
-          await createDocumentHistory(documentHistory as any);
+        /**
+         * Check the values.type
+         * If new, save directly to DB
+         * Add data to record history
+         */
+        if (values.type === 'New') {
+          const data = await createDocument(document as any);
+
+          if (data) {
+            await createDocumentHistory(document as any);
+          } else {
+            console.error('Document creation failed, no history entry made.');
+          }
         } else {
-          await createDocument(document as any);
-          // await createDocumentHistory(document as any);
+          /**
+           * If not new, check if item is in db
+           */
+          const exists = checkIfIdExists(document._id);
+          console.log('Does the item exist?', exists);
+          /**
+           * if its in DB, just update the DB else throw an error
+           * Add data to record history
+           */
+
+          await updateDocument(document as any);
+          await createDocumentHistory(document as any);
         }
+
+        // /**
+        //  * 1. shape the json tob passed on database
+        //  */
+        // const document = {
+        //   _id: uuidv4(),
+        //   createdAt: new Date(), // Use provided ID or generate a new one
+        //   ...values,
+        // };
+
+        // const documentHistory = {
+        //   _id: uuidv4(),
+        //   createdAt: new Date(), // Use provided ID or generate a new one
+        //   ...values,
+        // };
+
+        // /**
+        //  * 2. check if id is already in database
+        //  *
+        //  */
+        // // const items = await checkIfIdExists('001');
+        // const testIdChecker = async () => {
+        //   const exists = checkIfIdExists('001');
+        //   console.log('Does the item exist?', exists);
+        // };
+        // testIdChecker();
+        // /**
+        //  * 3. If existed just update the data on database
+        //  */
+        // // if (!items) {
+        // //   await updateDocument(document as any);
+        // // }
+
+        // /**
+        //  * 4. if not existed create a new documents
+        //  */
+        // // if (items) {
+        // //   await createDocument(document as any);
+        // // }
+
+        // /**
+        //  * 5. Create History for tracking the added items
+        //  */
 
         Swal.fire({
           title: 'Success!',
@@ -111,8 +170,8 @@ export default function useViewModel() {
 
         // Reset form fields and state
         resetForm();
-        setGeneratedId(''); // Assuming these are defined elsewhere
-        setScannedBarcode(''); // Assuming these are defined elsewhere
+        setGeneratedId('');
+        setScannedBarcode('');
       } catch (error) {
         Swal.fire({
           title: 'Error!',

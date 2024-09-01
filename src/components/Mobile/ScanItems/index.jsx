@@ -103,6 +103,7 @@ const ComboBox = () => {
                     <TextField
                       {...params}
                       label="Search Item"
+                      // InputLabelProps={{ shrink: false }}
                       size="small"
                       InputProps={{
                         ...params.InputProps,

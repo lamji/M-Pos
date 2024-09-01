@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import PouchDB from 'pouchdb';
 import PouchDBFind from 'pouchdb-find';
 
@@ -11,7 +12,7 @@ const createIndexes = async () => {
   try {
     await dbTransactions.createIndex({
       index: {
-        fields: ['id', 'quantity'],
+        fields: ['id', 'quantity', 'type'],
       },
     });
     console.log('Indexes created successfully');
@@ -25,12 +26,50 @@ createIndexes();
 
 const getWeekDateRange = (weekOffset: number = 0): { start: Date; end: Date } => {
   const now = new Date();
-  const currentWeekStart = new Date(now.setDate(now.getDate() - now.getDay() + 1 + weekOffset * 7)); // Monday
-  const currentWeekEnd = new Date(now.setDate(now.getDate() - now.getDay() + 7 + weekOffset * 7)); // Sunday
+
+  // Calculate the start of the current week (Monday)
+  const startOfWeek = new Date(now);
+  const dayOfWeek = startOfWeek.getDay(); // 0 is Sunday, 1 is Monday, etc.
+  const diffToMonday = (dayOfWeek + 6) % 7; // Number of days from Monday
+  startOfWeek.setDate(startOfWeek.getDate() - diffToMonday);
+  startOfWeek.setHours(0, 0, 0, 0); // Set time to midnight
+
+  // Calculate the end of the current week (Sunday)
+  const endOfWeek = new Date(startOfWeek);
+  endOfWeek.setDate(startOfWeek.getDate() + 6);
+  endOfWeek.setHours(23, 59, 59, 999); // Set time to end of day
 
   return {
-    start: new Date(currentWeekStart.setHours(0, 0, 0, 0)),
-    end: new Date(currentWeekEnd.setHours(23, 59, 59, 999)),
+    start: new Date(startOfWeek.setHours(0, 0, 0, 0)),
+    end: new Date(endOfWeek.setHours(23, 59, 59, 999)),
+  };
+};
+
+const getDateRanges = (): {
+  today: { start: Date; end: Date };
+  yesterday: { start: Date; end: Date };
+} => {
+  const now = new Date();
+
+  // Start and end of today
+  const todayStart = new Date(now.setHours(0, 0, 0, 0));
+  const todayEnd = new Date(now.setHours(23, 59, 59, 999));
+
+  // Adjust for yesterday
+  const yesterdayStart = new Date(todayStart);
+  yesterdayStart.setDate(todayStart.getDate() - 1);
+  const yesterdayEnd = new Date(todayEnd);
+  yesterdayEnd.setDate(todayEnd.getDate() - 1);
+
+  return {
+    today: {
+      start: todayStart,
+      end: todayEnd,
+    },
+    yesterday: {
+      start: yesterdayStart,
+      end: yesterdayEnd,
+    },
   };
 };
 
@@ -100,6 +139,7 @@ export const createDocumentTransaction = async (doc: any): Promise<{ data: any }
       data: newDocs.items,
       change: newDocs.cash - newDocs.total,
       remainingBalance: newDocs.total - newDocs?.partialAmount || 0,
+      total: newDocs.total,
     };
   } catch (err) {
     console.error('Error creating document', err);
@@ -108,10 +148,93 @@ export const createDocumentTransaction = async (doc: any): Promise<{ data: any }
 };
 
 // Read all documents
-export const readAllDocumentTransaction = async (): Promise<any[]> => {
+export const readAllDocumentTransaction = async (): Promise<{
+  today: { docs: any[]; total: number; totalCash: number; totalUtang: number; items: any };
+  yesterday: { docs: any[]; total: number; totalCash: number; totalUtang: number; items: any };
+}> => {
   try {
-    const result = await dbTransactions.allDocs({ include_docs: true });
-    return result.rows.map((row) => row.doc as any);
+    const { today, yesterday } = getDateRanges();
+
+    // Fetch documents for today
+    const todayResult = await dbTransactions.find({
+      selector: {
+        date: {
+          $gte: today.start.toISOString(),
+          $lte: today.end.toISOString(),
+        },
+      },
+    });
+
+    const test = await dbTransactions.allDocs({ include_docs: true });
+
+    console.log('docs===============>', test, todayResult);
+
+    // Fetch documents for yesterday
+    const yesterdayResult = await dbTransactions.find({
+      selector: {
+        date: {
+          $gte: yesterday.start.toISOString(),
+          $lte: yesterday.end.toISOString(),
+        },
+      },
+    });
+
+    // Calculate totals for today
+    const todayDocs = todayResult.docs;
+    let todayTotalCash = 0;
+    let todayTotalUtang = 0;
+
+    todayDocs.forEach((doc) => {
+      if (doc.type === 'Cash') {
+        todayTotalCash += doc.total || 0;
+      } else if (doc.type === 'Utang') {
+        todayTotalUtang += doc.total || 0;
+      }
+    });
+
+    const todayTotal = todayDocs.reduce((sum, doc) => sum + (doc.total || 0), 0);
+
+    // Calculate totals for yesterday
+    const yesterdayDocs = yesterdayResult.docs;
+    let yesterdayTotalCash = 0;
+    let yesterdayTotalUtang = 0;
+
+    yesterdayDocs.forEach((doc) => {
+      if (doc.type === 'Cash') {
+        yesterdayTotalCash += doc.total || 0;
+      } else if (doc.type === 'Utang') {
+        yesterdayTotalUtang += doc.total || 0;
+      }
+    });
+
+    const yesterdayTotal = yesterdayDocs.reduce((sum, doc) => sum + (doc.total || 0), 0);
+
+    // Extract items and merge them into a single array
+    const todayItems = todayDocs.flatMap((doc) => doc.items || []);
+    const yesterdayItems = yesterdayDocs.flatMap((doc) => doc.items || []);
+    // Sorting items by date in ascending order
+    const sortedTodayItems = todayItems.sort(
+      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+    );
+    const sortedYesterdayItems = yesterdayItems.sort(
+      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+    );
+    return {
+      today: {
+        docs: todayDocs,
+        total: todayTotal,
+        totalCash: todayTotalCash,
+        totalUtang: todayTotalUtang,
+        items: sortedTodayItems,
+      },
+      yesterday: {
+        items: sortedYesterdayItems,
+        docs: yesterdayDocs,
+        total: yesterdayTotal,
+        totalCash: yesterdayTotalCash,
+        totalUtang: yesterdayTotalUtang,
+      },
+    };
   } catch (err) {
     console.error('Error reading documents', err);
     throw err;

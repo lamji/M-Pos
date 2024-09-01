@@ -1,3 +1,4 @@
+import moment from 'moment';
 import PouchDB from 'pouchdb';
 import PouchDBFind from 'pouchdb-find';
 
@@ -64,15 +65,16 @@ export const readAllDocumentsUtang = async (): Promise<any> => {
     const result = await dbUtang.allDocs({ include_docs: true });
 
     // Filter documents from result
-    const filteredDocs = result.rows.map((row) => row.doc);
+    const filteredDocs = result.rows.map((row) => row.doc).filter((doc) => doc.total > 0);
 
+    console.log(filteredDocs);
     // Calculate the overall total
     const overallTotal = filteredDocs.reduce((total, doc) => {
       return total + (doc.total || 0); // Use 0 if `doc.total` is undefined
     }, 0);
 
-    console.log('Filtered Docs:', filteredDocs);
-    console.log('Overall Total:', overallTotal);
+    // console.log('Filtered Docs:', filteredDocs);
+    // console.log('Overall Total:', overallTotal);
 
     // Return both filteredDocs and overallTotal
     return {
@@ -142,6 +144,54 @@ export const deleteAllUtangDocuments = async (): Promise<void> => {
     console.log('All documents deleted successfully');
   } catch (err) {
     console.error('Error deleting documents', err);
+    throw err;
+  }
+};
+
+export const payment = async (id: any, payment: number, isFull?: boolean): Promise<any> => {
+  try {
+    // Create a new date for new items
+    // const newItems = doc.items.map((item: any) => ({
+    //   ...item,
+    //   date: new Date(),
+    // }));
+
+    // Query the document by _id using PouchDB Find
+    const resultFindByID = await dbUtang.find({
+      selector: { _id: id },
+    });
+
+    let updatedDoc;
+
+    if (resultFindByID.docs.length > 0) {
+      const existingDoc = resultFindByID.docs[0];
+
+      // Update the document with the new total and prepend new items
+      existingDoc.items = isFull
+        ? []
+        : [
+            {
+              name: 'Balance for date ' + moment().format('ll'),
+              price: existingDoc.total - payment,
+              quantity: 1,
+              date: new Date(),
+            },
+          ];
+      existingDoc.change = isFull ? payment - existingDoc.total : 0;
+      existingDoc.total = isFull ? 0 : existingDoc.total - payment; // Subtract payment from total, ensure it doesn't go below 0
+      existingDoc.date = new Date();
+
+      console.log('haist', resultFindByID, existingDoc, existingDoc.total - payment, payment);
+      // Save the updated document
+      await dbUtang.put(existingDoc);
+      updatedDoc = existingDoc;
+    }
+
+    return {
+      ...updatedDoc,
+    }; // Return the updated document
+  } catch (err) {
+    console.error('Error updating document', err);
     throw err;
   }
 };

@@ -60,6 +60,7 @@ export default function useViewModel({ isRefresh }: CheckoutProps) {
           return {
             ...item,
             _id: uuidv4(),
+            type: 'Cash',
           };
         }),
         cash: cashAmount,
@@ -114,31 +115,42 @@ export default function useViewModel({ isRefresh }: CheckoutProps) {
       setIsLoading(true);
       const transactionUtang = {
         type: 'Utang',
-        items: items,
+        items: items.map((item: any) => {
+          return {
+            ...item,
+            _id: uuidv4(),
+            type: 'Utang',
+          };
+        }),
         personName: values.personName,
         total,
+        date: new Date(),
         _id: values._id === '' ? uuidv4() : values._id,
       };
 
-      console.log('values', values, isOld, transactionUtang);
-
       const transactionData = {
         type: 'Utang',
-        items: items,
+        items: items.map((item: any) => {
+          return {
+            ...item,
+            _id: uuidv4(),
+            type: 'Utang',
+          };
+        }),
         personName: values.personName,
         cash: total,
+        date: new Date(),
         total,
         _id: uuidv4(),
       };
       try {
-        const [, , updatedData] = await Promise.all([
+        const [, transData] = await Promise.all([
           updateItemsQty(transactionData),
           createDocumentTransaction(transactionData),
-
           updateUtang(transactionUtang),
         ]);
 
-        setAllItems(updatedData);
+        setAllItems(transData);
         setReceiptOpen(true);
         handleClose();
         handleClearItems();
@@ -181,45 +193,73 @@ export default function useViewModel({ isRefresh }: CheckoutProps) {
       _id: Yup.string().nullable(),
     }),
     onSubmit: async (values, { resetForm }) => {
-      const partialAmount = Number(values.partialAmount);
-      const desiredAmount = Number(values.desiredAmount);
+      const partialAmount = Number(values.partialAmount); // cash
+      const desiredAmount = Number(values.desiredAmount); // partial
       dispatch(setIsBackDropOpen(true));
 
       const transactionData = {
-        type: 'partial',
-        items: items,
+        type: 'Cash',
+        items: items.map((item: any) => {
+          return {
+            ...item,
+            _id: uuidv4(),
+            type: 'Cash',
+          };
+        }),
         personName: values.personName,
         cash: partialAmount,
-        total,
+        total: desiredAmount,
+        date: new Date(),
         partialAmount: desiredAmount,
         _id: values._id === '' ? uuidv4() : values._id,
       };
 
+      const qtyData = {
+        type: 'Cash',
+        items: items.map((item: any) => {
+          return {
+            ...item,
+            _id: uuidv4(),
+            type: 'Cash',
+          };
+        }),
+        personName: values.personName,
+        cash: partialAmount,
+        total: total,
+        date: new Date(),
+        partialAmount: desiredAmount,
+        _id: uuidv4(),
+      };
+
       const transactionUtang = {
-        type: 'partial',
+        type: 'Utang',
         items: [
           {
             name: `Partial Balance of ${moment(new Date()).format('lll')}`,
             price: total - desiredAmount,
             quantity: 1,
             id: new Date(),
+            type: 'Utang',
           },
         ],
         personName: values.personName,
         cash: partialAmount,
         total: total - desiredAmount,
         partialAmount: desiredAmount,
+        date: new Date(),
         _id: values._id === '' ? uuidv4() : values._id,
       };
 
       setIsLoading(true);
       try {
-        const [, data] = await Promise.all([
+        const [, transData, data] = await Promise.all([
           updateItemsQty(transactionData),
-          createDocumentTransaction(transactionData),
+          createDocumentTransaction(qtyData),
           updateUtang(transactionUtang),
         ]);
-        setAllItems(data);
+
+        console.log('testData', transData, data);
+        setAllItems(transData);
         if (data) {
           setIsLoading(false);
           handleClearItems();
@@ -258,7 +298,7 @@ export default function useViewModel({ isRefresh }: CheckoutProps) {
   const getAllUtangData = async () => {
     try {
       const docs = await readAllDocumentsUtang();
-      console.log('getAllUtangData', docs);
+
       if (docs) {
         setAllItemsUtang(docs);
         // Get a list of all Utang names

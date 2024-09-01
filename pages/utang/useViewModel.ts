@@ -129,7 +129,7 @@ export default function useViewModel() {
     setType('adjustment');
   };
 
-  const hanndlePayment = () => {
+  const handlePayment = () => {
     const props = {
       name: selectedData?.personName, // Payor's name
       amount: selectedData?.total, // Payment amount
@@ -162,7 +162,7 @@ export default function useViewModel() {
 
   return {
     state,
-    hanndlePayment,
+    handlePayment,
     handleAdjustMent,
     formikUtang,
     open,

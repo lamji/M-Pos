@@ -510,7 +510,7 @@ export default function Checkout({ isRefresh }: CheckoutProps) {
                 align="left"
                 mb={1}
               >
-                {formatCurrency(model.allItems.total)}
+                {formatCurrency(model.allItems?.total)}
               </Typography>
             </Box>
             {model.selectedOption === 'partial' && (

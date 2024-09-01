@@ -93,6 +93,8 @@ const EditableTable = ({ handlePagination, isRefetch }: Props) => {
     handlePagination(value);
   };
 
+  console.log('step', state);
+
   const handleChangeAccordion =
     (panel: string) => (event: React.SyntheticEvent, newExpanded: boolean) => {
       setExpanded(newExpanded ? panel : false);
@@ -181,7 +183,7 @@ const EditableTable = ({ handlePagination, isRefetch }: Props) => {
   };
   // console.log(state);
   useEffect(() => {
-    setItems(state.items);
+    setItems(state);
   }, [state]);
 
   return (
@@ -268,7 +270,8 @@ const EditableTable = ({ handlePagination, isRefetch }: Props) => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {dataItem?.map((item, idx) => {
+              {dataItem?.map((item: any, idx: number) => {
+                const barcode = item.id.replace('-id', '');
                 return (
                   <>
                     <Accordion
@@ -279,7 +282,7 @@ const EditableTable = ({ handlePagination, isRefetch }: Props) => {
                         <Typography>{item.name}</Typography>
                       </AccordionSummary>
                       <AccordionDetails>
-                        <Barcode value={item.barcode} />
+                        <Barcode value={barcode} />
                         <Typography sx={{ fontSize: '12px' }}>
                           <strong>Product Name: </strong>
                           {item.name}
@@ -304,7 +307,7 @@ const EditableTable = ({ handlePagination, isRefetch }: Props) => {
                           <>
                             <Button
                               variant="contained"
-                              sx={{ textTransform: 'capitalize', p: 0 }}
+                              sx={{ textTransform: 'capitalize', p: 0, color: 'white' }}
                               onClick={() => setEditItem(item)}
                             >
                               Edit

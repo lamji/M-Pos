@@ -10,7 +10,7 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
 import Nav from '@/src/components/Nav';
 import Swal from 'sweetalert2';
-import { addPaymentToUtang } from '@/src/common/api/testApi';
+// import { addPaymentToUtang } from '@/src/common/api/testApi';
 import { formatCurrency } from '@/src/common/helpers';
 import { useDispatch, useSelector } from 'react-redux';
 import { clearPayment, getPayment } from '@/src/common/reducers/utangData';
@@ -18,6 +18,7 @@ import { setIsBackDropOpen } from '@/src/common/reducers/items';
 import { useRouter } from 'next/router';
 import { GetServerSideProps } from 'next';
 import { parse } from 'cookie';
+import { payment } from '@/src/common/app/lib/pouchDbUtang';
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { req } = context;
@@ -51,18 +52,28 @@ const AmountForm = () => {
     amount: Yup.number()
       .required('Amount is required')
       .min(0, 'Amount must be greater than or equal to 0')
-      .test(
-        'is-valid-amount',
-        'Amount must be less than or equal to the amount to pay for partial payment, or equal or greater for full payment',
-        function (value) {
-          const { isFullPayment } = this.parent;
-          const totalAmount = stateData.amount; // Example total amount to pay
-          if (isFullPayment) {
-            return value >= totalAmount;
+      .test('is-valid-amount', function (value) {
+        const { isFullPayment } = this.parent;
+        const totalAmount = stateData.amount; // Example total amount to pay
+
+        if (isFullPayment) {
+          // For full payment, check if the amount is at least the totalAmount
+          if (value < totalAmount) {
+            return this.createError({
+              message: 'Amount must be greater than or equal to the amount to pay',
+            });
           }
-          return value <= totalAmount;
+        } else {
+          // For partial payment, check if the amount is less than or equal to the totalAmount
+          if (value > totalAmount) {
+            return this.createError({
+              message: 'Amount must be less than or equal to the amount to pay for partial payment',
+            });
+          }
         }
-      ),
+
+        return true; // Pass validation if no errors
+      }),
     isFullPayment: Yup.boolean(),
   });
 
@@ -77,12 +88,16 @@ const AmountForm = () => {
       const args = {
         id: stateData?.id,
         payment: {
-          amount: parseFloat(values?.amount), // Ensure amount is a number
+          amount: parseFloat(values?.amount),
         },
       };
       try {
-        const data = await addPaymentToUtang(args.id, args.payment);
-        console.log(data);
+        const data = await payment(
+          args?.id,
+          args?.payment?.amount as unknown as number,
+          values.isFullPayment
+        );
+        console.log('stateData', data, args);
         if (data) {
           Swal.fire({
             title: 'Success!',
@@ -123,7 +138,7 @@ const AmountForm = () => {
           boxShadow: '0 0 10px rgba(0, 0, 0, 0.1)',
         }}
       >
-        <Typography variant="body1" sx={{ mb: 2 }}>
+        <Typography variant="body1" sx={{ mb: 2, textTransform: 'uppercase', fontWeight: 700 }}>
           Payor: {stateData.name}
         </Typography>
         <Typography variant="body1" sx={{ mb: 2 }}>

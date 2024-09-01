@@ -25,8 +25,6 @@ const BarcodeScannerComponent = dynamic(() => import('../../wt2Scanner'));
 const AddItemFormMobile = () => {
   const model = useViewModel();
 
-  console.log('model', model);
-
   return (
     <>
       <Nav />
@@ -44,8 +42,9 @@ const AddItemFormMobile = () => {
                 error={model.formik.touched.type && Boolean(model.formik.errors.type)}
                 helperText={model.formik.touched.type && model.formik.errors.type}
               >
-                <MenuItem value="New">New</MenuItem>
+                {/* <MenuItem value="New">New</MenuItem> */}
                 <MenuItem value="New Grocery">New Grocery</MenuItem>
+                <MenuItem value="New">New Item</MenuItem>
               </Select>
             </FormControl>
 
@@ -164,24 +163,22 @@ const AddItemFormMobile = () => {
                 )}
               </Box>
             </Box>
-            {model.type === 'New' && (
-              <>
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                  <Typography fontSize={'12px'}>No Barcode?</Typography>
-                  <Box
-                    onClick={() => model.handleGenerateBarcode()}
-                    sx={{
-                      fontSize: '12px',
-                      color: 'blue',
-                      textDecoration: 'underline',
-                      mx: '2px',
-                    }}
-                  >
-                    Generate here
-                  </Box>
-                </Box>
-              </>
-            )}
+
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <Typography fontSize={'12px'}>No Barcode?</Typography>
+              <Box
+                onClick={() => model.handleGenerateBarcode()}
+                sx={{
+                  fontSize: '12px',
+                  color: 'blue',
+                  textDecoration: 'underline',
+                  mx: '2px',
+                }}
+              >
+                Generate here
+              </Box>
+            </Box>
+
             <Box sx={{ height: '100px' }}></Box>
           </Box>
         </form>

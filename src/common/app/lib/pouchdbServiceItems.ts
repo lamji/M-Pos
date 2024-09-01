@@ -27,6 +27,7 @@ export const queryDocumentsByBarcode = async (barcode: string): Promise<any[]> =
 };
 
 export const updateItemsQty = async (doc: any): Promise<any> => {
+  console.log('docs================>', doc);
   try {
     // Step 1: Retrieve all items by their IDs using the index
     const result = await db.find({
@@ -57,7 +58,6 @@ export const updateItemsQty = async (doc: any): Promise<any> => {
     // Step 3: Update the quantities of the items in the database
     await Promise.all(
       itemsToUpdate.map(async (item: any) => {
-        console.log('newDocs', item);
         await db.put({
           ...item,
           _rev: item._rev, // Ensure the correct revision is used
@@ -71,9 +71,10 @@ export const updateItemsQty = async (doc: any): Promise<any> => {
 };
 
 // Create a document
-export const createDocument = async (doc: any): Promise<void> => {
+export const createDocument = async (doc: any): Promise<any> => {
   try {
     await db.put(doc);
+    return doc as any;
   } catch (err) {
     console.error('Error creating document', err);
     throw err;
@@ -147,6 +148,19 @@ export const updateDocument = async (doc: any): Promise<void> => {
     throw err;
   }
 };
+
+export async function checkIfIdExists(id: string): Promise<boolean> {
+  try {
+    await db.get(id); // Try to get the document by ID
+    return true; // If no error, the document exists
+  } catch (error: any) {
+    if (error.status === 404) {
+      return false; // Document not found
+    } else {
+      throw error; // Throw other unexpected errors
+    }
+  }
+}
 
 // Delete a document
 export const deleteDocument = async (id: string): Promise<void> => {

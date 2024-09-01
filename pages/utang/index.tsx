@@ -70,7 +70,7 @@ export interface Transaction {
 const UtangTransactions: React.FC = () => {
   const {
     grandTotal,
-    hanndlePayment,
+    handlePayment,
     handleAdjustMent,
     formikUtang,
     open,
@@ -89,7 +89,6 @@ const UtangTransactions: React.FC = () => {
       <div
         style={{
           background: 'white',
-
           marginTop: '-150px',
         }}
       >
@@ -265,7 +264,8 @@ const UtangTransactions: React.FC = () => {
                             alignItems: 'center',
                             justifyContent: 'space-between',
                             marginBottom: '5px',
-                            borderBottom: '1px solid gray',
+                            borderBottom: '1px solid #ababab',
+                            padding: '10px 0px',
                           }}
                         >
                           <Box>
@@ -320,7 +320,7 @@ const UtangTransactions: React.FC = () => {
                   variant="outlined"
                   sx={{ textTransform: 'capitalize' }}
                   color="success"
-                  onClick={() => hanndlePayment()}
+                  onClick={() => handlePayment()}
                 >
                   Pay
                 </Button>

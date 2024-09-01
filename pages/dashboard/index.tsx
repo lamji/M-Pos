@@ -9,7 +9,10 @@ import { useDispatch } from 'react-redux';
 import moment from 'moment';
 import { GetServerSideProps } from 'next';
 import { parse } from 'cookie';
-import { findTop10FastMovingItemsThisWeek } from '@/src/common/app/lib/pouchDbTransaction';
+import {
+  findTop10FastMovingItemsThisWeek,
+  readAllDocumentTransaction,
+} from '@/src/common/app/lib/pouchDbTransaction';
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { req } = context;
@@ -38,14 +41,18 @@ export default function Dashboard() {
   const dispatch = useDispatch();
   const [data, setData] = useState<any>({});
   const [fastMoving, setFastMoving] = useState<any>();
-  const [filterData, setFilterData] = useState('dataToday');
+  const [filterData, setFilterData] = useState('today');
 
   const getSales = async () => {
     dispatch(setIsBackDropOpen(true));
     try {
-      const [data] = await Promise.all([findTop10FastMovingItemsThisWeek()]);
-      console.log('top10', data);
+      const [data, transactions] = await Promise.all([
+        findTop10FastMovingItemsThisWeek(),
+        readAllDocumentTransaction(),
+      ]);
+      console.log('top10', data, transactions);
       setFastMoving(data);
+      setData(transactions);
       // const data = await getSalesData();
       // if (data) {
       //   dispatch(setIsBackDropOpen(false));
@@ -62,6 +69,8 @@ export default function Dashboard() {
     getSales();
   }, []);
 
+  console.log('test', data);
+
   return (
     <div>
       <Nav />
@@ -74,19 +83,6 @@ export default function Dashboard() {
         }}
       >
         <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-
-            justifyContent: 'center',
-          }}
-        >
-          <Typography align="center" fontWeight={700} variant="body1">
-            SALES
-          </Typography>
-        </Box>
-
-        <Box
           display="flex"
           alignItems="center"
           justifyContent="space-between"
@@ -95,19 +91,20 @@ export default function Dashboard() {
           <Box
             sx={{
               padding: '10px',
-              border: '2px solid #ff6b23',
+
               background: '#ef783e',
               borderRadius: 2,
               width: '48%',
               height: '120px',
-              boxShadow: '1px 1px 18px -5px rgba(0,0,0,0.75)',
             }}
-            onClick={() => setFilterData('dataYesterday')}
+            onClick={() => setFilterData('yesterday')}
           >
-            <Typography fontSize="12px" fontWeight={700}>
+            <Typography fontSize="12px" fontWeight={700} color={'white'}>
               Yesterday
             </Typography>
-            <Typography>{formatCurrency(data?.yesterday?.total ?? 0)}</Typography>
+            <Typography color={'white'} fontWeight={700}>
+              {formatCurrency(data?.yesterday?.total ?? 0)}
+            </Typography>
             <Box>
               <Typography
                 sx={{
@@ -118,7 +115,7 @@ export default function Dashboard() {
                   color: 'red',
                 }}
               >
-                Utang: {formatCurrency(data?.yesterday?.Utang ?? 0)}
+                Utang: {formatCurrency(data?.[filterData]?.totalUtang ?? 0)}
               </Typography>
               <Typography
                 sx={{
@@ -129,12 +126,12 @@ export default function Dashboard() {
                   mt: '3px',
                 }}
               >
-                Cash: {formatCurrency(data?.yesterday?.Cash ?? 0)}
+                Cash: {formatCurrency(data?.yesterday?.totalCash ?? 0)}
               </Typography>
             </Box>
           </Box>
           <Box
-            onClick={() => setFilterData('dataToday')}
+            onClick={() => setFilterData('today')}
             sx={{
               padding: '10px',
               border: '2px solid #ff6b23',
@@ -145,10 +142,12 @@ export default function Dashboard() {
               boxShadow: '1px 1px 18px -5px rgba(0,0,0,0.75)',
             }}
           >
-            <Typography fontSize="12px" fontWeight={700}>
+            <Typography fontSize="12px" fontWeight={700} color={'white'}>
               Today
             </Typography>
-            <Typography>{formatCurrency(data?.today?.total ?? 0)}</Typography>
+            <Typography color={'white'} fontWeight={700}>
+              {formatCurrency(data?.today?.total ?? 0)}
+            </Typography>
             <Box>
               <Typography
                 sx={{
@@ -159,7 +158,7 @@ export default function Dashboard() {
                   color: 'red',
                 }}
               >
-                Utang: {formatCurrency(data?.today?.Utang ?? 0)}
+                Utang: {formatCurrency(data?.today?.totalUtang ?? 0)}
               </Typography>
               <Typography
                 sx={{
@@ -170,7 +169,7 @@ export default function Dashboard() {
                   mt: '3px',
                 }}
               >
-                Cash: {formatCurrency(data?.today?.Cash ?? 0)}
+                Cash: {formatCurrency(data?.today?.totalCash ?? 0)}
               </Typography>
             </Box>
           </Box>
@@ -248,7 +247,7 @@ export default function Dashboard() {
               my: 2,
             }}
           >{`${
-            filterData === 'dataYesterday' ? `Yesterday's transaction` : `Today's transaction`
+            filterData === 'yesterday' ? `Yesterday's transaction` : `Today's transaction`
           }`}</Typography>
           <Box
             sx={{
@@ -259,53 +258,53 @@ export default function Dashboard() {
           >
             {data ? (
               <>
-                {data?.[filterData]
+                {data?.[filterData]?.items
                   ?.slice()
                   .reverse()
-                  ?.map((transaction: any, transactionIdx: number) => (
-                    <Box key={transactionIdx}>
-                      {transaction?.items?.map((item: any, itemIdx: number) => {
-                        return (
-                          <Box
-                            key={itemIdx}
+                  ?.map((transaction: any, transactionIdx: number) => {
+                    return (
+                      <Box
+                        key={transactionIdx}
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          padding: '10px',
+                          borderBottom: '1px solid #e0e0e0',
+                          margin: '5px',
+                        }}
+                      >
+                        <Box>
+                          <Typography sx={{ width: '170px' }} fontWeight={700} fontSize="10px">
+                            {transaction.name} - {formatCurrency(transaction.price)}
+                          </Typography>
+                          <Typography sx={{ width: '100px', color: 'gray' }} fontSize="10px">
+                            {moment(transaction.date).format('LTS')}
+                          </Typography>
+                          <Typography
                             sx={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'space-between',
-                              padding: '10px',
-                              borderBottom: '1px solid #e0e0e0',
-                              margin: '5px',
+                              width: '100px',
+                              color: 'gray',
+                              textTransform: 'capitalize',
                             }}
+                            fontSize="10px"
                           >
-                            <Box>
-                              <Typography sx={{ width: '170px' }} fontWeight={700} fontSize="10px">
-                                {item.name} - {formatCurrency(item.price)}
-                              </Typography>
-                              <Typography sx={{ width: '100px', color: 'gray' }} fontSize="10px">
-                                {moment(transaction.date).format('LTS')}
-                              </Typography>
-                              <Typography
-                                sx={{ width: '100px', color: 'gray', textTransform: 'capitalize' }}
-                                fontSize="10px"
-                              >
-                                {transaction.transactionType}
-                              </Typography>
-                            </Box>
+                            {transaction.transactionType}
+                          </Typography>
+                        </Box>
 
-                            <Typography fontSize="10px">qty: {item.quantity}</Typography>
-                            <Typography
-                              fontSize="10px"
-                              sx={{
-                                color: transaction.transactionType === 'Cash' ? 'green' : 'red',
-                              }}
-                            >
-                              {formatCurrency(item.quantity * item.price)}
-                            </Typography>
-                          </Box>
-                        );
-                      })}
-                    </Box>
-                  ))}
+                        <Typography fontSize="10px">qty: {transaction.quantity}</Typography>
+                        <Typography
+                          fontSize="10px"
+                          sx={{
+                            color: transaction.type === 'Cash' ? 'green' : 'red',
+                          }}
+                        >
+                          {formatCurrency(transaction.quantity * transaction.price)}
+                        </Typography>
+                      </Box>
+                    );
+                  })}
               </>
             ) : (
               <Box p={5}>No date</Box>

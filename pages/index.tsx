@@ -62,7 +62,6 @@ export default function Home() {
       </Head>
       <main>
         <Nav />
-
         <ScanItems />
       </main>
     </>
