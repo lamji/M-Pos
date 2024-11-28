@@ -11,6 +11,8 @@ import {
   Button,
   Box,
   InputAdornment,
+  Dialog,
+  DialogContent,
 } from '@mui/material';
 import 'react-date-range/dist/styles.css'; // Import the styles
 import 'react-date-range/dist/theme/default.css'; // Import the theme
@@ -28,7 +30,8 @@ import Barcode from 'react-barcode';
 import Pagination from '@mui/material/Pagination';
 import Stack from '@mui/material/Stack';
 import debounce from 'lodash/debounce';
-import { getItemsByName, postItemUpdate } from '@/src/common/api/testApi';
+import { getItemsByName, updateDocument } from '@/src/common/app/lib/pouchdbServiceItems';
+// import { getItemsByName, postItemUpdate } from '@/src/common/api/testApi';
 
 interface Item {
   _id: string;
@@ -79,6 +82,7 @@ interface Props {
   isRefetch: (i: boolean) => void;
 }
 const EditableTable = ({ handlePagination, isRefetch }: Props) => {
+  const [open, setOpen] = React.useState(false);
   const [refetch, setRefetch] = useState(false);
   const [expanded, setExpanded] = React.useState<string | false>('');
   const [items, setItems] = useState<Item[]>([]);
@@ -93,6 +97,10 @@ const EditableTable = ({ handlePagination, isRefetch }: Props) => {
     handlePagination(value);
   };
 
+  const handleClose = () => {
+    setOpen(false);
+  };
+
   const handleChangeAccordion =
     (panel: string) => (event: React.SyntheticEvent, newExpanded: boolean) => {
       setExpanded(newExpanded ? panel : false);
@@ -103,27 +111,20 @@ const EditableTable = ({ handlePagination, isRefetch }: Props) => {
       const updatedItems = items.map((item) => (item._id === editItem._id ? editItem : item));
 
       try {
-        const response = await postItemUpdate(editItem);
-        if (response.status === 200) {
-          setItems(updatedItems);
-          dispatch(setData(updatedItems as any)); // Update Redux store if needed
-          setEditItem(null); // Clear edit item
-          setRefetch(!refetch);
-          isRefetch(!refetch);
-          Swal.fire({
-            title: 'Success!',
-            text: 'Item updated successfully',
-            icon: 'success',
-            confirmButtonText: 'OK',
-          });
-        } else {
-          Swal.fire({
-            title: 'Error!',
-            text: 'Failed to update item',
-            icon: 'error',
-            confirmButtonText: 'OK',
-          });
-        }
+        await updateDocument(editItem);
+
+        setItems(updatedItems);
+        dispatch(setData(updatedItems as any)); // Update Redux store if needed
+        setEditItem(null); // Clear edit item
+        setRefetch(!refetch);
+        isRefetch(!refetch);
+        setOpen(false);
+        Swal.fire({
+          title: 'Success!',
+          text: 'Item updated successfully',
+          icon: 'success',
+          confirmButtonText: 'OK',
+        });
       } catch (error) {
         Swal.fire({
           title: 'Error!',
@@ -148,8 +149,8 @@ const EditableTable = ({ handlePagination, isRefetch }: Props) => {
     try {
       const response = await getItemsByName(searchTerm);
 
-      if (response.status === 200) {
-        const data = response.data;
+      if (response) {
+        const data = response;
         setItems2(data);
       } else {
         Swal.fire({
@@ -172,16 +173,18 @@ const EditableTable = ({ handlePagination, isRefetch }: Props) => {
   const dataItem = searchTerm ? items2 : items;
 
   // Debounce the fetchItems function
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const debouncedFetchItems = useCallback(debounce(fetchItems, 500), [page]);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const searchTerm = e.target.value;
+
     setSearchTerm(searchTerm);
     debouncedFetchItems(searchTerm);
   };
   // console.log(state);
   useEffect(() => {
-    setItems(state.items);
+    setItems(state);
   }, [state]);
 
   return (
@@ -201,66 +204,8 @@ const EditableTable = ({ handlePagination, isRefetch }: Props) => {
             fullWidth
           />
         </Box>
-        {editItem && (
-          <Box sx={{ mb: 2, border: '1px solid gray', p: 2, borderRadius: '4px' }}>
-            <Typography variant="h6" gutterBottom>
-              Edit Item
-            </Typography>
-            <TextField
-              label="Name"
-              variant="outlined"
-              size="small"
-              value={editItem.name}
-              onChange={(e: any) => handleChange(e, 'name')}
-              sx={{ mb: 2, mr: 2 }}
-              fullWidth
-            />
-            <TextField
-              type="number"
-              label="Price"
-              variant="outlined"
-              size="small"
-              value={editItem.price}
-              onChange={(e: any) => handleChange(e, 'price')}
-              sx={{ mb: 2, mr: 2 }}
-              fullWidth
-            />
-            <TextField
-              type="number"
-              label="Quantity"
-              variant="outlined"
-              size="small"
-              value={editItem.quantity || ''}
-              onChange={(e: any) => handleChange(e, 'quantity')}
-              sx={{ mb: 2, mr: 2 }}
-              fullWidth
-            />
-            <TextField
-              type="number"
-              label="Regular Price"
-              variant="outlined"
-              size="small"
-              value={editItem.regularPrice || ''}
-              onChange={(e: any) => handleChange(e, 'regularPrice')}
-              sx={{ mb: 2, mr: 2 }}
-              fullWidth
-            />
-            <Box display="flex" justifyContent="flex-end">
-              <Button variant="contained" color="primary" onClick={handleSave}>
-                Save
-              </Button>
-              <Button
-                variant="outlined"
-                color="secondary"
-                sx={{ ml: 2 }}
-                onClick={() => setEditItem(null)}
-              >
-                Cancel
-              </Button>
-            </Box>
-          </Box>
-        )}
-        <TableContainer component={Paper} sx={{ px: 3, width: '100%', paddingBottom: '100px' }}>
+
+        <TableContainer component={Paper} sx={{ width: '100%', paddingBottom: '100px' }}>
           <Table>
             <TableHead>
               <TableRow>
@@ -268,7 +213,8 @@ const EditableTable = ({ handlePagination, isRefetch }: Props) => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {dataItem?.map((item, idx) => {
+              {dataItem?.map((item: any, idx: number) => {
+                const barcode = item.id.replace('-id', '');
                 return (
                   <>
                     <Accordion
@@ -279,7 +225,7 @@ const EditableTable = ({ handlePagination, isRefetch }: Props) => {
                         <Typography>{item.name}</Typography>
                       </AccordionSummary>
                       <AccordionDetails>
-                        <Barcode value={item.barcode} />
+                        <Barcode value={barcode} />
                         <Typography sx={{ fontSize: '12px' }}>
                           <strong>Product Name: </strong>
                           {item.name}
@@ -304,8 +250,11 @@ const EditableTable = ({ handlePagination, isRefetch }: Props) => {
                           <>
                             <Button
                               variant="contained"
-                              sx={{ textTransform: 'capitalize', p: 0 }}
-                              onClick={() => setEditItem(item)}
+                              sx={{ textTransform: 'capitalize', p: 0, color: 'white' }}
+                              onClick={() => {
+                                setOpen(true);
+                                setEditItem(item);
+                              }}
                             >
                               Edit
                             </Button>
@@ -329,6 +278,78 @@ const EditableTable = ({ handlePagination, isRefetch }: Props) => {
             </Stack>
           </Box>
         </TableContainer>
+
+        <Dialog
+          open={open}
+          aria-labelledby="alert-dialog-title"
+          aria-describedby="alert-dialog-description"
+        >
+          {/* <DialogTitle id="alert-dialog-title">{"Use Google's location service?"}</DialogTitle> */}
+          <DialogContent>
+            {editItem && (
+              <Box sx={{ mb: 2, border: '1px solid gray', p: 2, borderRadius: '4px' }}>
+                <Typography variant="h6" gutterBottom>
+                  Edit Item
+                </Typography>
+                <TextField
+                  label="Name"
+                  variant="outlined"
+                  size="small"
+                  value={editItem.name}
+                  onChange={(e: any) => handleChange(e, 'name')}
+                  sx={{ mb: 2, mr: 2 }}
+                  fullWidth
+                />
+                <TextField
+                  type="number"
+                  label="Price"
+                  variant="outlined"
+                  size="small"
+                  value={editItem.price}
+                  onChange={(e: any) => handleChange(e, 'price')}
+                  sx={{ mb: 2, mr: 2 }}
+                  fullWidth
+                />
+                <TextField
+                  type="number"
+                  label="Quantity"
+                  variant="outlined"
+                  size="small"
+                  value={editItem.quantity || ''}
+                  onChange={(e: any) => handleChange(e, 'quantity')}
+                  sx={{ mb: 2, mr: 2 }}
+                  fullWidth
+                />
+                <TextField
+                  type="number"
+                  label="Regular Price"
+                  variant="outlined"
+                  size="small"
+                  value={editItem.regularPrice || ''}
+                  onChange={(e: any) => handleChange(e, 'regularPrice')}
+                  sx={{ mb: 2, mr: 2 }}
+                  fullWidth
+                />
+                <Box display="flex" justifyContent="flex-end">
+                  <Button variant="contained" color="primary" onClick={handleSave}>
+                    Save
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    color="secondary"
+                    sx={{ ml: 2 }}
+                    onClick={() => {
+                      handleClose();
+                      setEditItem(null);
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                </Box>
+              </Box>
+            )}
+          </DialogContent>
+        </Dialog>
       </>
     </Box>
   );

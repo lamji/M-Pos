@@ -1,35 +1,35 @@
-import axios, { AxiosError, AxiosRequestConfig } from 'axios';
-import { getCookie } from './cookie';
-// import { getCookie, saveCookie } from './cookie';
+/** @format */
 
-const onRequest = async (config: AxiosRequestConfig) => {
-  const token = getCookie('t');
+import axios, { AxiosRequestConfig } from 'axios';
+import { getCookie } from './cookie';
+
+// Request interceptor to add the Authorization header
+const onRequest = async (config: AxiosRequestConfig): Promise<any> => {
+  const token = getCookie('t'); // Fetch the token from cookies
 
   if (config.headers) {
-    config.headers.Authorization = `Bearer ${token}`;
+    config.headers.Authorization = `${token}`;
   }
 
-  return config;
+  // Explicitly cast to InternalAxiosRequestConfig
+  return config as any;
 };
 
-const onRequestError = (error: AxiosError): Promise<AxiosError> => {
+// Error handling for request errors
+const onRequestError = (error: any): Promise<any> => {
   return Promise.reject(error?.response?.data);
 };
 
-// const onResponse = (response: AxiosResponse) => {
-//   return response;
-// };
-
-const instance = axios.create({
+// Creating an Axios instance
+const apiClient = axios.create({
   baseURL: process.env.NEXT_PUBLIC_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  maxBodyLength: Infinity, // Set a default max body length
 });
 
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-instance.interceptors.request.use(onRequest, onRequestError);
-// instance.interceptors.response.use(onResponse, onResponseError);
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-// axiosAuthIDMS.interceptors.request.use(onRequest, onRequestError);
+// Applying the interceptors to the Axios instance
+apiClient.interceptors.request.use(onRequest, onRequestError);
 
-export default instance;
+export default apiClient;

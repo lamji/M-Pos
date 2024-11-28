@@ -12,6 +12,7 @@ import { Field, Formik, ErrorMessage } from 'formik';
 import * as yup from 'yup';
 import { Alert } from '@mui/material';
 import { useState } from 'react';
+import apiClient from '@/src/common/app/axios';
 
 const StyledTextField = styled(TextField)(({ theme }) => ({
   marginBottom: theme.spacing(2),
@@ -41,25 +42,18 @@ export default function RequestCodeModal({ open, handleClose }: Props) {
 
   const handleCancel = () => {
     handleClose(false);
+    setIsSuccess(false);
   };
 
   const handleSubmitForm = async (values: { code: string; email: string }) => {
     try {
-      const response = await fetch('/api/request-activation', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(values),
-      });
+      const response = await apiClient.post('/activate', values);
 
-      const result = await response.json();
-
-      if (response.ok) {
+      if (response.data.success) {
         setIsSuccess(true);
         setAlertMessage('Code activated successfully. You have 7 days of trial access.');
       } else {
-        setAlertMessage(result.message || 'An error occurred.');
+        setAlertMessage(response.data.message || 'An error occurred.');
       }
     } catch (error) {
       setAlertMessage('An error occurred.');

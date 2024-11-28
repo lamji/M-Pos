@@ -7,19 +7,21 @@ import {
   DialogTitle,
   IconButton,
   Typography,
-  Autocomplete,
   TextField,
-  InputAdornment,
-  CircularProgress,
+  Paper,
+  InputBase,
+  Divider,
 } from '@mui/material';
 import React from 'react';
 import { formatCurrency } from '@/src/common/helpers';
-import SearchIcon from '@mui/icons-material/Search';
+import { TbReportSearch } from 'react-icons/tb';
 import moment from 'moment';
 import Nav from '@/src/components/Nav';
 import useViewModel from './useViewModel';
 import { GetServerSideProps } from 'next';
+import { RiExpandDiagonalFill } from 'react-icons/ri';
 import { parse } from 'cookie';
+import { IoIosArrowRoundBack } from 'react-icons/io';
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { req } = context;
@@ -67,158 +69,127 @@ export interface Transaction {
 
 const UtangTransactions: React.FC = () => {
   const {
-    state,
-    hanndlePayment,
+    grandTotal,
+    handlePayment,
     handleAdjustMent,
     formikUtang,
-    handleChange,
     open,
     handleOpen,
-    transactions,
     type,
-    isLoading,
     handleClose,
     selectedData,
+    utangList,
+    handleSearchChange,
+    searchTerm,
+    setType,
   } = useViewModel();
   return (
     <>
-      <Nav></Nav>
-      <div style={{ padding: '20px', background: 'white', borderRadius: 25, marginTop: '-150px' }}>
+      <Nav />
+      <div
+        style={{
+          background: 'white',
+          marginTop: '-150px',
+        }}
+      >
         <Box
           sx={{
-            background: '#ffb7b7',
-            border: '2px solid #c54a4a',
-            borderRadius: '10px',
-            mb: '10px',
-            textAlign: 'center',
-            p: '10px',
-            fontWeight: 700,
+            display: 'flex',
+            alignItems: 'center',
+            height: '180px',
+            backgroundColor: 'primary.main',
           }}
         >
-          Total: {formatCurrency(state.totalUtang)}
-        </Box>
-        <Autocomplete
-          disablePortal
-          id="combo-box-demo"
-          options={transactions?.listUtangName || []}
-          getOptionLabel={(option: any) => option?.personName}
-          sx={{
-            width: '100%',
-            mb: '10px',
-            '& .MuiAutocomplete-endAdornment': {
-              display: 'none',
-            },
-            '& .MuiAutocomplete-inputRoot': {
-              padding: '10px !important',
-
-              borderRadius: '4px', // Optional: Add border radius
-              '&:hover': {
-                borderColor: '#888', // Change border color on hover
-              },
-            },
-          }}
-          onChange={handleChange}
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              label="Search Item"
-              InputProps={{
-                ...params.InputProps,
-                endAdornment: (
-                  <>
-                    {params.InputProps.endAdornment}
-                    <InputAdornment position="end">
-                      <IconButton>
-                        <SearchIcon />
-                      </IconButton>
-                    </InputAdornment>
-                  </>
-                ),
-              }}
-            />
-          )}
-        />
-        <Box
-          display="flex"
-          alignItems="center"
-          justifyContent="space-between"
-          p={1}
-          sx={{
-            border: '1px solid #ccd2d7',
-          }}
-        >
-          <Typography fontWeight={700}>Name</Typography>
-
-          <Typography fontWeight={700}>Total</Typography>
-          <Typography fontWeight={700} sx={{ textTransform: 'capitalize' }}>
-            Action
-          </Typography>
+          <Box sx={{ marginTop: '-60px', px: '20px', width: '100%' }}>
+            <Paper
+              component="form"
+              sx={{ p: '2px 4px', display: 'flex', alignItems: 'center', width: '100%' }}
+            >
+              <InputBase
+                sx={{ ml: 1, flex: 1 }}
+                placeholder="Search Name"
+                inputProps={{ 'aria-label': 'search google maps' }}
+                value={searchTerm}
+                onChange={handleSearchChange}
+              />
+              <Divider sx={{ height: 28, m: 0.5 }} orientation="vertical" />
+              <IconButton color="primary" sx={{ p: '10px' }} aria-label="directions">
+                <TbReportSearch />
+              </IconButton>
+            </Paper>
+            <Typography my={1} sx={{ fontWeight: 700, color: 'white', fontSize: '20px' }}>
+              {formatCurrency(grandTotal)}
+            </Typography>
+          </Box>
         </Box>
         <Box
           sx={{
-            width: '100%',
-            borderRadius: '0px 0px 10px 10px',
-            border: '1px solid #ccd2d7',
-            overflow: 'scroll',
-            marginBottom: '100px',
+            padding: '20px 40px',
+            overflowY: 'scroll',
+            marginBottom: '50px',
+            height: '70vh',
+            backgroundColor: 'white',
+            zIndex: 999,
+            marginTop: '-70px',
+            borderRadius: '80px 0 0 0',
           }}
         >
-          {isLoading ? (
-            <>
-              <Box
-                sx={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
+          {utangList
+            ?.slice()
+            ?.sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())
+            ?.map((data: any, idx: number) => {
+              return (
+                <Box
+                  key={idx}
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    background: '#c8c8c8',
+                    padding: '15px 10px',
+                    my: 1,
+                    borderRadius: '10px',
+                  }}
+                  onClick={() => handleOpen(data as any)}
+                >
+                  <Box>
+                    <Typography
+                      sx={{ fontSize: '13px', fontWeight: 700, textTransform: 'capitalize' }}
+                    >
+                      {data.personName}
+                    </Typography>
+                    <Typography sx={{ fontSize: '11px', color: 'gray' }}>
+                      {formatCurrency(data.total)}
+                    </Typography>
+                  </Box>
+                  <IconButton onClick={() => handleOpen(data as any)}>
+                    <RiExpandDiagonalFill />
+                  </IconButton>
+                </Box>
+              );
+            })}
+        </Box>
 
-                  padding: '0 20px', // Optional: Add some horizontal padding
-                  gap: '10px',
+        <Dialog open={open} onClose={handleClose} fullWidth fullScreen>
+          {type === 'adjustment' ? (
+            <Box sx={{ p: 2 }}>
+              <IconButton
+                onClick={() => {
+                  setType('');
                 }}
               >
-                <CircularProgress />
-              </Box>
-            </>
-          ) : (
-            transactions?.utang
-              ?.slice()
-              ?.reverse()
-              ?.map((data: any, idx: number) => {
-                return (
-                  <Box
-                    key={idx}
-                    display="flex"
-                    alignItems="center"
-                    justifyContent="space-between"
-                    p={1}
-                    sx={{
-                      border: '1px solid #ccd2d7',
-                    }}
-                  >
-                    <Box sx={{ width: 70 }}>
-                      <Typography fontSize={'12px'}>{data.personName}</Typography>
-                    </Box>
-                    <Typography fontSize={'12px'}>{formatCurrency(data.total)}</Typography>
-                    <Button onClick={() => handleOpen(data)} sx={{ textTransform: 'capitalize' }}>
-                      View
-                    </Button>
-                  </Box>
-                );
-              })
-          )}
-        </Box>
-        {/* <Box display="flex" alignItems="center" justifyContent="end">
-          <Typography fontWeight={700} py={2}>
-            Total: {formatCurrency(transactions?.totalUtang ?? 0)}
-          </Typography>
-        </Box> */}
-
-        <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
-          {type === 'adjustment' ? (
-            <DialogTitle>Adjustment</DialogTitle>
+                <IoIosArrowRoundBack />
+              </IconButton>
+              <Typography mx={1} fontWeight={700}>
+                New Custom Utang
+              </Typography>
+            </Box>
           ) : (
             <DialogTitle>
               <Box>
+                <IconButton onClick={handleClose}>
+                  <IoIosArrowRoundBack />
+                </IconButton>
                 <Typography
                   sx={{ marginBottom: '0px' }}
                   variant="body1"
@@ -229,7 +200,7 @@ const UtangTransactions: React.FC = () => {
                   {selectedData?.personName}
                 </Typography>
                 {type != 'adjustment' && (
-                  <Typography align="right" sx={{ fontSize: '10px' }}>
+                  <Typography align="right" sx={{ fontSize: '13px' }}>
                     <strong>Total: {formatCurrency(selectedData?.total as number)}</strong>
                   </Typography>
                 )}
@@ -247,7 +218,7 @@ const UtangTransactions: React.FC = () => {
                         fullWidth
                         id="description"
                         name="description"
-                        label="Input Description"
+                        label="Input Item"
                         value={formikUtang.values.description}
                         onChange={formikUtang.handleChange}
                         error={
@@ -266,7 +237,7 @@ const UtangTransactions: React.FC = () => {
                         id="amount"
                         name="amount"
                         type="number"
-                        label="Input Amount"
+                        label="Amount"
                         value={formikUtang.values.amount}
                         onChange={formikUtang.handleChange}
                         error={formikUtang.touched.amount && Boolean(formikUtang.errors.amount)}
@@ -284,17 +255,17 @@ const UtangTransactions: React.FC = () => {
                   {selectedData?.items
                     ?.slice()
                     .reverse()
-                    .map((item: any) => {
-                      console.log(item);
+                    .map((item: any, id: any) => {
                       return (
                         <Box
-                          key={item._id}
+                          key={id}
                           sx={{
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'space-between',
                             marginBottom: '5px',
-                            borderBottom: '1px solid gray',
+                            borderBottom: '1px solid #ababab',
+                            padding: '10px 0px',
                           }}
                         >
                           <Box>
@@ -334,32 +305,24 @@ const UtangTransactions: React.FC = () => {
               </Button>
             ) : (
               <Button
-                variant="text"
+                variant="outlined"
                 sx={{ textTransform: 'capitalize' }}
                 color="primary"
                 onClick={handleAdjustMent}
               >
-                Adjust
+                New
               </Button>
             )}
 
             {type != 'adjustment' && (
               <>
                 <Button
-                  variant="text"
+                  variant="outlined"
                   sx={{ textTransform: 'capitalize' }}
-                  color="primary"
-                  onClick={() => hanndlePayment()}
+                  color="success"
+                  onClick={() => handlePayment()}
                 >
                   Pay
-                </Button>
-                <Button
-                  variant="text"
-                  sx={{ textTransform: 'capitalize' }}
-                  color="error"
-                  onClick={handleClose}
-                >
-                  Close
                 </Button>
               </>
             )}

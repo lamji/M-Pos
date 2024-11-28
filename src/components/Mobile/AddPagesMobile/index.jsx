@@ -4,16 +4,19 @@ import {
   TextField,
   Box,
   Typography,
-  Switch,
   Select,
   MenuItem,
   InputLabel,
   FormControl,
+  IconButton,
 } from '@mui/material';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import dynamic from 'next/dynamic';
 import useViewModel from '../../AddPage/useViewModel';
+import SearchIcon from '@mui/icons-material/Search';
+import SearchDialog from '../../Dialog/SearchDialog';
+
 // import Html5QrcodePlugin from '../../Scanner/index';
 
 const Nav = dynamic(() => import('@/src/components/Nav'));
@@ -26,32 +29,25 @@ const AddItemFormMobile = () => {
     <>
       <Nav />
       <Box sx={model.styles.root}>
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <Typography
-            sx={{
-              color: !model.checked ? 'primary.main' : 'gray',
-              fontWeight: !model.checked ? 'bold' : 'normal',
-            }}
-          >
-            Add
-          </Typography>
-          <Switch
-            checked={model.checked}
-            onChange={model.handleChange}
-            inputProps={{ 'aria-label': 'controlled' }}
-          />
-          <Typography
-            sx={{
-              color: model.checked ? 'primary.main' : 'gray',
-              fontWeight: model.checked ? 'bold' : 'normal',
-            }}
-          >
-            Update
-          </Typography>
-        </Box>
-
         <form onSubmit={model.formik.handleSubmit}>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <FormControl fullWidth>
+              <InputLabel sx={{ marginTop: '-8px' }}>Type</InputLabel>
+              <Select
+                name="type"
+                label="Type"
+                size="small"
+                value={model.formik.values.type}
+                onChange={model.formik.handleChange}
+                error={model.formik.touched.type && Boolean(model.formik.errors.type)}
+                helperText={model.formik.touched.type && model.formik.errors.type}
+              >
+                {/* <MenuItem value="New">New</MenuItem> */}
+                <MenuItem value="New Grocery">New Grocery</MenuItem>
+                <MenuItem value="New">New Item</MenuItem>
+              </Select>
+            </FormControl>
+
             <TextField
               name="id"
               label="ID"
@@ -61,6 +57,18 @@ const AddItemFormMobile = () => {
               value={model.formik.values.id}
               error={model.formik.touched.id && Boolean(model.formik.errors.id)}
               helperText={model.formik.touched.id && model.formik.errors.id}
+              onChange={model.formik.handleChange}
+              disabled
+            />
+            <TextField
+              name="barcode"
+              size="small"
+              label="Barcode"
+              variant="outlined"
+              fullWidth
+              value={model.formik.values.barcode}
+              error={model.formik.touched.barcode && Boolean(model.formik.errors.barcode)}
+              helperText={model.formik.touched.barcode && model.formik.errors.barcode}
               onChange={model.formik.handleChange}
               disabled
             />
@@ -88,18 +96,6 @@ const AddItemFormMobile = () => {
               onChange={model.formik.handleChange}
             />
             <TextField
-              name="barcode"
-              size="small"
-              label="Barcode"
-              variant="outlined"
-              fullWidth
-              value={model.formik.values.barcode}
-              error={model.formik.touched.barcode && Boolean(model.formik.errors.barcode)}
-              helperText={model.formik.touched.barcode && model.formik.errors.barcode}
-              onChange={model.formik.handleChange}
-              disabled
-            />
-            <TextField
               name="quantity"
               label="Quantity"
               size="small"
@@ -123,28 +119,9 @@ const AddItemFormMobile = () => {
               helperText={model.formik.touched.regularPrice && model.formik.errors.regularPrice}
               onChange={model.formik.handleChange}
             />
-            {model.checked && (
-              <>
-                <FormControl fullWidth>
-                  <InputLabel>Type</InputLabel>
-                  <Select
-                    name="type"
-                    label="Type"
-                    size="small"
-                    value={model.formik.values.type}
-                    onChange={model.formik.handleChange}
-                    error={model.formik.touched.type && Boolean(model.formik.errors.type)}
-                    helperText={model.formik.touched.type && model.formik.errors.type}
-                  >
-                    <MenuItem value="Add">Add</MenuItem>
-                    <MenuItem value="Adjustment">Adjustment</MenuItem>
-                  </Select>
-                </FormControl>
-              </>
-            )}
+
             <Box
               sx={{
-                mt: '40px',
                 display: 'flex',
                 alignItems: 'center',
                 width: '100%',
@@ -156,42 +133,62 @@ const AddItemFormMobile = () => {
                 disableFlip={false}
                 qrCodeSuccessCallback={(decodedText) => model.handleBarcodeScanUpdate(decodedText)}
               /> */}
-              <Button
-                type="submit"
-                variant="contained"
-                color="primary"
-                disabled={model.formik.isSubmitting}
-                sx={{ width: '400px', marginTop: '-60px' }}
-              >
-                {model.formik.isSubmitting ? 'Submitting...' : model.checked ? 'Update' : 'Submit'}
-              </Button>
-
-              <BarcodeScannerComponent
-                dataOut={(data) => model.handleBarcodeScanUpdate(data)}
-                size={50}
-              />
+              <Box sx={{ width: '300px' }}>
+                <Button
+                  type="submit"
+                  variant="contained"
+                  color="primary"
+                  disabled={model.formik.isSubmitting}
+                  sx={{ width: '200px', color: 'white' }}
+                >
+                  {model.formik.isSubmitting
+                    ? 'Submitting...'
+                    : model.checked
+                    ? 'Update'
+                    : 'Submit'}
+                </Button>
+              </Box>
+              <Box>
+                <BarcodeScannerComponent
+                  dataOut={(data) => model.handleBarcodeScanUpdate(data)}
+                  size={40}
+                  color="primary"
+                />
+              </Box>
+              <Box>
+                {model.isHowSearch && (
+                  <IconButton onClick={() => model.setOpenDiog(true)}>
+                    <SearchIcon style={{ fontSize: '30px', marginLeft: '10px' }} />
+                  </IconButton>
+                )}
+              </Box>
             </Box>
-            {!model.checked && (
-              <>
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                  <Typography fontSize={'12px'}>No Barcode?</Typography>
-                  <Box
-                    onClick={() => model.handleGenerateBarcode()}
-                    sx={{
-                      fontSize: '12px',
-                      color: 'blue',
-                      textDecoration: 'underline',
-                      mx: '2px',
-                    }}
-                  >
-                    Generate here
-                  </Box>
-                </Box>
-              </>
-            )}
+
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <Typography fontSize={'12px'}>No Barcode?</Typography>
+              <Box
+                onClick={() => model.handleGenerateBarcode()}
+                sx={{
+                  fontSize: '12px',
+                  color: 'blue',
+                  textDecoration: 'underline',
+                  mx: '2px',
+                }}
+              >
+                Generate here
+              </Box>
+            </Box>
+
+            <Box sx={{ height: '100px' }}></Box>
           </Box>
         </form>
         <ToastContainer />
+        <SearchDialog
+          open={model.openDialog}
+          onClose={() => model.setOpenDiog(false)}
+          dataOut={model.handleDataOutSearch}
+          options={model.documents}
+        />
       </Box>
     </>
   );

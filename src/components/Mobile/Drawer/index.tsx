@@ -16,6 +16,8 @@ import { clearCookie } from '@/src/common/app/cookie';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
 import { Typography } from '@mui/material';
+import CloudSyncIcon from '@mui/icons-material/CloudSync';
+import useFetchDocumentsBackup from '@/src/common/hooks/useFetchDocuments';
 
 interface PropsDrawer {
   status: boolean;
@@ -24,14 +26,30 @@ interface PropsDrawer {
 
 export default function MobileDrawer({ status, setStatus }: PropsDrawer) {
   const router = useRouter();
+  const { fetchDocuments } = useFetchDocumentsBackup();
   const toggleDrawer = (newOpen: boolean) => () => {
     setStatus(newOpen);
   };
-
   const handleSignout = async () => {
-    clearCookie();
-    router.push('/');
+    try {
+      console.log('Starting document backup...');
+      await fetchDocuments(); // Perform backup
+      console.log('Backup completed successfully.');
+    } catch (error) {
+      console.error('Error during backup:', error);
+      // Optionally, add user feedback here
+    } finally {
+      console.log('Clearing cookies and signing out...');
+      clearCookie(); // Ensure this properly clears the session cookies
+      await router.push('/'); // Redirect to the home page
+    }
   };
+
+  // React.useEffect(() => {
+  //   if (!loading) {
+  //     router.push('/');
+  //   }
+  // }, [loading, router]);
 
   const DrawerList = (
     <Box
@@ -90,6 +108,14 @@ export default function MobileDrawer({ status, setStatus }: PropsDrawer) {
                 <InventoryIcon />
               </ListItemIcon>
               <ListItemText primary={'Create Inventory'} />
+            </ListItemButton>
+          </ListItem>
+          <ListItem disablePadding>
+            <ListItemButton onClick={() => router.push('/backup')}>
+              <ListItemIcon>
+                <CloudSyncIcon />
+              </ListItemIcon>
+              <ListItemText primary={'Backup/Restore'} />
             </ListItemButton>
           </ListItem>
           <ListItem disablePadding>

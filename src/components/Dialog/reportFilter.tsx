@@ -22,10 +22,11 @@ import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { DefinedRange } from 'react-date-range';
 import moment from 'moment';
-import { fetchItems } from '@/src/common/api/testApi';
+// import { fetchItems } from '@/src/common/api/testApi';
 import { formatCurrency } from '@/src/common/helpers';
 import SearchIcon from '@mui/icons-material/Search';
 import Swal from 'sweetalert2';
+import { readAllDocuments } from '@/src/common/app/lib/pouchdbServiceItems';
 
 interface Props {
   isOpen: boolean;
@@ -42,7 +43,7 @@ const ReportFilter = ({ isOpen, handleClose, handleConfrim }: Props) => {
   const [selectedFilter, setSelectedFilter] = React.useState<string | null>('lowStocks');
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [isDateEmpty, setIsDateEmpty] = React.useState(false);
-  const [allItems, setAllItems] = React.useState([]);
+  const [allItems, setAllItems] = React.useState<any>([]);
   const [displayedItems, setDisplayedItems] = React.useState([]);
   const [selectedtData, setSlectedData] = React.useState<any[]>([]);
   const [isFullDataLoaded, setIsFullDataLoaded] = React.useState(false);
@@ -86,8 +87,9 @@ const ReportFilter = ({ isOpen, handleClose, handleConfrim }: Props) => {
 
   const fetItems = async () => {
     try {
-      const itemsData = await fetchItems();
-      setAllItems(itemsData);
+      // const itemsData = await fetchItems();
+      const docs = await readAllDocuments();
+      setAllItems(docs);
     } catch (error) {
       console.log(error);
     }

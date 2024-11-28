@@ -1,17 +1,18 @@
-import { getAllUtang, getUtangById, postTransaction } from '@/src/common/api/testApi';
 import { setIsBackDropOpen } from '@/src/common/reducers/items';
-import {
-  getUtangData,
-  setPayment,
-  setUtangData,
-  setUtangTotal,
-} from '@/src/common/reducers/utangData';
+import { getUtangData, setPayment } from '@/src/common/reducers/utangData';
 import { useFormik } from 'formik';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import * as Yup from 'yup';
 import { Transaction } from '.';
+import {
+  readAllDocumentsUtang,
+  readDocsByPersonName,
+  updateUtang,
+} from '@/src/common/app/lib/pouchDbUtang'; // Import the readDocById function
+import { getData } from '@/src/common/reducers/data';
+import { createDocumentTransaction } from '@/src/common/app/lib/pouchDbTransaction';
 
 const validationSchema = Yup.object({
   description: Yup.string()
@@ -28,12 +29,17 @@ export default function useViewModel() {
   const router = useRouter();
   const dispatch = useDispatch();
   const state = useSelector(getUtangData);
+  const utangState = useSelector(getData);
   const [transactions, setTransactions] = useState<any>([]);
+  const [utangList, setUtangList] = useState<any>([]);
   const [open, setOpen] = useState(false);
   const [selectedData, setSelectedData] = useState<Transaction | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [type, setType] = useState('');
   const [refresh, setRefresh] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [grandTotal, setGrandTotal] = useState(0);
+
   const handleOpen = (row: Transaction) => {
     setSelectedData(row);
     setOpen(true);
@@ -44,12 +50,14 @@ export default function useViewModel() {
     setSelectedData(null);
   };
 
-  const handleChange = async (event: any, value: any) => {
+  const handleSearchChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    event.preventDefault();
+    setSearchTerm(event.target.value);
     setIsLoading(true);
     try {
-      const data = await getUtangById(value?._id);
+      const data = await readDocsByPersonName(event.target.value); // Use readDocById to fetch the document by ID
       if (data) {
-        setTransactions(data);
+        setUtangList(data);
         setIsLoading(false);
       }
     } catch (error) {
@@ -70,7 +78,7 @@ export default function useViewModel() {
         type: 'Utang',
         items: [
           {
-            id: '480036-adjustMent',
+            id: new Date(),
             name: values?.description,
             price: values?.amount,
             quantity: 1,
@@ -81,15 +89,32 @@ export default function useViewModel() {
         _id: selectedData?._id || undefined,
         forAdj: 'adjustment',
       };
+
+      const transactionDataDocs = {
+        type: 'Utang',
+        items: [
+          {
+            id: new Date(),
+            name: values?.description,
+            price: values?.amount,
+            quantity: 1,
+          },
+        ],
+        personName: selectedData?.personName,
+        total: values.amount,
+        _id: new Date() || undefined,
+        forAdj: 'adjustment',
+      };
       try {
-        const data = await postTransaction(transactionData);
-        if (data) {
-          resetForm();
-          dispatch(setIsBackDropOpen(false));
-          setType('');
-          setRefresh(!refresh);
-          handleClose();
-        }
+        await Promise.all([
+          updateUtang(transactionData),
+          createDocumentTransaction(transactionDataDocs),
+        ]);
+        resetForm();
+        dispatch(setIsBackDropOpen(false));
+        setType('');
+        setRefresh(!refresh);
+        handleClose();
       } catch (error) {
         alert(JSON.stringify(error));
         console.error('Error:', error);
@@ -104,7 +129,7 @@ export default function useViewModel() {
     setType('adjustment');
   };
 
-  const hanndlePayment = () => {
+  const handlePayment = () => {
     const props = {
       name: selectedData?.personName, // Payor's name
       amount: selectedData?.total, // Payment amount
@@ -118,28 +143,28 @@ export default function useViewModel() {
     setTransactions(state);
   }, [state]);
 
-  const updateUtang = async () => {
-    try {
-      const data = await getAllUtang();
-      if (data) {
-        dispatch(setUtangData(data));
-        dispatch(setUtangTotal(100 as any));
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
   useEffect(() => {
-    updateUtang();
-  }, []);
+    const fetchDocuments = async () => {
+      try {
+        const docs = await readAllDocumentsUtang();
+        setUtangList(docs.filteredDocs);
+
+        // Calculate the grand total once
+
+        setGrandTotal(docs.total);
+      } catch (err) {
+        console.error('Error fetching documents', err);
+      }
+    };
+
+    fetchDocuments();
+  }, [utangState.isRefetch, refresh]);
 
   return {
     state,
-    hanndlePayment,
+    handlePayment,
     handleAdjustMent,
     formikUtang,
-    handleChange,
     open,
     handleOpen,
     transactions,
@@ -147,5 +172,10 @@ export default function useViewModel() {
     isLoading,
     handleClose,
     selectedData,
+    utangList,
+    handleSearchChange,
+    searchTerm,
+    grandTotal,
+    setType,
   };
 }

@@ -11,10 +11,12 @@ interface Item {
 
 interface DataState {
   data: Item[];
+  isRefetch: boolean;
 }
 
 const initialState: DataState = {
   data: [],
+  isRefetch: false,
 };
 
 const dataSlice = createSlice({
@@ -30,11 +32,15 @@ const dataSlice = createSlice({
     clearData: (state) => {
       state.data = [];
     },
+    setRefetch: (state) => {
+      state.isRefetch = !state.isRefetch; // Correctly toggles the isRefetch state
+    },
   },
 });
 
-export const { setData, addItem, clearData } = dataSlice.actions;
+export const { setData, addItem, clearData, setRefetch } = dataSlice.actions;
 
 export const getData = (state: any) => state.data.data;
+export const getDataRefetch = (state: any) => state.data;
 
 export default dataSlice.reducer;

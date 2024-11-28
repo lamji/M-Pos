@@ -1,6 +1,9 @@
-import { fetchItems } from '@/src/common/api/testApi';
-import { getCookie } from '@/src/common/app/cookie';
+import {
+  queryDocumentsByBarcode,
+  readAllDocuments,
+} from '@/src/common/app/lib/pouchdbServiceItems';
 import { useDeviceType } from '@/src/common/helpers';
+import { getDataRefetch } from '@/src/common/reducers/data';
 import {
   addItem,
   deleteItem,
@@ -9,16 +12,15 @@ import {
   setIsBackDropOpen,
   updateItemQuantity,
 } from '@/src/common/reducers/items';
-import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 import Swal from 'sweetalert2';
 
 export default function useViewModel() {
-  const token = getCookie('t');
   const dispatch = useDispatch();
   const { items } = useSelector(getSelectedItems);
+  const { isRefetch } = useSelector(getDataRefetch);
   const [quantity, setQuantity] = useState(1);
   const [modalOpen, setModalOpen] = useState(false);
   const [activeOrders, setActiveOrders] = useState({});
@@ -34,6 +36,9 @@ export default function useViewModel() {
   const [stocks, setStocks] = useState(0);
   const { isMobile, isLaptop, isPC } = useDeviceType();
   const isLarge = isLaptop || isPC;
+
+  console.log('activeOrders', activeOrders);
+
   // const [lastScan, setLastScan] = useState(0);
   // const [isScanning, setIsScanning] = useState(false); // State to manage scanner visibility
 
@@ -55,20 +60,18 @@ export default function useViewModel() {
     }
   }, []);
 
-  const fetItems = async () => {
-    try {
-      const itemsData = await fetchItems();
-      setAllItems(itemsData);
-      // dispatch(setData(itemsData));
-    } catch (error) {
-      alert(JSON.stringify(error));
-      console.log(error);
-    }
-  };
-
   useEffect(() => {
-    fetItems();
-  }, [refetch]);
+    const fetchDocuments = async () => {
+      try {
+        const docs = await readAllDocuments();
+        setAllItems(docs);
+      } catch (err) {
+        console.error('Error fetching documents', err);
+      }
+    };
+
+    fetchDocuments();
+  }, [isRefetch]);
 
   const handleAddItem = (event, value) => {
     if (value) {
@@ -100,9 +103,6 @@ export default function useViewModel() {
     setOpen(true);
     setDeleteProduct(name);
     setItemToDelete(id);
-    // if (confirmed) {
-    //   dispatch(removeItem(id));
-    // }
   };
 
   const onNewScanResult = async (decodedText) => {
@@ -118,13 +118,7 @@ export default function useViewModel() {
     }
 
     try {
-      dispatch(setIsBackDropOpen(true));
-      const response = await axios.get(`/api/items2?barcode=${decodedText}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      const data = response.data;
+      const data = await queryDocumentsByBarcode(decodedText);
 
       if (data.length > 0) {
         dispatch(setIsBackDropOpen(false));
@@ -152,7 +146,6 @@ export default function useViewModel() {
   };
 
   const handleIncreaseQuantity = (id) => {
-    console.log('quantity', quantity);
     setQuantity((prevQuantity) => prevQuantity + 1);
     dispatch(
       updateItemQuantity({
@@ -215,6 +208,7 @@ export default function useViewModel() {
       setQuantity(1);
       setIsEdit(false);
     } else {
+      console.log('newData', newData);
       dispatch(addItem(newData));
       setModalOpen(false);
       setQuantity(1);

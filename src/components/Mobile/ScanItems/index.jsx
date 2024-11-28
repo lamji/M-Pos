@@ -21,6 +21,7 @@ import LinearIndeterminate from '../../Loader/linear';
 import DeleteConfirmationDialog from '../DeleteModal';
 import useViewModel from './useViewModel';
 import dynamic from 'next/dynamic';
+// import Html5QrcodePlugin from '../../Scanner/index';
 
 const Checkout = dynamic(() => import('../CheckOut/index'));
 const BarcodeScannerComponent = dynamic(() => import('../../wt2Scanner/index'));
@@ -52,8 +53,6 @@ const ComboBox = () => {
     handleInputChange,
     displayedItems,
     stocks,
-    isMobile,
-    isLarge,
   } = useViewModel();
 
   return (
@@ -62,28 +61,20 @@ const ComboBox = () => {
         <>
           <Box
             sx={{
-              padding: '20px',
-              display: 'flex',
-              flexDirection: 'column',
+              paddingBottom: '60px',
+              borderRadius: 10,
+              background: 'white',
+              marginTop: '-200px',
             }}
           >
             <Box
               sx={{
-                paddingBottom: '50px',
-                borderRadius: '5px 5px 5px 5px',
-                background: 'white',
-                marginTop: '-200px',
-                padding: '10px',
+                backgroundColor: 'primary.main',
+                height: '250px',
+                padding: '70px 20px 200px 20px',
               }}
             >
-              {isMobile && (
-                <>
-                  <Box sx={{ textAlign: 'center' }}>
-                    <Checkout isRefresh={(i) => handleRefetch(i)} />
-                  </Box>
-                </>
-              )}
-              <Box sx={{ display: 'flex', alignItems: 'center', marginTop: '10px' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
                 <Autocomplete
                   disablePortal
                   id="combo-box-demo"
@@ -93,6 +84,8 @@ const ComboBox = () => {
                   getOptionLabel={(option) => option.name}
                   sx={{
                     width: '100%',
+                    background: 'white',
+                    borderRadius: '4px',
                     '& .MuiAutocomplete-endAdornment': {
                       display: 'none',
                     },
@@ -110,6 +103,7 @@ const ComboBox = () => {
                     <TextField
                       {...params}
                       label="Search Item"
+                      // InputLabelProps={{ shrink: false }}
                       size="small"
                       InputProps={{
                         ...params.InputProps,
@@ -156,13 +150,26 @@ const ComboBox = () => {
                     </MenuItem>
                   )}
                 />
-                {isMobile && (
-                  <Box sx={{ marginTop: '50px', marginLeft: '20px' }}>
-                    <BarcodeScannerComponent dataOut={(data) => onNewScanResult(data)} size={50} />
-                  </Box>
-                )}
+                <Box sx={{ marginLeft: '20px' }}>
+                  <BarcodeScannerComponent dataOut={(data) => onNewScanResult(data)} size={50} />
+                  {/* <Html5QrcodePlugin
+                  fps={10}
+                  qrbox={250}
+                  disableFlip={false}
+                  qrCodeSuccessCallback={(decodedText) => onNewScanResult(decodedText)}
+                /> */}
+                </Box>
               </Box>
-              <List sx={{ marginTop: '10px', height: 'calc(100vh - 350px)', overflowY: 'scroll' }}>
+
+              <Box sx={{ textAlign: 'center', paddingBottom: '300px' }}>
+                <Checkout isRefresh={(i) => handleRefetch(i)} />
+              </Box>
+            </Box>
+
+            <Box sx={{ background: 'white', borderRadius: '50px 50px 0 0', marginTop: '-90px' }}>
+              <List
+                sx={{ marginTop: '0px', height: '50vh', overflow: 'scroll', padding: '30px 20px' }}
+              >
                 {items.length > 0 ? (
                   items
                     .slice()
@@ -227,15 +234,14 @@ const ComboBox = () => {
                 )}
               </List>
             </Box>
-            <Box sx={{ height: '150px' }}>
-              {isLarge && (
-                <>
-                  <Box sx={{ textAlign: 'center' }}>
-                    <Checkout isRefresh={(i) => handleRefetch(i)} />
-                  </Box>
-                </>
-              )}
-            </Box>
+
+            <ToastContainer />
+            <DeleteConfirmationDialog
+              open={open}
+              onClose={handleClose}
+              onConfirm={handleConfirm}
+              item={deleteProduct}
+            />
           </Box>
 
           <QuantityAdjuster
@@ -249,13 +255,6 @@ const ComboBox = () => {
             onCancel={handleCancel}
             items={activeOrders}
             stocks={stocks}
-          />
-          <ToastContainer />
-          <DeleteConfirmationDialog
-            open={open}
-            onClose={handleClose}
-            onConfirm={handleConfirm}
-            item={deleteProduct}
           />
         </>
       ) : (

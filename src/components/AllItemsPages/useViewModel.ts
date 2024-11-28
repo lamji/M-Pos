@@ -1,4 +1,4 @@
-import { getAllItem } from '@/src/common/api/testApi';
+import { readAllDocuments } from '@/src/common/app/lib/pouchdbServiceItems';
 import { setData } from '@/src/common/reducers/data';
 import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
@@ -12,8 +12,8 @@ export default function useViewModel() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await getAllItem(page, limit);
-        dispatch(setData(response));
+        const docs = await readAllDocuments();
+        dispatch(setData(docs));
       } catch (error) {
         console.error('Error fetching JSON data:', error);
       }

@@ -1,301 +1,60 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import {
   Box,
   Button,
   Dialog,
   DialogActions,
   DialogContent,
-  DialogTitle,
   IconButton,
   Typography,
   TextField,
   Autocomplete,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import { useFormik } from 'formik';
-import * as Yup from 'yup';
-import useViewModel from './useViewModel';
-import { useDispatch, useSelector } from 'react-redux';
 import { formatCurrency } from '@/src/common/helpers';
-import { getSelectedItems, setIsBackDropOpen } from '@/src/common/reducers/items';
-import { getAllUtang, postTransaction } from '@/src/common/api/testApi';
-import moment from 'moment';
-import hotkeys from 'hotkeys-js';
-import { useRouter } from 'next/router';
-import { clearCookie } from '@/src/common/app/cookie';
+import useViewModel from './useViewModel';
+import Receipts from '../../Receipts';
 
-interface Props {
+export interface CheckoutProps {
   isRefresh: (i: boolean) => void;
 }
 
-export default function Checkout({ isRefresh }: Props) {
-  const [refresh, setRefresh] = useState(false);
-  const dispatch = useDispatch();
-  const router = useRouter();
-  const { total, items } = useSelector(getSelectedItems); // Get total from Redux
-  const {
-    classes,
-    handleClickOpen,
-    handleClose,
-    open,
-    fullScreen,
-    handleClearItems,
-    token,
-    isMobile,
-  } = useViewModel();
-  const [selectedOption, setSelectedOption] = React.useState<'cash' | 'utang' | 'partial' | null>(
-    null
-  );
-  const [receiptOpen, setReceiptOpen] = React.useState(false);
-  const [allItems, setAllItems] = useState<any>([]);
-  const [allItemsUtang, setAllItemsUtang] = useState<any>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isOld, setIsOld] = useState(true);
-
-  const formikCash = useFormik({
-    initialValues: {
-      cashAmount: '',
-    },
-    validationSchema: Yup.object({
-      cashAmount: Yup.number()
-        .required('Required')
-        .positive('Must be a positive number')
-        .integer('Must be an integer')
-        .min(total, 'Cash amount must be at least the amount to pay'), // Use total here
-    }),
-    onSubmit: async (values, { resetForm }) => {
-      const cashAmount = Number(values.cashAmount);
-      dispatch(setIsBackDropOpen(true));
-      const transactionData = {
-        type: 'Cash',
-        items: items,
-        cash: cashAmount,
-        total,
-      };
-      setIsLoading(true);
-      try {
-        const data = await postTransaction(transactionData);
-        if (data) {
-          setAllItems(data.data);
-          handleClearItems();
-          setReceiptOpen(true);
-          handleClose();
-          setIsLoading(false);
-          resetForm();
-          dispatch(setIsBackDropOpen(false));
-          setRefresh(!refresh);
-          isRefresh(!refresh);
-        }
-      } catch (error) {
-        console.error('Error:', error);
-        alert(JSON.stringify(error, null, 2));
-        setIsLoading(false);
-        dispatch(setIsBackDropOpen(false));
-      }
-    },
-  });
-
-  const formikUtang = useFormik({
-    initialValues: {
-      personName: '',
-      _id: '',
-    },
-    validationSchema: Yup.object({
-      personName: Yup.string()
-        .required('Required')
-        .min(2, 'Name is too short')
-        .max(50, 'Name is too long'),
-      _id: Yup.string().nullable(),
-    }),
-    onSubmit: async (values, { resetForm }) => {
-      dispatch(setIsBackDropOpen(true));
-      setIsLoading(true);
-      const transactionData = {
-        type: 'Utang',
-        items: items,
-        personName: values.personName,
-        total,
-        _id: values._id || undefined,
-      };
-      try {
-        const data = await postTransaction(transactionData);
-        if (data) {
-          setAllItems(data.data);
-          setReceiptOpen(true);
-          handleClose();
-          handleClearItems();
-          resetForm();
-          setIsLoading(false);
-          setIsOld(true);
-          dispatch(setIsBackDropOpen(false));
-          isRefresh(!refresh);
-        }
-      } catch (error) {
-        alert(JSON.stringify(error, null, 2));
-        setIsLoading(false);
-        dispatch(setIsBackDropOpen(false));
-      }
-    },
-  });
-
-  const formikPartial = useFormik({
-    initialValues: {
-      partialAmount: '',
-      desiredAmount: '',
-      personName: '',
-      _id: '',
-    },
-    validationSchema: Yup.object({
-      partialAmount: Yup.number()
-        .required('Required')
-        .positive('Must be a positive number')
-        .integer('Must be an integer')
-        .min(0, 'Must be greater than or equal to 0'),
-      desiredAmount: Yup.number()
-        .required('Required')
-        .positive('Must be a positive number')
-        .integer('Must be an integer')
-        .max(total, 'Cannot be more than amount to pay'), // Use total here
-      personName: Yup.string()
-        .required('Required')
-        .min(2, 'Name is too short')
-        .max(50, 'Name is too long'),
-      _id: Yup.string().nullable(),
-    }),
-    onSubmit: async (values, { resetForm }) => {
-      const partialAmount = Number(values.partialAmount);
-      const desiredAmount = Number(values.desiredAmount);
-      dispatch(setIsBackDropOpen(true));
-
-      const transactionData = {
-        type: 'partial',
-        items: items,
-        personName: values.personName,
-        cash: partialAmount,
-        total,
-        partialAmount: desiredAmount,
-        _id: values._id || undefined,
-      };
-      setIsLoading(true);
-      try {
-        const data = await postTransaction(transactionData);
-        setAllItems(data.data);
-        if (data) {
-          setIsLoading(false);
-          handleClearItems();
-          setReceiptOpen(true);
-          resetForm();
-          handleClose();
-          dispatch(setIsBackDropOpen(false));
-          isRefresh(!refresh);
-        }
-      } catch (error) {
-        alert(JSON.stringify(error, null, 2));
-        console.error('Error:', error);
-        dispatch(setIsBackDropOpen(false));
-      }
-    },
-  });
-
-  const handleOptionClick = (option: 'cash' | 'utang' | 'partial') => {
-    setSelectedOption(option);
-  };
-
-  const handleProceedClick = () => {
-    if (selectedOption === 'cash') {
-      formikCash.handleSubmit();
-    } else if (selectedOption === 'utang') {
-      formikUtang.handleSubmit();
-    } else if (selectedOption === 'partial') {
-      console.log(formikPartial);
-      formikPartial.handleSubmit();
-    } else {
-      handleClose();
-    }
-  };
-
-  const getAllUtandData = async () => {
-    try {
-      const data = await getAllUtang();
-      if (data) {
-        setAllItemsUtang(data);
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  useEffect(() => {
-    getAllUtandData();
-  }, [allItems]);
-
-  const handleSignout = async () => {
-    clearCookie();
-    router.push('/');
-  };
-
-  useEffect(() => {
-    // Attach the hotkey event
-    hotkeys('ctrl+p', (event, handler) => {
-      // Prevent the default refresh event under WINDOWS system
-      event.preventDefault();
-      console.log(handler);
-      handleClickOpen();
-    });
-
-    // Clear
-    hotkeys('ctrl+c', (event) => {
-      event.preventDefault();
-      handleClearItems();
-    });
-
-    hotkeys('ctrl+l', (event) => {
-      event.preventDefault();
-      handleSignout();
-    });
-
-    // Cleanup the hotkey event on component unmount
-    return () => {
-      hotkeys.unbind('ctrl+p');
-      hotkeys.unbind('ctrl+c');
-      hotkeys.unbind('ctrl+l');
-    };
-  }, []);
-
+export default function Checkout({ isRefresh }: CheckoutProps) {
+  const { classes, model, actions } = useViewModel({ isRefresh });
   return (
     <div>
-      <Box
-        sx={{ borderRadius: '5px', marginBottom: '10px', marginTop: isMobile ? '50px' : '10px' }}
-      >
-        {isMobile ? (
+      <Box sx={{ borderRadius: '5px', marginBottom: '10px', marginTop: '5px' }}>
+        {model.isMobile ? (
           <>
             <Box>
-              {token && total > 0 && (
-                <Typography fontWeight={700}>{formatCurrency(total)}</Typography>
-              )}
-              {/* Use total here */}
-              {token && total > 0 && (
-                <>
-                  <Button
-                    onClick={handleClickOpen}
-                    sx={{ ...classes.button, py: 1, width: '100%', color: 'white' }}
-                    variant="contained"
-                  >
-                    PAY
-                  </Button>
-                </>
-              )}
+              <>
+                <Button
+                  onClick={actions.handleClickOpen}
+                  sx={{ ...classes.button, py: 1, width: '100%', background: 'white' }}
+                  variant="contained"
+                  disabled={model.total === 0}
+                  startIcon={
+                    <Typography
+                      sx={{ fontWeight: 700, marginRight: '20px', fontSize: '17px !important' }}
+                    >
+                      {formatCurrency(model.total)}
+                    </Typography>
+                  }
+                >
+                  CHECKOUT
+                </Button>
+              </>
             </Box>
           </>
         ) : (
           <>
             <Box sx={{ textAlign: 'left' }}>
               <Typography mb={2} fontSize="20px" fontWeight={700}>
-                TOTAL: {formatCurrency(total)}
+                TOTAL: {formatCurrency(model.total)}
               </Typography>
 
               <Button
-                onClick={handleClickOpen}
+                onClick={actions.handleClickOpen}
                 sx={{ width: '100%', height: '100px', color: 'white', fontSize: '30px' }}
                 variant="contained"
               >
@@ -307,24 +66,24 @@ export default function Checkout({ isRefresh }: Props) {
       </Box>
       <div>
         <Dialog
-          fullScreen={fullScreen}
-          open={open}
-          onClose={handleClose}
+          fullScreen={model.fullScreen}
+          open={model.open}
+          onClose={actions.handleClose}
           aria-labelledby="responsive-dialog-title"
           maxWidth={'xs'}
         >
-          <DialogTitle>
+          <Box>
             <Typography variant="h5" fontWeight={700}>
               Check Out
             </Typography>
             <IconButton
-              onClick={handleClose}
+              onClick={actions.handleClose}
               aria-label="close"
               sx={{ position: 'absolute', right: 8, top: 8 }}
             >
               <CloseIcon />
             </IconButton>
-          </DialogTitle>
+          </Box>
           <DialogContent>
             <Box px={2}>
               <Typography fontWeight={700} variant="h6">
@@ -333,12 +92,12 @@ export default function Checkout({ isRefresh }: Props) {
             </Box>
             <Box px={2} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <Box
-                onClick={() => handleOptionClick('cash')}
+                onClick={() => actions.handleOptionClick('cash')}
                 sx={{
                   border: '2px solid',
-                  borderColor: selectedOption === 'cash' ? '#ef783e' : 'gray',
-                  background: selectedOption === 'cash' ? '#ef783e' : '#d1d1d1',
-                  color: selectedOption === 'cash' ? 'white' : 'unset',
+                  borderColor: model.selectedOption === 'cash' ? '#ef783e' : 'gray',
+                  background: model.selectedOption === 'cash' ? '#ef783e' : '#d1d1d1',
+                  color: model.selectedOption === 'cash' ? 'white' : 'unset',
                   padding: '10px',
                   borderRadius: '10px',
                   width: '90px',
@@ -352,12 +111,12 @@ export default function Checkout({ isRefresh }: Props) {
                 Cash
               </Box>
               <Box
-                onClick={() => handleOptionClick('utang')}
+                onClick={() => actions.handleOptionClick('utang')}
                 sx={{
                   border: '2px solid',
-                  borderColor: selectedOption === 'utang' ? '#ef783e' : 'gray',
-                  background: selectedOption === 'utang' ? '#ef783e' : '#d1d1d1',
-                  color: selectedOption === 'utang' ? 'white' : 'unset',
+                  borderColor: model.selectedOption === 'utang' ? '#ef783e' : 'gray',
+                  background: model.selectedOption === 'utang' ? '#ef783e' : '#d1d1d1',
+                  color: model.selectedOption === 'utang' ? 'white' : 'unset',
                   padding: '10px',
                   borderRadius: '10px',
                   width: '90px',
@@ -371,7 +130,7 @@ export default function Checkout({ isRefresh }: Props) {
                 Utang
               </Box>
               <Box
-                onClick={() => handleOptionClick('partial')}
+                onClick={() => actions.handleOptionClick('partial')}
                 sx={{
                   padding: '10px',
                   borderRadius: '10px',
@@ -381,9 +140,9 @@ export default function Checkout({ isRefresh }: Props) {
                   justifyContent: 'center',
                   alignItems: 'center',
                   border: '2px solid',
-                  borderColor: selectedOption === 'partial' ? '#ef783e' : 'gray',
-                  background: selectedOption === 'partial' ? '#ef783e' : '#d1d1d1',
-                  color: selectedOption === 'partial' ? 'white' : 'unset',
+                  borderColor: model.selectedOption === 'partial' ? '#ef783e' : 'gray',
+                  background: model.selectedOption === 'partial' ? '#ef783e' : '#d1d1d1',
+                  color: model.selectedOption === 'partial' ? 'white' : 'unset',
                   mx: '10px',
                 }}
               >
@@ -392,40 +151,48 @@ export default function Checkout({ isRefresh }: Props) {
             </Box>
 
             <Typography textTransform="capitalize" fontWeight={700} m={2}>
-              {selectedOption}
+              {model.selectedOption}
             </Typography>
             <Box px={2}>
-              {selectedOption === 'cash' && (
-                <form onSubmit={formikCash.handleSubmit}>
+              {model.selectedOption === 'cash' && (
+                <form onSubmit={model.formikCash.handleSubmit}>
                   <TextField
                     fullWidth
                     id="cashAmount"
                     name="cashAmount"
                     label="Input Cash"
-                    value={formikCash.values.cashAmount}
-                    onChange={formikCash.handleChange}
-                    error={formikCash.touched.cashAmount && Boolean(formikCash.errors.cashAmount)}
-                    helperText={formikCash.touched.cashAmount && formikCash.errors.cashAmount}
+                    value={model.formikCash.values.cashAmount}
+                    onChange={model.formikCash.handleChange}
+                    error={
+                      model.formikCash.touched.cashAmount &&
+                      Boolean(model.formikCash.errors.cashAmount)
+                    }
+                    helperText={
+                      model.formikCash.touched.cashAmount && model.formikCash.errors.cashAmount
+                    }
                     margin="normal"
                     type="number"
                   />
                 </form>
               )}
-              {selectedOption === 'utang' && (
+              {model.selectedOption === 'utang' && (
                 <>
-                  <form onSubmit={formikUtang.handleSubmit}>
+                  <form onSubmit={model.formikUtang.handleSubmit}>
                     <Box>
-                      {isOld ? (
+                      {model.isOld ? (
                         <>
                           <Autocomplete
                             // value={formikUtang.values.personName}
                             onChange={(event, value) => {
-                              formikUtang.setFieldValue('_id', value?._id ?? ''); // Set _id
-                              formikUtang.setFieldValue('personName', value?.personName ?? ''); // Set personName
+                              model.formikUtang.setFieldValue('_id', value?._id ?? ''); // Set _id
+                              model.formikUtang.setFieldValue(
+                                'personName',
+                                value?.personName ?? ''
+                              ); // Set personName
                             }}
                             disablePortal
                             id="combo-box-demo"
-                            options={allItemsUtang.listUtangName}
+                            options={model.allUtangList || []}
                             getOptionLabel={(option: any) => option?.personName}
                             sx={{ width: 300, marginBottom: 2 }}
                             renderInput={(params) => (
@@ -434,11 +201,12 @@ export default function Checkout({ isRefresh }: Props) {
                                 label="Select Name"
                                 name="personName"
                                 error={
-                                  formikUtang.touched.personName &&
-                                  Boolean(formikUtang.errors.personName)
+                                  model.formikUtang.touched.personName &&
+                                  Boolean(model.formikUtang.errors.personName)
                                 }
                                 helperText={
-                                  formikUtang.touched.personName && formikUtang.errors.personName
+                                  model.formikUtang.touched.personName &&
+                                  model.formikUtang.errors.personName
                                 }
                               />
                             )}
@@ -454,7 +222,7 @@ export default function Checkout({ isRefresh }: Props) {
                               mt: 2,
                               fontSize: '12px',
                             }}
-                            onClick={() => setIsOld(false)}
+                            onClick={() => actions.setIsOld(false)}
                           >
                             Not found?
                           </Box>
@@ -466,14 +234,15 @@ export default function Checkout({ isRefresh }: Props) {
                             id="personName"
                             name="personName"
                             label="Input Person Name"
-                            value={formikUtang.values.personName}
-                            onChange={formikUtang.handleChange}
+                            value={model.formikUtang.values.personName}
+                            onChange={model.formikUtang.handleChange}
                             error={
-                              formikUtang.touched.personName &&
-                              Boolean(formikUtang.errors.personName)
+                              model.formikUtang.touched.personName &&
+                              Boolean(model.formikUtang.errors.personName)
                             }
                             helperText={
-                              formikUtang.touched.personName && formikUtang.errors.personName
+                              model.formikUtang.touched.personName &&
+                              model.formikUtang.errors.personName
                             }
                             margin="normal"
                           />
@@ -488,7 +257,7 @@ export default function Checkout({ isRefresh }: Props) {
                               mt: 2,
                               fontSize: '12px',
                             }}
-                            onClick={() => setIsOld(true)}
+                            onClick={() => actions.setIsOld(true)}
                           >
                             Back
                           </Box>
@@ -498,8 +267,8 @@ export default function Checkout({ isRefresh }: Props) {
                   </form>
                 </>
               )}
-              {selectedOption === 'partial' && (
-                <form onSubmit={formikPartial.handleSubmit}>
+              {model.selectedOption === 'partial' && (
+                <form onSubmit={model.formikPartial.handleSubmit}>
                   <Box>
                     <TextField
                       type="number"
@@ -508,14 +277,15 @@ export default function Checkout({ isRefresh }: Props) {
                       name="partialAmount"
                       label="Input Cash"
                       margin="normal"
-                      value={formikPartial.values.partialAmount}
-                      onChange={formikPartial.handleChange}
+                      value={model.formikPartial.values.partialAmount}
+                      onChange={model.formikPartial.handleChange}
                       error={
-                        formikPartial.touched.partialAmount &&
-                        Boolean(formikPartial.errors.partialAmount)
+                        model.formikPartial.touched.partialAmount &&
+                        Boolean(model.formikPartial.errors.partialAmount)
                       }
                       helperText={
-                        formikPartial.touched.partialAmount && formikPartial.errors.partialAmount
+                        model.formikPartial.touched.partialAmount &&
+                        model.formikPartial.errors.partialAmount
                       }
                       sx={{ marginBottom: '10px' }}
                     />
@@ -524,42 +294,47 @@ export default function Checkout({ isRefresh }: Props) {
                       type="number"
                       id="desiredAmount"
                       name="desiredAmount"
-                      label="Input Desired Amount"
-                      value={formikPartial.values.desiredAmount}
-                      onChange={formikPartial.handleChange}
+                      label="Input Partial Amount"
+                      value={model.formikPartial.values.desiredAmount}
+                      onChange={model.formikPartial.handleChange}
                       error={
-                        formikPartial.touched.desiredAmount &&
-                        Boolean(formikPartial.errors.desiredAmount)
+                        model.formikPartial.touched.desiredAmount &&
+                        Boolean(model.formikPartial.errors.desiredAmount)
                       }
                       helperText={
-                        formikPartial.touched.desiredAmount && formikPartial.errors.desiredAmount
+                        model.formikPartial.touched.desiredAmount &&
+                        model.formikPartial.errors.desiredAmount
                       }
                       sx={{ marginBottom: '10px' }}
                     />
-                    {isOld ? (
+                    {model.isOld ? (
                       <>
                         <Autocomplete
+                          // value={formikUtang.values.personName}
                           onChange={(event, value) => {
-                            formikPartial.setFieldValue('_id', value?._id ?? ''); // Set _id
-                            formikPartial.setFieldValue('personName', value?.personName ?? ''); // Set personName
+                            model.formikPartial.setFieldValue('_id', value?._id ?? ''); // Set _id
+                            model.formikPartial.setFieldValue(
+                              'personName',
+                              value?.personName ?? ''
+                            ); // Set personName
                           }}
                           disablePortal
                           id="combo-box-demo"
-                          options={allItemsUtang.listUtangName}
+                          options={model.allUtangList || []}
                           getOptionLabel={(option: any) => option?.personName}
-                          sx={{ width: '100%', marginBottom: 2 }}
+                          sx={{ width: 300, marginBottom: 2 }}
                           renderInput={(params) => (
                             <TextField
                               {...params}
                               label="Select Name"
-                              id="personName"
                               name="personName"
                               error={
-                                formikPartial.touched.personName &&
-                                Boolean(formikPartial.errors.personName)
+                                model.formikPartial.touched.personName &&
+                                Boolean(model.formikPartial.errors.personName)
                               }
                               helperText={
-                                formikPartial.touched.personName && formikPartial.errors.personName
+                                model.formikPartial.touched.personName &&
+                                model.formikPartial.errors.personName
                               }
                             />
                           )}
@@ -575,7 +350,7 @@ export default function Checkout({ isRefresh }: Props) {
                             mt: 2,
                             fontSize: '12px',
                           }}
-                          onClick={() => setIsOld(false)}
+                          onClick={() => actions.setIsOld(false)}
                         >
                           Person not found?
                         </Box>
@@ -587,14 +362,15 @@ export default function Checkout({ isRefresh }: Props) {
                           id="personName"
                           name="personName"
                           label="Input Person Name"
-                          value={formikPartial.values.personName}
-                          onChange={formikPartial.handleChange}
+                          value={model.formikPartial.values.personName}
+                          onChange={model.formikPartial.handleChange}
                           error={
-                            formikPartial.touched.personName &&
-                            Boolean(formikPartial.errors.personName)
+                            model.formikPartial.touched.personName &&
+                            Boolean(model.formikPartial.errors.personName)
                           }
                           helperText={
-                            formikPartial.touched.personName && formikPartial.errors.personName
+                            model.formikPartial.touched.personName &&
+                            model.formikPartial.errors.personName
                           }
                         />
                         <Box
@@ -608,7 +384,7 @@ export default function Checkout({ isRefresh }: Props) {
                             mt: 2,
                             fontSize: '12px',
                           }}
-                          onClick={() => setIsOld(true)}
+                          onClick={() => actions.setIsOld(true)}
                         >
                           Back
                         </Box>
@@ -622,8 +398,8 @@ export default function Checkout({ isRefresh }: Props) {
           <DialogActions sx={{ p: '0px' }}>
             <Box sx={classes.footerButton}>
               <Button
-                disabled={selectedOption ? false : true}
-                onClick={handleProceedClick}
+                disabled={model.selectedOption ? false : true}
+                onClick={actions.handleProceedClick}
                 variant="contained"
                 color="primary"
                 sx={{
@@ -634,211 +410,18 @@ export default function Checkout({ isRefresh }: Props) {
                   '& .MuiButtonBase-root': { borderRadius: 'unset !important' },
                 }}
               >
-                {isLoading ? 'Processing' : `PAY ${formatCurrency(total)}`}
+                {model.isLoading ? 'Processing' : `PAY ${formatCurrency(model.total)}`}
               </Button>
             </Box>
           </DialogActions>
         </Dialog>
       </div>
-
-      {/* Receipt Modal */}
-      <Dialog open={receiptOpen} onClose={() => setReceiptOpen(false)} maxWidth="xs" fullWidth>
-        <DialogTitle>
-          <Typography align="center">Receipt</Typography>
-          <IconButton
-            onClick={() => setReceiptOpen(false)}
-            aria-label="close"
-            sx={{ position: 'absolute', right: 8, top: 8 }}
-          >
-            <CloseIcon />
-          </IconButton>
-        </DialogTitle>
-        <DialogContent>
-          <Box p={2}>
-            <Typography variant="body1" align="left" mb={1}>
-              Akhiro Store
-            </Typography>
-            <Typography
-              sx={classes.receiptsText}
-              fontSize={'11px'}
-              variant="body2"
-              align="left"
-              mb={1}
-            >
-              ** Receipt **
-            </Typography>
-            <Typography
-              sx={classes.receiptsText}
-              fontSize={'11px'}
-              variant="body2"
-              align="left"
-              mb={1}
-            >
-              Date: {moment(allItems.date).format('llll')}
-            </Typography>
-            <Typography fontSize={'11px'} variant="body2" align="left" mb={1}>
-              Type: {allItems?.data?.transactionType}
-            </Typography>
-            <Typography fontSize={'11px'} variant="body2" align="left" mb={1} fontWeight={700}>
-              Items
-            </Typography>
-
-            {allItems?.data?.map((data: any, idx: number) => {
-              return (
-                <>
-                  <Box sx={classes.receiptsWrapper} key={idx}>
-                    <Typography
-                      sx={classes.receiptsText}
-                      fontSize={'11px'}
-                      variant="body2"
-                      align="left"
-                      mb={1}
-                    >
-                      {data.name} x {data.quantity}
-                    </Typography>
-                    <Typography
-                      sx={classes.receiptsText}
-                      fontSize={'11px'}
-                      variant="body2"
-                      align="left"
-                      mb={1}
-                    >
-                      {formatCurrency(data.price)}
-                    </Typography>
-                  </Box>
-                </>
-              );
-            })}
-
-            <Typography>- - - - - - - - - - - - - - - - - - - - -</Typography>
-            <Box sx={classes.receiptsWrapper}>
-              <Typography
-                sx={classes.receiptsText}
-                fontSize={'11px'}
-                variant="body2"
-                align="left"
-                mb={1}
-              >
-                Total
-              </Typography>
-              <Typography
-                sx={classes.receiptsText}
-                fontSize={'11px'}
-                variant="body2"
-                align="left"
-                mb={1}
-              >
-                {formatCurrency(allItems.total)}
-              </Typography>
-            </Box>
-            {selectedOption === 'partial' && (
-              <>
-                <Box sx={classes.receiptsWrapper}>
-                  <Typography
-                    sx={classes.receiptsText}
-                    fontSize={'11px'}
-                    variant="body2"
-                    align="left"
-                    mb={1}
-                  >
-                    Partial Payment
-                  </Typography>
-                  <Typography
-                    sx={classes.receiptsText}
-                    fontSize={'11px'}
-                    variant="body2"
-                    align="left"
-                    mb={1}
-                  >
-                    {formatCurrency(allItems?.partialAmount) ?? '-'}
-                  </Typography>
-                </Box>
-              </>
-            )}
-
-            {selectedOption !== 'utang' && (
-              <>
-                <Box sx={classes.receiptsWrapper}>
-                  <Typography
-                    sx={classes.receiptsText}
-                    fontSize={'11px'}
-                    variant="body2"
-                    align="left"
-                    mb={1}
-                  >
-                    Cash
-                  </Typography>
-                  <Typography
-                    sx={classes.receiptsText}
-                    fontSize={'11px'}
-                    variant="body2"
-                    align="left"
-                    mb={1}
-                  >
-                    {formatCurrency(allItems?.cash)}
-                  </Typography>
-                </Box>
-                <Box sx={classes.receiptsWrapper}>
-                  <Typography
-                    sx={classes.receiptsText}
-                    fontSize={'11px'}
-                    variant="body2"
-                    align="left"
-                    mb={1}
-                  >
-                    Change
-                  </Typography>
-                  <Typography
-                    sx={classes.receiptsText}
-                    fontSize={'11px'}
-                    variant="body2"
-                    align="left"
-                    mb={1}
-                  >
-                    {formatCurrency(allItems?.change) ?? '-'}
-                  </Typography>
-                </Box>
-              </>
-            )}
-
-            {selectedOption === 'partial' && (
-              <>
-                <Box sx={classes.receiptsWrapper}>
-                  <Typography
-                    sx={classes.receiptsText}
-                    fontSize={'11px'}
-                    variant="body2"
-                    align="left"
-                    mb={1}
-                  >
-                    Remaining Balance
-                  </Typography>
-                  <Typography
-                    sx={classes.receiptsText}
-                    fontSize={'11px'}
-                    variant="body2"
-                    align="left"
-                    mb={1}
-                  >
-                    {formatCurrency(allItems?.remainingBalance) ?? '-'}
-                  </Typography>
-                </Box>
-              </>
-            )}
-
-            {selectedOption === 'utang' && (
-              <Typography fontSize={'11px'} variant="body2" align="left" mb={1}>
-                Person Name: {allItems?.data?.personName ?? '-'}
-              </Typography>
-            )}
-            <Box mt={2}>
-              <Typography fontSize={'11px'} variant="body2" align="left" color="textSecondary">
-                Thank you for your payment!
-              </Typography>
-            </Box>
-          </Box>
-        </DialogContent>
-      </Dialog>
+      <Receipts
+        setReceiptOpen={actions.setReceiptOpen}
+        receiptOpen={model.receiptOpen}
+        allItems={model.allItems}
+        selectedOption={model.selectedOption}
+      />
     </div>
   );
 }

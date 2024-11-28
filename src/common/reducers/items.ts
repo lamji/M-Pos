@@ -6,6 +6,7 @@ interface SelectedItem {
   price: number;
   quantity: number;
   stocks: number;
+  _id: string;
 }
 
 interface SelectedItemsState {
@@ -31,22 +32,13 @@ const selectedItemsSlice = createSlice({
     setIsBackDropOpen: (state, action) => {
       state.isBackDropOpen = action.payload;
     },
-    addItem: (
-      state,
-      action: PayloadAction<{
-        id: string;
-        name: string;
-        price: number;
-        quantity: number;
-        stocks: number;
-      }>
-    ) => {
-      const { id, name, price, quantity, stocks } = action.payload;
+    addItem: (state, action: PayloadAction<any>) => {
+      const { id, name, price, quantity, stocks, _id } = action.payload;
       const existingItem = state.items.find((item) => item.id === id);
       if (existingItem) {
         existingItem.quantity += quantity;
       } else {
-        state.items.push({ id, name, price, quantity, stocks });
+        state.items.push({ id, name, price, quantity, stocks, _id });
       }
       state.total = calculateTotal(state.items);
     },

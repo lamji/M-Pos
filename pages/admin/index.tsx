@@ -5,7 +5,8 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { GetServerSideProps } from 'next';
 import { parse } from 'cookie';
-import { getAllItem } from '@/src/common/api/testApi';
+import { readAllDocuments } from '@/src/common/app/lib/pouchdbServiceItems';
+// import { getAllItem } from '@/src/common/api/testApi';
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { req } = context;
@@ -39,8 +40,10 @@ export default function Admin() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await getAllItem(page, limit);
-        dispatch(setData(response));
+        // const response = await getAllItem(page, limit);
+        const docs = await readAllDocuments();
+        // console,log()
+        dispatch(setData(docs));
       } catch (error) {
         console.error('Error fetching JSON data:', error);
       }

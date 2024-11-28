@@ -2,7 +2,6 @@
 import dynamic from 'next/dynamic';
 import React from 'react';
 import { useDeviceType } from '@/src/common/helpers';
-import LaptopScanItems from '../Laptop/ScanItems';
 
 const ScanItems = dynamic(() => import('@/src/components/Mobile/ScanItems'));
 const Nav = dynamic(() => import('@/src/components/Nav'));
@@ -18,11 +17,7 @@ export default function homePages() {
           <ScanItems />
         </>
       )}
-      {isLarge && (
-        <>
-          <LaptopScanItems />
-        </>
-      )}
+      {isLarge && <></>}
     </div>
   );
 }
