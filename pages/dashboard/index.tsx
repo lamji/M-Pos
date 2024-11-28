@@ -1,8 +1,8 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import Nav from '@/src/components/Nav';
-import { Box, Typography } from '@mui/material';
+import { Accordion, AccordionDetails, AccordionSummary, Box, Typography } from '@mui/material';
 import React, { useEffect, useState } from 'react';
-
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { formatCurrency } from '@/src/common/helpers';
 import { setIsBackDropOpen } from '@/src/common/reducers/items';
 import { useDispatch } from 'react-redux';
@@ -13,6 +13,7 @@ import {
   findTop10FastMovingItemsThisWeek,
   readAllDocumentTransaction,
 } from '@/src/common/app/lib/pouchDbTransaction';
+import useViewModel from './useViewModel';
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { req } = context;
@@ -38,9 +39,10 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 };
 
 export default function Dashboard() {
+  const { classes } = useViewModel();
   const dispatch = useDispatch();
   const [data, setData] = useState<any>({});
-  const [fastMoving, setFastMoving] = useState<any>();
+  // const [fastMoving, setFastMoving] = useState<any>();
   const [filterData, setFilterData] = useState('today');
 
   const getSales = async () => {
@@ -51,13 +53,9 @@ export default function Dashboard() {
         readAllDocumentTransaction(),
       ]);
       console.log('top10', data, transactions);
-      setFastMoving(data);
+      // setFastMoving(data);
       setData(transactions);
-      // const data = await getSalesData();
-      // if (data) {
-      //   dispatch(setIsBackDropOpen(false));
-      //   setData(data);
-      // }
+
       dispatch(setIsBackDropOpen(false));
     } catch (error) {
       console.log(error);
@@ -69,36 +67,12 @@ export default function Dashboard() {
     getSales();
   }, []);
 
-  console.log('test', data);
-
   return (
     <div>
       <Nav />
-      <Box
-        sx={{
-          padding: '10px',
-          background: 'white',
-          borderRadius: 15,
-          marginTop: '-130px',
-        }}
-      >
-        <Box
-          display="flex"
-          alignItems="center"
-          justifyContent="space-between"
-          sx={{ width: '100%' }}
-        >
-          <Box
-            sx={{
-              padding: '10px',
-
-              background: '#ef783e',
-              borderRadius: 2,
-              width: '48%',
-              height: '120px',
-            }}
-            onClick={() => setFilterData('yesterday')}
-          >
+      <Box sx={classes.rootBox}>
+        <Box sx={classes.saleBox}>
+          <Box sx={classes.onClickBox} onClick={() => setFilterData('yesterday')}>
             <Typography fontSize="12px" fontWeight={700} color={'white'}>
               Yesterday
             </Typography>
@@ -106,42 +80,15 @@ export default function Dashboard() {
               {formatCurrency(data?.yesterday?.total ?? 0)}
             </Typography>
             <Box>
-              <Typography
-                sx={{
-                  fontSize: '9px',
-                  background: 'white',
-                  padding: '4px',
-                  borderRadius: '3px',
-                  color: 'red',
-                }}
-              >
-                Utang: {formatCurrency(data?.[filterData]?.totalUtang ?? 0)}
+              <Typography sx={classes.utangTyp}>
+                Utang: {formatCurrency(data?.yesterday?.totalUtang ?? 0)}
               </Typography>
-              <Typography
-                sx={{
-                  fontSize: '9px',
-                  background: 'white',
-                  padding: '4px',
-                  borderRadius: '3px',
-                  mt: '3px',
-                }}
-              >
+              <Typography sx={classes.cashType}>
                 Cash: {formatCurrency(data?.yesterday?.totalCash ?? 0)}
               </Typography>
             </Box>
           </Box>
-          <Box
-            onClick={() => setFilterData('today')}
-            sx={{
-              padding: '10px',
-              border: '2px solid #ff6b23',
-              background: '#ef783e',
-              borderRadius: 2,
-              width: '48%',
-              height: '120px',
-              boxShadow: '1px 1px 18px -5px rgba(0,0,0,0.75)',
-            }}
-          >
+          <Box onClick={() => setFilterData('today')} sx={classes.todayBox}>
             <Typography fontSize="12px" fontWeight={700} color={'white'}>
               Today
             </Typography>
@@ -149,104 +96,18 @@ export default function Dashboard() {
               {formatCurrency(data?.today?.total ?? 0)}
             </Typography>
             <Box>
-              <Typography
-                sx={{
-                  fontSize: '9px',
-                  background: 'white',
-                  padding: '4px',
-                  borderRadius: '3px',
-                  color: 'red',
-                }}
-              >
+              <Typography sx={classes.todayUtang}>
                 Utang: {formatCurrency(data?.today?.totalUtang ?? 0)}
               </Typography>
-              <Typography
-                sx={{
-                  fontSize: '9px',
-                  background: 'white',
-                  padding: '4px',
-                  borderRadius: '3px',
-                  mt: '3px',
-                }}
-              >
+              <Typography sx={classes.todayCash}>
                 Cash: {formatCurrency(data?.today?.totalCash ?? 0)}
               </Typography>
             </Box>
           </Box>
         </Box>
-        <Box
-          sx={{
-            background: '#ff6e31',
-            p: 1,
-            borderRadius: 2,
-            mt: '5px',
-            border: '2px solid #ffe8de',
-            boxShadow: '1px 1px 18px -5px rgba(0,0,0,0.75)',
-          }}
-        >
-          <Typography
-            sx={{
-              fontSize: '11px',
-              fontWeight: 700,
-              mb: '10px',
-              color: 'white',
-            }}
-          >
-            Weekly fast moving
-          </Typography>
-          <Box sx={{ overflowX: 'auto', display: 'flex', whiteSpace: 'wrap' }}>
-            <Box sx={{ display: 'flex' }}>
-              {fastMoving &&
-                fastMoving.map((items: any, idx: number) => {
-                  return (
-                    <Box
-                      key={idx}
-                      sx={{
-                        padding: '9px',
-                        borderRadius: 2,
-                        border: '1px solid #2d3349',
-                        gap: 2,
-                        width: '90px',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'left',
-                        justifyContent: 'center',
-                        margin: '1px',
-                        background: '#fff9f6',
-                        flexShrink: 0, // Prevent the items from shrinking
-                      }}
-                    >
-                      <Box>
-                        <Typography sx={{ fontSize: '10px', fontWeight: 700 }}>
-                          {items?.name}
-                        </Typography>
-                        <Typography sx={{ fontSize: '9px', fontWeight: 700 }}>
-                          Sold: {items.quantity}
-                        </Typography>
-                        <Typography
-                          sx={{
-                            fontSize: '9px',
-                            fontWeight: 700,
-                            color: items.stock <= 5 ? 'red' : 'green',
-                          }}
-                        >
-                          Stocks: {items.stock}
-                        </Typography>
-                      </Box>
-                    </Box>
-                  );
-                })}
-            </Box>
-          </Box>
-        </Box>
+
         <Box>
-          <Typography
-            sx={{
-              fontSize: '12px',
-              fontWeight: 700,
-              my: 2,
-            }}
-          >{`${
+          <Typography sx={classes.filterTyp}>{`${
             filterData === 'yesterday' ? `Yesterday's transaction` : `Today's transaction`
           }`}</Typography>
           <Box
@@ -258,51 +119,174 @@ export default function Dashboard() {
           >
             {data ? (
               <>
-                {data?.[filterData]?.items
+                {data?.[filterData]?.docs
                   ?.slice()
                   .reverse()
                   ?.map((transaction: any, transactionIdx: number) => {
-                    return (
-                      <Box
-                        key={transactionIdx}
-                        sx={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                          padding: '10px',
-                          borderBottom: '1px solid #e0e0e0',
-                          margin: '5px',
-                        }}
-                      >
-                        <Box>
-                          <Typography sx={{ width: '170px' }} fontWeight={700} fontSize="10px">
-                            {transaction.name} - {formatCurrency(transaction.price)}
-                          </Typography>
-                          <Typography sx={{ width: '100px', color: 'gray' }} fontSize="10px">
-                            {moment(transaction.date).format('LTS')}
-                          </Typography>
-                          <Typography
+                    console.log('transaction', transaction);
+                    if (transaction?.isPartial) {
+                      return (
+                        <>
+                          <Box
+                            key={transactionIdx}
                             sx={{
-                              width: '100px',
-                              color: 'gray',
-                              textTransform: 'capitalize',
+                              borderBottom: '1px solid #e0e0e0',
+                              padding: '5px ',
+                              margin: '5px',
                             }}
-                            fontSize="10px"
                           >
-                            {transaction.transactionType}
-                          </Typography>
-                        </Box>
+                            <Box>
+                              {transaction.items.map((t: any, i: number) => {
+                                return (
+                                  <Box
+                                    key={i}
+                                    sx={{
+                                      display: 'flex',
+                                      alignItems: 'flex-start',
+                                      justifyContent: 'space-between',
+                                      mt: '3px',
+                                    }}
+                                  >
+                                    <Box>
+                                      <Typography
+                                        sx={{ width: '170px' }}
+                                        fontWeight={700}
+                                        fontSize="10px"
+                                      >
+                                        {t.name} - {formatCurrency(t.price)}
+                                      </Typography>
+                                      <Typography
+                                        sx={{ width: '100px', color: 'gray' }}
+                                        fontSize="10px"
+                                      >
+                                        {moment(t.date).format('LTS')}
+                                      </Typography>
+                                      <Typography
+                                        sx={{
+                                          width: '100px',
+                                          color: 'gray',
+                                          textTransform: 'capitalize',
+                                        }}
+                                        fontSize="10px"
+                                      >
+                                        {t.transactionType}
+                                      </Typography>
+                                    </Box>
 
-                        <Typography fontSize="10px">qty: {transaction.quantity}</Typography>
-                        <Typography
-                          fontSize="10px"
-                          sx={{
-                            color: transaction.type === 'Cash' ? 'green' : 'red',
-                          }}
-                        >
-                          {formatCurrency(transaction.quantity * transaction.price)}
-                        </Typography>
-                      </Box>
+                                    <Typography
+                                      fontSize="10px"
+                                      sx={{
+                                        color: t.type === 'Cash' ? 'green' : 'red',
+                                      }}
+                                    >
+                                      {formatCurrency(t.quantity * t.price)}
+                                    </Typography>
+                                  </Box>
+                                );
+                              })}
+                            </Box>
+                            <div>
+                              <Accordion>
+                                <AccordionSummary
+                                  expandIcon={<ExpandMoreIcon />}
+                                  aria-controls="panel1-content"
+                                  id="panel1-header"
+                                  sx={{ fontSize: '13px' }}
+                                >
+                                  Items
+                                </AccordionSummary>
+                                <AccordionDetails>
+                                  {transaction.partialItems.map((t: any, i: number) => {
+                                    return (
+                                      <Box
+                                        key={i}
+                                        sx={{
+                                          display: 'flex',
+                                          alignItems: 'center',
+                                          justifyContent: 'space-between',
+                                        }}
+                                      >
+                                        <Box>
+                                          <Typography
+                                            sx={{ width: '170px' }}
+                                            fontWeight={700}
+                                            fontSize="10px"
+                                          >
+                                            {t.name} - {formatCurrency(t.price)}
+                                          </Typography>
+                                          <Typography
+                                            sx={{ width: '100px', color: 'gray' }}
+                                            fontSize="10px"
+                                          >
+                                            {moment(t.date).format('LTS')}
+                                          </Typography>
+                                          <Typography
+                                            sx={{
+                                              width: '100px',
+                                              color: 'gray',
+                                              textTransform: 'capitalize',
+                                            }}
+                                            fontSize="10px"
+                                          >
+                                            {t.transactionType}
+                                          </Typography>
+                                        </Box>
+
+                                        <Typography fontSize="10px">qty: {t.quantity}</Typography>
+                                        <Typography fontSize="10px">
+                                          {formatCurrency(t.quantity * t.price)}
+                                        </Typography>
+                                      </Box>
+                                    );
+                                  })}
+                                </AccordionDetails>
+                              </Accordion>
+                            </div>
+                          </Box>
+                        </>
+                      );
+                    }
+                    return (
+                      <>
+                        {transaction.items.map((t: any, i: number) => {
+                          return (
+                            <Box key={i} sx={classes.transactionItemsMap}>
+                              <Box>
+                                <Typography
+                                  sx={{ width: '170px' }}
+                                  fontWeight={700}
+                                  fontSize="10px"
+                                >
+                                  {t.name} - {formatCurrency(t.price)}
+                                </Typography>
+                                <Typography sx={{ width: '100px', color: 'gray' }} fontSize="10px">
+                                  {moment(t.date).format('LTS')}
+                                </Typography>
+                                <Typography
+                                  sx={{
+                                    width: '100px',
+                                    color: 'gray',
+                                    textTransform: 'capitalize',
+                                  }}
+                                  fontSize="10px"
+                                >
+                                  {t.transactionType}
+                                </Typography>
+                              </Box>
+
+                              <Typography fontSize="10px">qty: {t.quantity}</Typography>
+                              <Typography
+                                fontSize="10px"
+                                sx={{
+                                  color: t.type === 'Cash' ? 'green' : 'red',
+                                }}
+                              >
+                                {formatCurrency(t.quantity * t.price)}
+                              </Typography>
+                            </Box>
+                          );
+                        })}
+                      </>
                     );
                   })}
               </>

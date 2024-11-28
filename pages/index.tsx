@@ -39,6 +39,7 @@ export default function Home() {
   useEffect(() => {
     const fetchDocuments = async () => {
       try {
+        // await fetchItems();
         const docs = await readAllDocuments();
         const history = await readAllDocumentsHistory();
         const utang = await readAllDocumentsUtang();

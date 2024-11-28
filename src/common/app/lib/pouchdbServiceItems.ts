@@ -7,6 +7,28 @@ PouchDB.plugin(PouchDBFind);
 // Initialize the PouchDB database
 const db = new PouchDB<any>('my_database_my_items');
 
+export const getItemsByName = async (name: string): Promise<any[]> => {
+  try {
+    // Ensure the `name` index exists
+    await db.createIndex({
+      index: { fields: ['name'] },
+    });
+
+    // Use `$regex` to query documents with partial matching on the `name` field
+    const result = await db.find({
+      selector: {
+        name: { $regex: new RegExp(name, 'i') }, // Case-insensitive partial match
+      },
+    });
+
+    console.log('Search Term:', name, 'Matching Documents:', result.docs);
+    return result.docs;
+  } catch (err) {
+    console.error('Error querying documents:', err);
+    throw err;
+  }
+};
+
 export const queryDocumentsByBarcode = async (barcode: string): Promise<any[]> => {
   try {
     // Create an index on the `barcode` field if not already created
@@ -27,25 +49,29 @@ export const queryDocumentsByBarcode = async (barcode: string): Promise<any[]> =
 };
 
 export const updateItemsQty = async (doc: any): Promise<any> => {
-  console.log('docs================>', doc);
   try {
-    // Step 1: Retrieve all items by their IDs using the index
-    const result = await db.find({
-      selector: {
-        id: { $in: doc.items.map((item: any) => item.id) },
-      },
-      fields: ['id', 'quantity', '_rev', '_id', 'name', 'price', 'stocks'], // Retrieve only the necessary fields
+    // Step 1: Retrieve all items by their IDs using bulkGet
+    const result = await db.bulkGet({
+      docs: doc.items.map((item: any) => {
+        return {
+          id: item._id,
+        };
+      }),
     });
 
     // Step 2: Deduct the quantity from the existing items
     const itemsToUpdate = await Promise.all(
-      result.docs.map(async (existingItem: any) => {
-        const itemToUpdate = doc.items.find((item: any) => item.id === existingItem.id);
+      result.results.map(async (docResult: any) => {
+        const existingItem = docResult.docs[0].ok; // Access the successful document
+        if (!existingItem) {
+          throw new Error(`Document with ID ${docResult.id} not found`);
+        }
+
+        const itemToUpdate = doc.items.find((item: any) => item._id === existingItem._id);
         const newQuantity = existingItem.quantity - itemToUpdate.quantity;
-        // console.log('newDocs', itemToUpdate, existingItem);
 
         if (newQuantity < 0) {
-          throw new Error(`Insufficient quantity for item ${existingItem.id}`);
+          throw new Error(`Insufficient quantity for item ${existingItem._id}`);
         }
 
         return {
@@ -64,8 +90,10 @@ export const updateItemsQty = async (doc: any): Promise<any> => {
         });
       })
     );
+
+    console.log('Items successfully updated');
   } catch (err) {
-    console.error('Error creating or updating transaction', err);
+    console.error('Error updating item quantities', err);
     throw err;
   }
 };
@@ -122,31 +150,67 @@ export const readAllDocuments = async (): Promise<any[]> => {
   }
 };
 
-// Update a document
-export const updateDocument = async (doc: any): Promise<void> => {
+export const deleteItems = async (params: any) => {
   try {
-    // Fetch the existing document from the database
-    const existingDoc = await db.get(doc._id);
-
-    // Update the document based on its type
-    const updatedDoc = { ...existingDoc, ...doc };
-
-    if (doc.type !== 'New') {
-      updatedDoc.quantity = (existingDoc.quantity || 0) + (doc.quantity || 0);
-    }
-
-    // Save the updated document
-    await db.put({
-      ...updatedDoc,
-      _id: existingDoc._id,
-      _rev: existingDoc._rev, // Include the revision ID for update
-    });
-
-    console.log('Document updated successfully');
+    const doc = await db.get(params._id);
+    const response = await db.remove(doc);
+    return response;
   } catch (err) {
-    console.error('Error updating document', err);
-    throw err;
+    console.log(err);
   }
+};
+
+export const updateDocument = async (doc: any): Promise<void> => {
+  db.get(doc._id)
+    .catch(function (err) {
+      if (err.name === 'not_found') {
+        return 'not found';
+      } else {
+        // hm, some other error
+        throw err;
+      }
+    })
+    .then(function (configDoc) {
+      const updatedDoc = { ...configDoc, ...doc };
+
+      /**
+       * if type is not new, make sure to add the quantity
+       */
+      if (doc?.type !== 'New') {
+        updatedDoc.quantity = (configDoc?.quantity || 0) + (doc.quantity || 0);
+      }
+
+      db.put({
+        ...updatedDoc,
+        _id: doc._id,
+        _rev: updatedDoc._rev, // Include the revision ID for update
+      });
+      return updatedDoc;
+    })
+    .catch(function (err) {
+      console.error('Error updating document', err);
+      throw err;
+    });
+  // try {
+  //   // Fetch the existing document from the database
+  //   const existingDoc = await db.get(doc._id);
+  //   console.log('existingDoc');
+  //   // Update the document based on its type
+  //   const updatedDoc = { ...existingDoc, ...doc };
+  //   if (doc?.type !== 'New') {
+  //     updatedDoc.quantity = (existingDoc.quantity || 0) + (doc.quantity || 0);
+  //   }
+  //   // Save the updated document
+  //   await db.put({
+  //     ...updatedDoc,
+  //     _id: existingDoc._id,
+  //     _rev: existingDoc._rev, // Include the revision ID for update
+  //   });
+  //   return updatedDoc;
+  // } catch (err) {
+  //   console.error('Error updating document', err);
+  //   throw err;
+  // }
 };
 
 export async function checkIfIdExists(id: string): Promise<boolean> {

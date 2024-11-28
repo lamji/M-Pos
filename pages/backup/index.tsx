@@ -10,6 +10,7 @@ import { restoreUtangDocument } from '@/src/common/app/lib/pouchDbUtang';
 import { restoreTransactionDocs } from '@/src/common/app/lib/pouchDbTransaction';
 import apiClient from '@/src/common/app/axios';
 import { deleteDatabase } from '@/src/common/app/lib/PouchDbHistory';
+import useFetchDocumentsBackup from '@/src/common/hooks/useFetchDocuments';
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { req } = context;
@@ -38,6 +39,7 @@ const Nav = dynamic(() => import('@/src/components/Nav'));
 
 export default function Backup() {
   const dispatch = useDispatch();
+  const { fetchDocuments } = useFetchDocumentsBackup();
 
   const clearDB = async () => {
     try {
@@ -55,6 +57,7 @@ export default function Backup() {
     dispatch(setIsBackDropOpen(true));
     try {
       const response = await apiClient.get('/restore');
+      // console.log('response', response);
       const data = response.data;
       const userData = data.users[0] || {};
 
@@ -62,10 +65,12 @@ export default function Backup() {
       const utangsData = userData.utangs || [];
       const transactionsData = userData.transactions || [];
 
+      console.log('utangsData', utangsData);
+
       if (data.success) {
         // Create an array of promises for restoring 'items' documents
-        const restoreItemPromises = itemsData.map(async (data: any) => {
-          await restoreDocument(data);
+        const restoreItemPromises = itemsData.map(async ({ _rev, ...cleanedData }: any) => {
+          await restoreDocument(cleanedData);
         });
 
         // Create an array of promises for restoring 'utang' documents
@@ -73,9 +78,11 @@ export default function Backup() {
           await restoreUtangDocument(data);
         });
 
-        const restoreTransactionsPromises = transactionsData.map(async (data: any) => {
-          await restoreTransactionDocs(data);
-        });
+        const restoreTransactionsPromises = transactionsData.map(
+          async ({ _rev, ...cleanedData }: any) => {
+            await restoreTransactionDocs(cleanedData);
+          }
+        );
 
         // Wait for all restore operations to complete
         await Promise.all([
@@ -88,7 +95,6 @@ export default function Backup() {
       }
     } catch (error) {
       console.error(error);
-      alert(JSON.stringify(error));
     } finally {
       // Ensure the backdrop is closed after all operations complete or if an error occurs
       dispatch(setIsBackDropOpen(false));
@@ -103,28 +109,30 @@ export default function Backup() {
           sx={{
             display: 'flex',
             justifyContent: 'center',
-            flexDirection: 'column',
+            flexDirection: 'row',
             alignItems: 'center',
           }}
         >
           <CardButton
             images="/cloud-backup.png"
-            height={80}
-            width={80}
+            height={50}
+            width={50}
             header="Backup"
-            onClick={() => console.log('test')}
+            onClick={async () => {
+              await fetchDocuments();
+            }}
           />
           <CardButton
             images="/restore.png"
-            height={80}
-            width={80}
+            height={50}
+            width={50}
             header="Restore"
             onClick={() => fetItems()}
           />
           <CardButton
             images="/restore.png"
-            height={80}
-            width={80}
+            height={50}
+            width={50}
             header="Clear DB"
             onClick={() => clearDB()}
           />

@@ -80,11 +80,18 @@ export default function useViewModel() {
     enableReinitialize: true,
     validationSchema: checked ? validationSchemaChecked : validationSchemaUnchecked,
     onSubmit: async (values, { resetForm, setSubmitting }) => {
+      console.log('values', searchedVal);
       try {
         /**
          * Shape the json payload
          */
         const document = {
+          _id: values.type === 'New' ? uuidv4() : searchedVal._id,
+          createdAt: new Date(),
+          ...values,
+        };
+
+        const documentHistory = {
           _id: uuidv4(),
           createdAt: new Date(),
           ...values,
@@ -115,51 +122,8 @@ export default function useViewModel() {
            */
 
           await updateDocument(document as any);
-          await createDocumentHistory(document as any);
+          await createDocumentHistory(documentHistory as any);
         }
-
-        // /**
-        //  * 1. shape the json tob passed on database
-        //  */
-        // const document = {
-        //   _id: uuidv4(),
-        //   createdAt: new Date(), // Use provided ID or generate a new one
-        //   ...values,
-        // };
-
-        // const documentHistory = {
-        //   _id: uuidv4(),
-        //   createdAt: new Date(), // Use provided ID or generate a new one
-        //   ...values,
-        // };
-
-        // /**
-        //  * 2. check if id is already in database
-        //  *
-        //  */
-        // // const items = await checkIfIdExists('001');
-        // const testIdChecker = async () => {
-        //   const exists = checkIfIdExists('001');
-        //   console.log('Does the item exist?', exists);
-        // };
-        // testIdChecker();
-        // /**
-        //  * 3. If existed just update the data on database
-        //  */
-        // // if (!items) {
-        // //   await updateDocument(document as any);
-        // // }
-
-        // /**
-        //  * 4. if not existed create a new documents
-        //  */
-        // // if (items) {
-        // //   await createDocument(document as any);
-        // // }
-
-        // /**
-        //  * 5. Create History for tracking the added items
-        //  */
 
         Swal.fire({
           title: 'Success!',
@@ -229,6 +193,7 @@ export default function useViewModel() {
             quantity: matchedItem.quantity,
             regularPrice: matchedItem.regularPrice,
             type: type, // Set type if available
+            _id: matchedItem._id,
           });
           dispatch(setIsBackDropOpen(false));
         } else {
@@ -254,8 +219,8 @@ export default function useViewModel() {
   };
 
   const handleDataOutSearch = (search: any) => {
-    console.log(search);
     setOpenDiog(false);
+    setSearchVal(search);
     formik.setValues({
       id: search.id,
       name: search.name,
@@ -281,7 +246,6 @@ export default function useViewModel() {
   }, []);
 
   useEffect(() => {
-    console.log(formik);
     if (formik.values.type) {
       setType(formik.values.type);
     }

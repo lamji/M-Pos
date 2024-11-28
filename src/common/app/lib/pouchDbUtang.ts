@@ -87,6 +87,23 @@ export const readAllDocumentsUtang = async (): Promise<any> => {
   }
 };
 
+export const readAllDocumentsUtangA = async (): Promise<any[]> => {
+  try {
+    const result = await dbUtang.allDocs({ include_docs: true });
+
+    // Filter out documents with the specific language value
+    const filteredDocs = result.rows
+      .map((row) => row.doc as any)
+      .filter((doc) => doc.language !== 'query') // Exclude documents where language is "query"
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()); // Sort by date
+
+    return filteredDocs;
+  } catch (err) {
+    console.error('Error reading documents', err);
+    throw err;
+  }
+};
+
 // Read documents by partial match on personName (case-sensitive)
 export const readDocsByPersonName = async (searchTerm: string): Promise<any[]> => {
   try {

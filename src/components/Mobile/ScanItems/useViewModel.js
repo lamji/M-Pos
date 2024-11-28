@@ -37,7 +37,7 @@ export default function useViewModel() {
   const { isMobile, isLaptop, isPC } = useDeviceType();
   const isLarge = isLaptop || isPC;
 
-  console.log('isRefetch', isRefetch);
+  console.log('activeOrders', activeOrders);
 
   // const [lastScan, setLastScan] = useState(0);
   // const [isScanning, setIsScanning] = useState(false); // State to manage scanner visibility
@@ -208,6 +208,7 @@ export default function useViewModel() {
       setQuantity(1);
       setIsEdit(false);
     } else {
+      console.log('newData', newData);
       dispatch(addItem(newData));
       setModalOpen(false);
       setQuantity(1);

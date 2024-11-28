@@ -5,7 +5,6 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
-  DialogTitle,
   IconButton,
   Typography,
   TextField,
@@ -13,8 +12,8 @@ import {
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { formatCurrency } from '@/src/common/helpers';
-import moment from 'moment';
 import useViewModel from './useViewModel';
+import Receipts from '../../Receipts';
 
 export interface CheckoutProps {
   isRefresh: (i: boolean) => void;
@@ -417,210 +416,12 @@ export default function Checkout({ isRefresh }: CheckoutProps) {
           </DialogActions>
         </Dialog>
       </div>
-
-      {/* Receipt Modal */}
-      <Dialog
-        open={model.receiptOpen}
-        onClose={() => actions.setReceiptOpen(false)}
-        maxWidth="xs"
-        fullWidth
-      >
-        <DialogTitle>
-          <Typography align="center">Receipt</Typography>
-          <IconButton
-            onClick={() => actions.setReceiptOpen(false)}
-            aria-label="close"
-            sx={{ position: 'absolute', right: 8, top: 8 }}
-          >
-            <CloseIcon />
-          </IconButton>
-        </DialogTitle>
-        <DialogContent>
-          <Box p={2}>
-            <Typography variant="body1" align="left" mb={1}>
-              Akhiro Store
-            </Typography>
-            <Typography
-              sx={classes.receiptsText}
-              fontSize={'11px'}
-              variant="body2"
-              align="left"
-              mb={1}
-            >
-              ** Receipt **
-            </Typography>
-            <Typography
-              sx={classes.receiptsText}
-              fontSize={'11px'}
-              variant="body2"
-              align="left"
-              mb={1}
-            >
-              Date: {moment(model.allItems?.date).format('llll')}
-            </Typography>
-            <Typography fontSize={'11px'} variant="body2" align="left" mb={1}>
-              Type: {model.allItems?.type}
-            </Typography>
-            <Typography fontSize={'11px'} variant="body2" align="left" mb={1} fontWeight={700}>
-              Items
-            </Typography>
-
-            {model.allItems?.data?.map((data: any, idx: number) => {
-              return (
-                <>
-                  <Box sx={classes.receiptsWrapper} key={idx}>
-                    <Typography
-                      sx={classes.receiptsText}
-                      fontSize={'11px'}
-                      variant="body2"
-                      align="left"
-                      mb={1}
-                    >
-                      {data.name} x {data.quantity}
-                    </Typography>
-                    <Typography
-                      sx={classes.receiptsText}
-                      fontSize={'11px'}
-                      variant="body2"
-                      align="left"
-                      mb={1}
-                    >
-                      {formatCurrency(data.price)}
-                    </Typography>
-                  </Box>
-                </>
-              );
-            })}
-
-            <Typography>- - - - - - - - - - - - - - - - - - - - -</Typography>
-            <Box sx={classes.receiptsWrapper}>
-              <Typography
-                sx={classes.receiptsText}
-                fontSize={'11px'}
-                variant="body2"
-                align="left"
-                mb={1}
-              >
-                Total
-              </Typography>
-              <Typography
-                sx={classes.receiptsText}
-                fontSize={'11px'}
-                variant="body2"
-                align="left"
-                mb={1}
-              >
-                {formatCurrency(model.allItems?.total)}
-              </Typography>
-            </Box>
-            {model.selectedOption === 'partial' && (
-              <>
-                <Box sx={classes.receiptsWrapper}>
-                  <Typography
-                    sx={classes.receiptsText}
-                    fontSize={'11px'}
-                    variant="body2"
-                    align="left"
-                    mb={1}
-                  >
-                    Partial Payment
-                  </Typography>
-                  <Typography
-                    sx={classes.receiptsText}
-                    fontSize={'11px'}
-                    variant="body2"
-                    align="left"
-                    mb={1}
-                  >
-                    {formatCurrency(model.allItems?.partialAmount) ?? '-'}
-                  </Typography>
-                </Box>
-              </>
-            )}
-
-            {model.selectedOption !== 'utang' && (
-              <>
-                <Box sx={classes.receiptsWrapper}>
-                  <Typography
-                    sx={classes.receiptsText}
-                    fontSize={'11px'}
-                    variant="body2"
-                    align="left"
-                    mb={1}
-                  >
-                    Cash
-                  </Typography>
-                  <Typography
-                    sx={classes.receiptsText}
-                    fontSize={'11px'}
-                    variant="body2"
-                    align="left"
-                    mb={1}
-                  >
-                    {formatCurrency(model.allItems?.cash)}
-                  </Typography>
-                </Box>
-                <Box sx={classes.receiptsWrapper}>
-                  <Typography
-                    sx={classes.receiptsText}
-                    fontSize={'11px'}
-                    variant="body2"
-                    align="left"
-                    mb={1}
-                  >
-                    Change
-                  </Typography>
-                  <Typography
-                    sx={classes.receiptsText}
-                    fontSize={'11px'}
-                    variant="body2"
-                    align="left"
-                    mb={1}
-                  >
-                    {formatCurrency(model.allItems?.change) ?? '-'}
-                  </Typography>
-                </Box>
-              </>
-            )}
-
-            {model.selectedOption === 'partial' && (
-              <>
-                <Box sx={classes.receiptsWrapper}>
-                  <Typography
-                    sx={classes.receiptsText}
-                    fontSize={'11px'}
-                    variant="body2"
-                    align="left"
-                    mb={1}
-                  >
-                    Remaining Balance
-                  </Typography>
-                  <Typography
-                    sx={classes.receiptsText}
-                    fontSize={'11px'}
-                    variant="body2"
-                    align="left"
-                    mb={1}
-                  >
-                    {formatCurrency(model.allItems?.remainingBalance) ?? '-'}
-                  </Typography>
-                </Box>
-              </>
-            )}
-
-            {model.selectedOption === 'utang' && (
-              <Typography fontSize={'11px'} variant="body2" align="left" mb={1}>
-                Person Name: {model.allItems?.personName ?? '-'}
-              </Typography>
-            )}
-            <Box mt={2}>
-              <Typography fontSize={'11px'} variant="body2" align="left" color="textSecondary">
-                Thank you for your payment!
-              </Typography>
-            </Box>
-          </Box>
-        </DialogContent>
-      </Dialog>
+      <Receipts
+        setReceiptOpen={actions.setReceiptOpen}
+        receiptOpen={model.receiptOpen}
+        allItems={model.allItems}
+        selectedOption={model.selectedOption}
+      />
     </div>
   );
 }

@@ -116,8 +116,11 @@ export const findTop10FastMovingItemsThisWeek = async (weekOffset: number = 0): 
 };
 
 // Create a document
-export const createDocumentTransaction = async (doc: any): Promise<{ data: any }> => {
+export const createDocumentTransaction = async (
+  doc: any
+): Promise<{ data: any; total: number }> => {
   try {
+    // Map through items to add a date field
     const newItems = doc.items.map((item: any) => {
       return {
         ...item,
@@ -125,21 +128,30 @@ export const createDocumentTransaction = async (doc: any): Promise<{ data: any }
       };
     });
 
+    // Calculate total based on price * quantity for each item
+    const calculateTotal = (items: any[]) =>
+      items.reduce((total, item) => total + item.price * item.quantity, 0);
+
+    const itemsTotal = calculateTotal(newItems);
+
     const newDocs = {
       ...doc,
       items: newItems,
+      total: itemsTotal, // Add the calculated total
     };
+
+    console.log('newDocs', newDocs);
 
     // Save the document to the database
     await dbTransactions.put(newDocs);
 
-    // Return the saved document
+    // Return the saved document with additional details
     return {
       ...newDocs,
-      data: newDocs.items,
+      data: newDocs.partialItems,
       change: newDocs.cash - newDocs.total,
-      remainingBalance: newDocs.total - newDocs?.partialAmount || 0,
-      total: newDocs.total,
+      remainingBalance: newDocs.partialAmount ? newDocs.total - newDocs.partialAmount : 0,
+      total: itemsTotal, // Ensure the total is explicitly returned
     };
   } catch (err) {
     console.error('Error creating document', err);
@@ -147,6 +159,22 @@ export const createDocumentTransaction = async (doc: any): Promise<{ data: any }
   }
 };
 
+export const readAllDocumentsTransactions = async (): Promise<any[]> => {
+  try {
+    const result = await dbTransactions.allDocs({ include_docs: true });
+
+    // Filter out documents with the specific language value
+    const filteredDocs = result.rows
+      .map((row) => row.doc as any)
+      .filter((doc) => doc.language !== 'query') // Exclude documents where language is "query"
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()); // Sort by date
+
+    return filteredDocs;
+  } catch (err) {
+    console.error('Error reading documents', err);
+    throw err;
+  }
+};
 // Read all documents
 export const readAllDocumentTransaction = async (): Promise<{
   today: { docs: any[]; total: number; totalCash: number; totalUtang: number; items: any };
@@ -167,8 +195,6 @@ export const readAllDocumentTransaction = async (): Promise<{
 
     const test = await dbTransactions.allDocs({ include_docs: true });
 
-    console.log('docs===============>', test, todayResult);
-
     // Fetch documents for yesterday
     const yesterdayResult = await dbTransactions.find({
       selector: {
@@ -185,9 +211,9 @@ export const readAllDocumentTransaction = async (): Promise<{
     let todayTotalUtang = 0;
 
     todayDocs.forEach((doc) => {
-      if (doc.type === 'Cash') {
+      if (doc?.transactionType === 'Cash' || doc?.type === 'Cash') {
         todayTotalCash += doc.total || 0;
-      } else if (doc.type === 'Utang') {
+      } else if (doc.transactionType === 'Utang' || doc?.type === 'Utang') {
         todayTotalUtang += doc.total || 0;
       }
     });
@@ -200,9 +226,9 @@ export const readAllDocumentTransaction = async (): Promise<{
     let yesterdayTotalUtang = 0;
 
     yesterdayDocs.forEach((doc) => {
-      if (doc.type === 'Cash') {
+      if (doc?.transactionType === 'Cash' || doc?.type === 'Cash') {
         yesterdayTotalCash += doc.total || 0;
-      } else if (doc.type === 'Utang') {
+      } else if (doc.transactionType === 'Utang' || doc?.type === 'Utang') {
         yesterdayTotalUtang += doc.total || 0;
       }
     });
@@ -210,8 +236,12 @@ export const readAllDocumentTransaction = async (): Promise<{
     const yesterdayTotal = yesterdayDocs.reduce((sum, doc) => sum + (doc.total || 0), 0);
 
     // Extract items and merge them into a single array
-    const todayItems = todayDocs.flatMap((doc) => doc.items || []);
-    const yesterdayItems = yesterdayDocs.flatMap((doc) => doc.items || []);
+    const todayItems = todayDocs.flatMap((doc) => {
+      return doc?.partialItems ? doc?.partialItems : doc.items || [];
+    });
+    const yesterdayItems = yesterdayDocs.flatMap((doc) =>
+      doc?.partialItems ? doc?.partialItems : doc.items || []
+    );
     // Sorting items by date in ascending order
     const sortedTodayItems = todayItems.sort(
       (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
@@ -219,6 +249,25 @@ export const readAllDocumentTransaction = async (): Promise<{
     const sortedYesterdayItems = yesterdayItems.sort(
       (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
     );
+
+    const todayItemsTes = todayDocs.flatMap((doc) => {
+      const isPartial = doc?.isPartial ?? false;
+
+      // Return partialItems if available, otherwise map items and append isPartial
+      if (doc?.partialItems) {
+        return doc.partialItems.map((item: any) => ({
+          ...item,
+          isPartial,
+          items: doc.partialItems,
+          tempItems: doc.items,
+        }));
+      } else if (doc?.items) {
+        return doc.items.map((item: any) => ({ ...item, isPartial }));
+      }
+
+      return []; // Fallback to an empty array if neither partialItems nor items exist
+    });
+
     return {
       today: {
         docs: todayDocs,

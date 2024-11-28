@@ -20,14 +20,14 @@ export default function SimplePaper({ images, header, height, width, onClick }: 
         flexWrap: 'wrap',
         '& > :not(style)': {
           m: 1,
-          width: 128,
-          height: 128,
+          width: 100,
+          height: 100,
           p: 1,
           position: 'relative', // Make sure the Paper component is positioned relative to its container
         },
       }}
     >
-      <Paper elevation={3}>
+      <Paper elevation={1}>
         <Typography fontWeight={700}>{header}</Typography>
         <Box
           sx={{

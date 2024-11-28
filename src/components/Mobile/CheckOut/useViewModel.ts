@@ -14,9 +14,17 @@ import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { createDocumentTransaction } from '@/src/common/app/lib/pouchDbTransaction';
 import { setRefetch } from '@/src/common/reducers/data';
-import moment from 'moment';
-import { v4 as uuidv4 } from 'uuid';
 import { updateItemsQty } from '@/src/common/app/lib/pouchdbServiceItems';
+import {
+  cashTransactionQty,
+  cashUpdateQty,
+  createTransactionPayload,
+  partialQtyPayload,
+  partialTransactionPayload,
+  partialUtangPayload,
+  updateQtyPayload,
+  updateUtangPayload,
+} from '@/src/common/helpers/payloadGenerator';
 
 export default function useViewModel({ isRefresh }: CheckoutProps) {
   const classes = useStyles();
@@ -54,25 +62,18 @@ export default function useViewModel({ isRefresh }: CheckoutProps) {
       const cashAmount = Number(values.cashAmount);
       dispatch(setIsBackDropOpen(true));
 
-      const transactionData = {
+      const payload = {
         type: 'Cash',
-        items: items.map((item: any) => {
-          return {
-            ...item,
-            _id: uuidv4(),
-            type: 'Cash',
-          };
-        }),
-        cash: cashAmount,
+        items,
+        cashAmount,
         total,
-        date: new Date(),
-        _id: uuidv4(),
       };
-
+      const transactionDataQty = cashUpdateQty(payload);
+      const transactionData = cashTransactionQty(payload);
       setIsLoading(true);
       try {
         const [, updatedData] = await Promise.all([
-          updateItemsQty(transactionData),
+          updateItemsQty(transactionDataQty),
           createDocumentTransaction(transactionData),
         ]);
 
@@ -113,39 +114,15 @@ export default function useViewModel({ isRefresh }: CheckoutProps) {
     onSubmit: async (values, { resetForm }) => {
       dispatch(setIsBackDropOpen(true));
       setIsLoading(true);
-      const transactionUtang = {
-        type: 'Utang',
-        items: items.map((item: any) => {
-          return {
-            ...item,
-            _id: uuidv4(),
-            type: 'Utang',
-          };
-        }),
-        personName: values.personName,
-        total,
-        date: new Date(),
-        _id: values._id === '' ? uuidv4() : values._id,
-      };
 
-      const transactionData = {
-        type: 'Utang',
-        items: items.map((item: any) => {
-          return {
-            ...item,
-            _id: uuidv4(),
-            type: 'Utang',
-          };
-        }),
-        personName: values.personName,
-        cash: total,
-        date: new Date(),
-        total,
-        _id: uuidv4(),
-      };
+      const payload = { type: 'Utang', items, values, total };
+      const transactionUtang = updateUtangPayload(payload);
+      const transactionData = createTransactionPayload(payload);
+      const qtyPayload = updateQtyPayload(payload);
+
       try {
         const [, transData] = await Promise.all([
-          updateItemsQty(transactionData),
+          updateItemsQty(qtyPayload),
           createDocumentTransaction(transactionData),
           updateUtang(transactionUtang),
         ]);
@@ -197,68 +174,36 @@ export default function useViewModel({ isRefresh }: CheckoutProps) {
       const desiredAmount = Number(values.desiredAmount); // partial
       dispatch(setIsBackDropOpen(true));
 
-      const transactionData = {
+      const payload = {
         type: 'Cash',
-        items: items.map((item: any) => {
-          return {
-            ...item,
-            _id: uuidv4(),
-            type: 'Cash',
-          };
-        }),
-        personName: values.personName,
-        cash: partialAmount,
-        total: desiredAmount,
-        date: new Date(),
-        partialAmount: desiredAmount,
-        _id: values._id === '' ? uuidv4() : values._id,
+        items,
+        values,
+        partialAmount,
+        desiredAmount,
+        total,
       };
 
-      const qtyData = {
-        type: 'Cash',
-        items: items.map((item: any) => {
-          return {
-            ...item,
-            _id: uuidv4(),
-            type: 'Cash',
-          };
-        }),
-        personName: values.personName,
-        cash: partialAmount,
-        total: total,
-        date: new Date(),
-        partialAmount: desiredAmount,
-        _id: uuidv4(),
-      };
-
-      const transactionUtang = {
+      const transactionData = partialTransactionPayload(payload);
+      const qtyData = partialQtyPayload(payload);
+      const transactionUtang = partialUtangPayload({
         type: 'Utang',
-        items: [
-          {
-            name: `Partial Balance of ${moment(new Date()).format('lll')}`,
-            price: total - desiredAmount,
-            quantity: 1,
-            id: new Date(),
-            type: 'Utang',
-          },
-        ],
-        personName: values.personName,
-        cash: partialAmount,
-        total: total - desiredAmount,
-        partialAmount: desiredAmount,
-        date: new Date(),
-        _id: values._id === '' ? uuidv4() : values._id,
-      };
+        total,
+        desiredAmount,
+        values,
+        partialAmount,
+        items,
+      });
 
       setIsLoading(true);
       try {
         const [, transData, data] = await Promise.all([
-          updateItemsQty(transactionData),
-          createDocumentTransaction(qtyData),
+          updateItemsQty(qtyData),
+          createDocumentTransaction(transactionData),
           updateUtang(transactionUtang),
         ]);
 
         console.log('testData', transData, data);
+
         setAllItems(transData);
         if (data) {
           setIsLoading(false);
@@ -348,6 +293,7 @@ export default function useViewModel({ isRefresh }: CheckoutProps) {
       hotkeys.unbind('ctrl+c');
       hotkeys.unbind('ctrl+l');
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleClickOpen = () => {
