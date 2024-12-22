@@ -65,8 +65,6 @@ export default function Backup() {
       const utangsData = userData.utangs || [];
       const transactionsData = userData.transactions || [];
 
-      console.log('utangsData', utangsData);
-
       if (data.success) {
         // Create an array of promises for restoring 'items' documents
         const restoreItemPromises = itemsData.map(async ({ _rev, ...cleanedData }: any) => {

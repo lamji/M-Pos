@@ -126,6 +126,14 @@ export default function MobileDrawer({ status, setStatus }: PropsDrawer) {
               <ListItemText primary={'Subscription'} />
             </ListItemButton>
           </ListItem>
+          <ListItem disablePadding>
+            <ListItemButton onClick={() => router.push('/voucher')}>
+              <ListItemIcon>
+                <PaymentsIcon />
+              </ListItemIcon>
+              <ListItemText primary={'Voucher'} />
+            </ListItemButton>
+          </ListItem>
         </List>
       </Box>
       <Box sx={{ padding: 2 }}>
