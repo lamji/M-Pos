@@ -5,7 +5,7 @@ export default function useStyles() {
       margin: 'auto',
       padding: 3,
       borderRadius: 10,
-      marginTop: '-130px',
+      marginTop: '60px',
       background: 'white',
     },
   };

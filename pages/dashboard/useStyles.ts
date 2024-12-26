@@ -4,7 +4,7 @@ export default function useStyles() {
       padding: '10px',
       background: 'white',
       borderRadius: 15,
-      marginTop: '-130px',
+      marginTop: '60px',
     },
     saleBox: {
       display: 'flex',

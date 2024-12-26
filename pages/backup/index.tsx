@@ -73,8 +73,8 @@ export default function Backup() {
         });
 
         // Create an array of promises for restoring 'utang' documents
-        const restoreUtangPromises = utangsData.map(async (data: any) => {
-          await restoreUtangDocument(data);
+        const restoreUtangPromises = utangsData.map(async ({ _rev, ...cleanedData }: any) => {
+          await restoreUtangDocument(cleanedData);
         });
 
         const restoreTransactionsPromises = transactionsData.map(

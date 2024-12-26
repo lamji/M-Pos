@@ -89,7 +89,7 @@ const UtangTransactions: React.FC = () => {
       <div
         style={{
           background: 'white',
-          marginTop: '-150px',
+          marginTop: '60px',
         }}
       >
         <Box
