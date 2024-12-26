@@ -12,7 +12,7 @@ import { setIsBackDropOpen } from '@/src/common/reducers/items';
 import { useDispatch } from 'react-redux';
 import SimpleDialogDemo from '../../Loader/backdrop';
 import apiClient from '@/src/common/app/axios';
-import useFetchItems from '@/src/common/hooks/useRestore';
+// import useFetchItems from '@/src/common/hooks/useRestore';
 
 // Define TypeScript types for form values
 interface FormValues {
@@ -30,7 +30,7 @@ const MobileBankingLoginComponent: React.FC = () => {
   const dispatch = useDispatch();
   const router = useRouter();
   const [open, setOpen] = useState(false);
-  const { fetchItems } = useFetchItems();
+  // const { fetchItems } = useFetchItems();
   // const requestCode = getCookie('rc');
 
   // Initialize Formik with TypeScript types
@@ -54,7 +54,7 @@ const MobileBankingLoginComponent: React.FC = () => {
           toast.success('Login successful!', {
             position: 'top-center',
           });
-          await fetchItems();
+          // await fetchItems();
 
           setTimeout(() => router.push('/'), 1);
           resetForm();
