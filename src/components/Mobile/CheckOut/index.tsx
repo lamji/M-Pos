@@ -14,6 +14,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import { formatCurrency } from '@/src/common/helpers';
 import useViewModel from './useViewModel';
 import Receipts from '../../Receipts';
+import CardButton from '../CardButton';
 
 export interface CheckoutProps {
   isRefresh: (i: boolean) => void;
@@ -48,7 +49,7 @@ export default function Checkout({ isRefresh }: CheckoutProps) {
           </>
         ) : (
           <>
-            <Box sx={{ textAlign: 'left' }}>
+            {/* <Box sx={{ textAlign: 'left' }}>
               <Typography mb={2} fontSize="20px" fontWeight={700}>
                 TOTAL: {formatCurrency(model.total)}
               </Typography>
@@ -58,9 +59,17 @@ export default function Checkout({ isRefresh }: CheckoutProps) {
                 sx={{ width: '100%', height: '100px', color: 'white', fontSize: '30px' }}
                 variant="contained"
               >
-                CHECKOUT
+                CHECKOUTs
               </Button>
-            </Box>
+            </Box> */}
+            <CardButton
+              height={40}
+              description="Checkout"
+              width={80}
+              header={`${formatCurrency(model.total)}`}
+              cardHight={60}
+              onClick={actions.handleClickOpen}
+            />
           </>
         )}
       </Box>
@@ -73,7 +82,7 @@ export default function Checkout({ isRefresh }: CheckoutProps) {
           maxWidth={'xs'}
         >
           <Box>
-            <Typography variant="h5" fontWeight={700}>
+            <Typography variant="h5" fontWeight={700} sx={{ padding: '10px' }}>
               Check Out
             </Typography>
             <IconButton

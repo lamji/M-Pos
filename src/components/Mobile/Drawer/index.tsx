@@ -18,6 +18,11 @@ import Image from 'next/image';
 import { Typography } from '@mui/material';
 import CloudSyncIcon from '@mui/icons-material/CloudSync';
 import useFetchDocumentsBackup from '@/src/common/hooks/useFetchDocuments';
+import GridViewIcon from '@mui/icons-material/GridView';
+import PointOfSaleIcon from '@mui/icons-material/PointOfSale';
+import PostAddIcon from '@mui/icons-material/PostAdd';
+
+import FormatListNumberedIcon from '@mui/icons-material/FormatListNumbered';
 
 interface PropsDrawer {
   status: boolean;
@@ -86,6 +91,38 @@ export default function MobileDrawer({ status, setStatus }: PropsDrawer) {
 
         <Divider />
         <List>
+          <ListItem disablePadding>
+            <ListItemButton onClick={() => router.push('/dashboard')}>
+              <ListItemIcon>
+                <GridViewIcon />
+              </ListItemIcon>
+              <ListItemText primary={'Dashboard'} />
+            </ListItemButton>
+          </ListItem>
+          <ListItem disablePadding>
+            <ListItemButton onClick={() => router.push('/')}>
+              <ListItemIcon>
+                <PointOfSaleIcon />
+              </ListItemIcon>
+              <ListItemText primary={'POS'} />
+            </ListItemButton>
+          </ListItem>
+          <ListItem disablePadding>
+            <ListItemButton onClick={() => router.push('/utang')}>
+              <ListItemIcon>
+                <FormatListNumberedIcon />
+              </ListItemIcon>
+              <ListItemText primary={'Utang'} />
+            </ListItemButton>
+          </ListItem>
+          <ListItem disablePadding>
+            <ListItemButton onClick={() => router.push('/add')}>
+              <ListItemIcon>
+                <PostAddIcon />
+              </ListItemIcon>
+              <ListItemText primary={'Add'} />
+            </ListItemButton>
+          </ListItem>
           <ListItem disablePadding>
             <ListItemButton onClick={() => router.push('/admin')}>
               <ListItemIcon>

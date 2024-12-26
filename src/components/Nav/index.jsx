@@ -7,10 +7,12 @@ import { getCookie } from '@/src/common/app/cookie';
 import MobileDrawer from '../Mobile/Drawer';
 import MenuIcon from '@mui/icons-material/Menu';
 import { useState } from 'react';
+import { useDeviceType } from '@/src/common/helpers';
 
 // import LogoutIcon from '@mui/icons-material/Logout';
 
 export default function Nav() {
+  const { isMobile } = useDeviceType();
   const router = useRouter();
   const currentPath = router.pathname;
   const [open, setOpen] = useState(false);
@@ -80,11 +82,11 @@ export default function Nav() {
       ></Box>
       <Box
         sx={{
-          marginTop: '200px',
+          marginTop: '60px',
           position: 'relative',
         }}
       ></Box>
-      {token && <BottomNav />}
+      {token && <>{isMobile && <BottomNav />}</>}
     </div>
   );
 }

@@ -63,6 +63,7 @@ export default function Backup() {
 
       const itemsData = userData.items || [];
       const utangsData = userData.utangs || [];
+      console.log('utangsData', utangsData);
       const transactionsData = userData.transactions || [];
 
       if (data.success) {
@@ -119,6 +120,7 @@ export default function Backup() {
             onClick={async () => {
               await fetchDocuments();
             }}
+            cardHight={100}
           />
           <CardButton
             images="/restore.png"
@@ -126,6 +128,7 @@ export default function Backup() {
             width={50}
             header="Restore"
             onClick={() => fetItems()}
+            cardHight={100}
           />
           <CardButton
             images="/restore.png"
@@ -133,6 +136,7 @@ export default function Backup() {
             width={50}
             header="Clear DB"
             onClick={() => clearDB()}
+            cardHight={100}
           />
         </Box>
       </main>

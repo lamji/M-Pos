@@ -56,11 +56,13 @@ export const useDeviceType = () => {
   const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
   const isLaptop = useMediaQuery(theme.breakpoints.between('md', 'lg'));
   const isPC = useMediaQuery(theme.breakpoints.up('lg'));
+  const isPortrait = true;
 
   return {
     isMobile,
     isTablet,
     isLaptop,
     isPC,
+    isPortrait,
   };
 };

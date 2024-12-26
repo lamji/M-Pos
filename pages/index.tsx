@@ -9,6 +9,8 @@ import { readAllDocuments } from '@/src/common/app/lib/pouchdbServiceItems';
 import { readAllDocumentsHistory } from '@/src/common/app/lib/PouchDbHistory';
 import { readAllDocumentsUtang } from '@/src/common/app/lib/pouchDbUtang';
 import { readAllDocumentTransaction } from '@/src/common/app/lib/pouchDbTransaction';
+import { useDeviceType } from '@/src/common/helpers';
+import LaptopScanItems from '@/src/components/Laptop/Pos';
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { req } = context;
@@ -36,6 +38,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 const Nav = dynamic(() => import('@/src/components/Nav'));
 
 export default function Home() {
+  const { isMobile } = useDeviceType();
   useEffect(() => {
     const fetchDocuments = async () => {
       try {
@@ -63,7 +66,8 @@ export default function Home() {
       </Head>
       <main>
         <Nav />
-        <ScanItems />
+        {isMobile ? <ScanItems /> : <LaptopScanItems />}
+        {/* <ScanItems /> */}
       </main>
     </>
   );

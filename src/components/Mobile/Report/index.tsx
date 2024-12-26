@@ -23,6 +23,7 @@ export default function ReportMobile() {
               width={60}
               header="Grocery List"
               onClick={model.handleGroceryListClick}
+              cardHight={0}
             />
           </Grid>
           <Grid item>
@@ -32,6 +33,7 @@ export default function ReportMobile() {
               width={60}
               header="Create Report"
               onClick={() => console.log('test')}
+              cardHight={0}
             />
           </Grid>
         </Grid>
