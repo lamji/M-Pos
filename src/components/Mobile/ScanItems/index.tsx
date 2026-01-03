@@ -12,6 +12,7 @@ import {
   ListItemText,
   Typography,
   MenuItem,
+  Button,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import CloseIcon from '@mui/icons-material/Close';
@@ -21,13 +22,20 @@ import LinearIndeterminate from '../../Loader/linear';
 import DeleteConfirmationDialog from '../DeleteModal';
 import useViewModel from './useViewModel';
 import dynamic from 'next/dynamic';
-// import Html5QrcodePlugin from '../../Scanner/index';
+import Fab from "@mui/material/Fab";
+import ManageSearchIcon from '@mui/icons-material/ManageSearch';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import { useScanItemsStyles } from './useStyles';
+import { TbRuler } from 'react-icons/tb';
+
+import Html5QrcodePlugin from '../../Scanner/index';
 
 const Checkout = dynamic(() => import('../CheckOut/index'));
 const BarcodeScannerComponent = dynamic(() => import('../../wt2Scanner/index'));
 const QuantityAdjuster = dynamic(() => import('../QtyConfrimatoin'));
 
 const ComboBox = () => {
+  const styles = useScanItemsStyles()
   const {
     handleIncrement,
     handleDecrement,
@@ -53,6 +61,9 @@ const ComboBox = () => {
     handleInputChange,
     displayedItems,
     stocks,
+    searchOpen,
+    showWebQr,
+    setSearchOpen
   } = useViewModel();
 
   return (
@@ -61,29 +72,28 @@ const ComboBox = () => {
         <>
           <Box
             sx={{
-              paddingBottom: '60px',
               borderRadius: 10,
               background: 'white',
-              marginTop: '-200px',
+              height: "90vh",
+              paddingBottom: "100px", // 👈 space for FAB
             }}
           >
-            <Box
-              sx={{
-                backgroundColor: 'primary.main',
-                height: '250px',
-                padding: '70px 20px 200px 20px',
-              }}
-            >
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Box>
+              <Box sx={{
+                width: "100%",
+                padding: "20px"
+              }}>
                 <Autocomplete
                   disablePortal
                   id="combo-box-demo"
                   options={displayedItems}
                   value={autocompleteValue}
                   disabled={allItems.length === 0}
-                  getOptionLabel={(option) => option.name}
+                  getOptionLabel={(option: any) => option?.name}
                   sx={{
-                    width: '100%',
+                    zIndex: 99999,
+                    position: "absolute",
+                    width: '90%',
                     background: 'white',
                     borderRadius: '4px',
                     '& .MuiAutocomplete-endAdornment': {
@@ -103,7 +113,7 @@ const ComboBox = () => {
                     <TextField
                       {...params}
                       label="Search Item"
-                      // InputLabelProps={{ shrink: false }}
+                      InputLabelProps={{ shrink: false }}
                       size="small"
                       InputProps={{
                         ...params.InputProps,
@@ -151,43 +161,28 @@ const ComboBox = () => {
                   )}
                 />
                 <Box sx={{ marginLeft: '20px' }}>
-                  <BarcodeScannerComponent dataOut={(data) => onNewScanResult(data)} size={50} />
-                  {/* <Html5QrcodePlugin
-                  fps={10}
-                  qrbox={250}
-                  disableFlip={false}
-                  qrCodeSuccessCallback={(decodedText) => onNewScanResult(decodedText)}
-                /> */}
+                  {showWebQr && (<Html5QrcodePlugin
+                    fps={10}
+                    qrbox={250}
+                    disableFlip={false}
+                    qrCodeSuccessCallback={(decodedText: any) => onNewScanResult(decodedText)}
+                  />)}
                 </Box>
               </Box>
 
-              <Box sx={{ textAlign: 'center', paddingBottom: '300px' }}>
-                <Checkout isRefresh={(i) => handleRefetch(i)} />
-              </Box>
+
             </Box>
 
-            <Box sx={{ background: 'white', borderRadius: '50px 50px 0 0', marginTop: '-90px' }}>
-              <List
-                sx={{ marginTop: '0px', height: '50vh', overflow: 'scroll', padding: '30px 20px' }}
-              >
+            <Box sx={styles.boxList}>
+              <List sx={styles.listWrapper} >
                 {items.length > 0 ? (
                   items
                     .slice()
                     .reverse()
-                    .map((item) => (
+                    .map((item: any) => (
                       <Box
                         key={item.id}
-                        sx={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                          width: '98%',
-                          margin: '0 auto',
-                          background: '#f7f7f7',
-                          padding: '5px',
-                          mb: '3px',
-                          borderRadius: '10px',
-                        }}
+                        sx={styles.boxItems}
                       >
                         <Box sx={{ width: '130px' }}>
                           <Typography
@@ -197,10 +192,9 @@ const ComboBox = () => {
                           <Typography fontSize={'9px'} fontWeight={700}>{`${formatCurrency(
                             item.price
                           )}`}</Typography>
-                          <Typography
-                            color={'gray'}
-                            fontSize={'10px'}
-                          >{`Quantity: ${item.quantity}`}</Typography>
+                          <Typography sx={styles.itemQuantity}>
+                            {`Quantity: ${item.quantity}`}
+                          </Typography>
                         </Box>
                         <Box>
                           <Typography fontSize={'12px'}>
@@ -226,11 +220,16 @@ const ComboBox = () => {
                       </Box>
                     ))
                 ) : (
-                  <ListItem>
+                  <ListItem sx={styles.emptyListItems} >
                     <ListItemText
-                      primary={<Typography color="textSecondary">No items added yet.</Typography>}
+                      primary={
+                        <Typography color="textSecondary">
+                          No items added yet, use scan or search.
+                        </Typography>
+                      }
                     />
                   </ListItem>
+
                 )}
               </List>
             </Box>
@@ -260,6 +259,26 @@ const ComboBox = () => {
       ) : (
         <LinearIndeterminate />
       )}
+
+      <Box sx={styles.fabBox}>
+        <Fab sx={styles.fab} >
+          <Button startIcon={<ManageSearchIcon style={{ fontSize: "30px" }} />} onClick={() => setSearchOpen(true)} />
+        </Fab>
+
+        <Fab sx={styles.fab} >
+          <BarcodeScannerComponent
+            color="black"
+            dataOut={(data: any) => onNewScanResult(data)}
+            size={50}
+          />
+        </Fab>
+
+        <Fab sx={styles.fab} >
+          <Box sx={{ textAlign: 'center' }}>
+            <Checkout isRefresh={(i) => handleRefetch(i)} />
+          </Box>
+        </Fab>
+      </Box>
     </>
   );
 };

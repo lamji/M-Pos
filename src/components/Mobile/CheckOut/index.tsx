@@ -15,6 +15,7 @@ import { formatCurrency } from '@/src/common/helpers';
 import useViewModel from './useViewModel';
 import Receipts from '../../Receipts';
 import CardButton from '../CardButton';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 
 export interface CheckoutProps {
   isRefresh: (i: boolean) => void;
@@ -26,42 +27,20 @@ export default function Checkout({ isRefresh }: CheckoutProps) {
     <div>
       <Box sx={{ borderRadius: '5px', marginBottom: '10px', marginTop: '5px' }}>
         {model.isMobile ? (
-          <>
-            <Box>
-              <>
-                <Button
-                  onClick={actions.handleClickOpen}
-                  sx={{ ...classes.button, py: 1, width: '100%', background: 'white' }}
-                  variant="contained"
-                  disabled={model.total === 0}
-                  startIcon={
-                    <Typography
-                      sx={{ fontWeight: 700, marginRight: '20px', fontSize: '17px !important' }}
-                    >
-                      {formatCurrency(model.total)}
-                    </Typography>
-                  }
-                >
-                  CHECKOUT
-                </Button>
-              </>
-            </Box>
-          </>
+
+          <Button
+            onClick={actions.handleClickOpen}
+            sx={{ ...classes.button, py: 1, width: '200px', background: 'transparent' }}
+            variant="text"
+            disabled={model.total === 0}
+            endIcon={<ArrowForwardIcon />}
+          >
+            <Typography>
+              {formatCurrency(model.total)}
+            </Typography>
+          </Button>
         ) : (
           <>
-            {/* <Box sx={{ textAlign: 'left' }}>
-              <Typography mb={2} fontSize="20px" fontWeight={700}>
-                TOTAL: {formatCurrency(model.total)}
-              </Typography>
-
-              <Button
-                onClick={actions.handleClickOpen}
-                sx={{ width: '100%', height: '100px', color: 'white', fontSize: '30px' }}
-                variant="contained"
-              >
-                CHECKOUTs
-              </Button>
-            </Box> */}
             <CardButton
               height={40}
               description="Checkout"

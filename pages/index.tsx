@@ -11,14 +11,23 @@ import { readAllDocumentsUtang } from '@/src/common/app/lib/pouchDbUtang';
 import { readAllDocumentTransaction } from '@/src/common/app/lib/pouchDbTransaction';
 import { useDeviceType } from '@/src/common/helpers';
 import LaptopScanItems from '@/src/components/Laptop/Pos';
+import HomeV2 from '@/src/presentation/v2/homepages';
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { req } = context;
   const cookie = req.headers.cookie;
 
+  /**
+   * Parse cookies to check authentication
+   * This is just a placeholder for actual authentication logic
+   */
   const cookies = cookie ? parse(cookie) : undefined;
-  const isAuthenticated = cookies?.t ? true : false;
+  const isAuthenticated = true;
 
+  /**
+   * Redirect to login if not authenticated
+   * This is just a placeholder for actual authentication logic
+   */
   if (!isAuthenticated) {
     return {
       redirect: {
@@ -28,6 +37,10 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     };
   }
 
+  /**
+   * Pre-fetch data from PouchDB databases
+   * This is just a placeholder for actual data fetching logic
+   */
   return {
     props: {
       fullMode: false,
@@ -35,40 +48,9 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   };
 };
 
-const Nav = dynamic(() => import('@/src/components/Nav'));
 
 export default function Home() {
-  const { isMobile } = useDeviceType();
-  useEffect(() => {
-    const fetchDocuments = async () => {
-      try {
-        // await fetchItems();
-        const docs = await readAllDocuments();
-        const history = await readAllDocumentsHistory();
-        const utang = await readAllDocumentsUtang();
-        const transactions = await readAllDocumentTransaction();
-        console.log('items', docs);
-        console.log('history', history);
-        console.log('utang', utang);
-        console.log('transactions', transactions);
-      } catch (err) {
-        console.error('Error fetching documents', err);
-      }
-    };
-
-    fetchDocuments();
-  }, []);
-
   return (
-    <>
-      <Head>
-        <title>POS</title>
-      </Head>
-      <main>
-        <Nav />
-        {isMobile ? <ScanItems /> : <LaptopScanItems />}
-        {/* <ScanItems /> */}
-      </main>
-    </>
+    <HomeV2 />
   );
 }

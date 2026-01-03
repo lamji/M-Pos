@@ -3,7 +3,6 @@ import { Provider } from 'react-redux';
 import { theme } from '@/src/common/app/theme';
 import CssBaseline from '@mui/material/CssBaseline';
 import { ThemeProvider } from '@mui/material/styles';
-import Layout from '@/src/components/Layout';
 import { persistor, store } from '@/src/common/app/store';
 import { PersistGate } from 'redux-persist/integration/react';
 import '@/styles/globals.css';
@@ -34,18 +33,16 @@ const queryClient = new QueryClient({
 export default function App({ Component, pageProps }: AppProps) {
   return (
     <div className={roboto.className}>
-      <Layout>
-        <QueryClientProvider client={queryClient}>
-          <Provider store={store}>
-            <PersistGate loading={null} persistor={persistor}>
-              <ThemeProvider theme={theme}>
-                <CssBaseline />
-                <Component {...pageProps} />
-              </ThemeProvider>
-            </PersistGate>
-          </Provider>
-        </QueryClientProvider>
-      </Layout>
+      <QueryClientProvider client={queryClient}>
+        <Provider store={store}>
+          <PersistGate loading={null} persistor={persistor}>
+            <ThemeProvider theme={theme}>
+              <CssBaseline />
+              <Component {...pageProps} />
+            </ThemeProvider>
+          </PersistGate>
+        </Provider>
+      </QueryClientProvider>
     </div>
   );
 }

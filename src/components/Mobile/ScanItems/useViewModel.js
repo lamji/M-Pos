@@ -36,6 +36,7 @@ export default function useViewModel() {
   const [stocks, setStocks] = useState(0);
   const { isMobile, isLaptop, isPC } = useDeviceType();
   const isLarge = isLaptop || isPC;
+  const [searchOpen,setSearchOpen] = useState(false)
 
   console.log('activeOrders', activeOrders);
 
@@ -281,5 +282,8 @@ export default function useViewModel() {
     stocks,
     isLarge,
     isMobile,
+    searchOpen,
+    setSearchOpen,
+    showWebQr:false
   };
 }

@@ -24,7 +24,7 @@
     "**/*.tsx",
     "src/components/Scanner/index.jsx",
     "src/components/Scanner",
-    "src/components/Mobile/ScanItems/index.jsx",
+    "src/components/Mobile/ScanItems/index.tsx",
     "pages/add/index.jsx",
     "src/components/Nav/index.jsx",
     "src/components/Mobile/ScanItems/useViewModel.js",
