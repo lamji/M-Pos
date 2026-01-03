@@ -25,12 +25,11 @@ export default function Checkout({ isRefresh }: CheckoutProps) {
   const { classes, model, actions } = useViewModel({ isRefresh });
   return (
     <div>
-      <Box sx={{ borderRadius: '5px', marginBottom: '10px', marginTop: '5px' }}>
+      <Box>
         {model.isMobile ? (
-
           <Button
             onClick={actions.handleClickOpen}
-            sx={{ ...classes.button, py: 1, width: '200px', background: 'transparent' }}
+            sx={{ ...classes.button, py: 1, minWidth: '150px', background: 'transparent' }}
             variant="text"
             disabled={model.total === 0}
             endIcon={<ArrowForwardIcon />}
