@@ -188,7 +188,7 @@ const EditableTable = ({ handlePagination, isRefetch }: Props) => {
   }, [state]);
 
   return (
-    <Box sx={{ p: 1, m: 2, width: '100%', maxWidth: '1200px', mx: 'auto', marginTop: '80px' }}>
+    <Box sx={{ p: 1, m: 2, width: '100%', maxWidth: '1200px', mx: 'auto' }}>
       <>
         <Box sx={{ mb: 2 }}>
           <TextField
@@ -205,7 +205,7 @@ const EditableTable = ({ handlePagination, isRefetch }: Props) => {
           />
         </Box>
 
-        <TableContainer component={Paper} sx={{ width: '100%', paddingBottom: '100px' }}>
+        <TableContainer component={Paper} sx={{ width: '100%', paddingBottom: '100px', boxShadow: "none", background: "transparent" }}>
           <Table>
             <TableHead>
               <TableRow>

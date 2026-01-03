@@ -1,5 +1,4 @@
 import { setData } from '@/src/common/reducers/data';
-import Nav from '@/src/components/Nav';
 import EditableTable from '@/src/components/Table';
 import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
@@ -13,7 +12,10 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const cookie = req.headers.cookie;
 
   const cookies = cookie ? parse(cookie) : undefined;
-  const isAuthenticated = cookies?.t ? true : false;
+  // const isAuthenticated = cookies?.t ? true : false;
+  const isAuthenticated = true
+
+  console.log(cookies)
 
   if (!isAuthenticated) {
     return {
@@ -58,7 +60,6 @@ export default function Admin() {
 
   return (
     <div>
-      <Nav />
       <EditableTable
         handlePagination={handlePagination}
         isRefetch={(i: boolean) => setRefetch(i)}

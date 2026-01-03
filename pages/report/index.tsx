@@ -8,8 +8,9 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const cookie = req.headers.cookie;
 
   const cookies = cookie ? parse(cookie) : undefined;
-  const isAuthenticated = cookies?.t ? true : false;
-
+  // const isAuthenticated = cookies?.t ? true : false;
+  const isAuthenticated = true
+  console.log(cookies)
   if (!isAuthenticated) {
     return {
       redirect: {

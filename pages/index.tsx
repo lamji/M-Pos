@@ -1,16 +1,16 @@
-import Head from 'next/head';
+// import Head from 'next/head';
 import { GetServerSideProps } from 'next';
 import { parse } from 'cookie';
 
-import ScanItems from '@/src/components/Mobile/ScanItems';
-import dynamic from 'next/dynamic';
-import { useEffect } from 'react';
-import { readAllDocuments } from '@/src/common/app/lib/pouchdbServiceItems';
-import { readAllDocumentsHistory } from '@/src/common/app/lib/PouchDbHistory';
-import { readAllDocumentsUtang } from '@/src/common/app/lib/pouchDbUtang';
-import { readAllDocumentTransaction } from '@/src/common/app/lib/pouchDbTransaction';
-import { useDeviceType } from '@/src/common/helpers';
-import LaptopScanItems from '@/src/components/Laptop/Pos';
+// import ScanItems from '@/src/components/Mobile/ScanItems';
+// import dynamic from 'next/dynamic';
+// import { useEffect } from 'react';
+// import { readAllDocuments } from '@/src/common/app/lib/pouchdbServiceItems';
+// import { readAllDocumentsHistory } from '@/src/common/app/lib/PouchDbHistory';
+// import { readAllDocumentsUtang } from '@/src/common/app/lib/pouchDbUtang';
+// import { readAllDocumentTransaction } from '@/src/common/app/lib/pouchDbTransaction';
+// import { useDeviceType } from '@/src/common/helpers';
+// import LaptopScanItems from '@/src/components/Laptop/Pos';
 import HomeV2 from '@/src/presentation/v2/homepages';
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
@@ -23,6 +23,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
    */
   const cookies = cookie ? parse(cookie) : undefined;
   const isAuthenticated = true;
+
+  console.log(cookies)
 
   /**
    * Redirect to login if not authenticated

@@ -1,5 +1,4 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import Nav from '@/src/components/Nav';
 import { Accordion, AccordionDetails, AccordionSummary, Box, Typography } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -20,7 +19,10 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const cookie = req.headers.cookie;
 
   const cookies = cookie ? parse(cookie) : undefined;
-  const isAuthenticated = cookies?.t ? true : false;
+  // const isAuthenticated = cookies?.t ? true : false;
+  const isAuthenticated = true
+
+  console.log(cookies)
 
   if (!isAuthenticated) {
     return {
@@ -69,7 +71,6 @@ export default function Dashboard() {
 
   return (
     <div>
-      <Nav />
       <Box sx={classes.rootBox}>
         <Box sx={classes.saleBox}>
           <Box sx={classes.onClickBox} onClick={() => setFilterData('yesterday')}>
@@ -107,9 +108,8 @@ export default function Dashboard() {
         </Box>
 
         <Box>
-          <Typography sx={classes.filterTyp}>{`${
-            filterData === 'yesterday' ? `Yesterday's transaction` : `Today's transaction`
-          }`}</Typography>
+          <Typography sx={classes.filterTyp}>{`${filterData === 'yesterday' ? `Yesterday's transaction` : `Today's transaction`
+            }`}</Typography>
           <Box
             sx={{
               background: '#F6F5F2',

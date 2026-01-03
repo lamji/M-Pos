@@ -24,9 +24,8 @@ import useViewModel from './useViewModel';
 import dynamic from 'next/dynamic';
 import Fab from "@mui/material/Fab";
 import ManageSearchIcon from '@mui/icons-material/ManageSearch';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { useScanItemsStyles } from './useStyles';
-import { TbRuler } from 'react-icons/tb';
+
 
 import Html5QrcodePlugin from '../../Scanner/index';
 
@@ -61,7 +60,7 @@ const ComboBox = () => {
     handleInputChange,
     displayedItems,
     stocks,
-    searchOpen,
+    // searchOpen,
     showWebQr,
     setSearchOpen
   } = useViewModel();

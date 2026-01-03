@@ -4,8 +4,13 @@ import RemoveIcon from "@mui/icons-material/Remove";
 import ProductionQuantityLimitsIcon from '@mui/icons-material/ProductionQuantityLimits';
 import LogoutIcon from '@mui/icons-material/Logout';
 import FormatListNumberedIcon from '@mui/icons-material/FormatListNumbered';
+import PlaylistAddCheckCircleIcon from '@mui/icons-material/PlaylistAddCheckCircle';
+import { useRouter } from "next/router";
+
 
 export const useViewModel = () => {
+    const router = useRouter()
+
     /**
      * Text Content for Homepage V2
      */
@@ -21,21 +26,28 @@ export const useViewModel = () => {
             title: "POS",
             icon: PointOfSaleIcon,
             onClick: () => {
-                console.log("POS clicked");
+                router.push("/pos")
+            },
+        },
+        {
+            title: "Lista",
+            icon: PlaylistAddCheckCircleIcon,
+            onClick: () => {
+                console.log("Add clicked");
             },
         },
         {
             title: "Add",
             icon: AddIcon,
             onClick: () => {
-                console.log("Add clicked");
+                router.push("/add")
             },
         },
         {
             title: "Products",
             icon: ProductionQuantityLimitsIcon,
             onClick: () => {
-                console.log("Remove clicked");
+                router.push('/admin')
             },
         },
         {
